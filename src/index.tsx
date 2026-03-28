@@ -5,22 +5,26 @@ import * as Sentry from "@sentry/react";
 import { App } from "./App";
 
 Sentry.init({
-  dsn: "https://95288c36555ce0e17db927873dac28a0@o4511123518652416.ingest.de.sentry.io/4511123533725776",
+  dsn: "https://97e9b5dfead6dacc473ce14488423f76@o4511123518652416.ingest.de.sentry.io/4511123536412752",
+  // Setting this option to true will send default PII data to Sentry.
+  // For example, automatic IP address collection on events
+  sendDefaultPii: true,
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),
   ],
-  // Performance Monitoring
-  tracesSampleRate: 1.0, // Capture 100% of the transactions
-  // Session Replay
-  replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-  replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+  tracesSampleRate: 1.0, 
+  replaysSessionSampleRate: 0.1, 
+  replaysOnErrorSampleRate: 1.0, 
 });
 
-createRoot(document.getElementById("app") as HTMLElement).render(
+const container = document.getElementById("app") as HTMLElement;
+const root = createRoot(container);
+
+root.render(
   <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </StrictMode>,
+  </StrictMode>
 );
