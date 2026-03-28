@@ -56,6 +56,8 @@ module.exports = {
           '"Segoe UI Symbol"',
           '"Noto Color Emoji"',
         ],
+        montserrat: ["Montserrat", "system-ui", "sans-serif"],
+        lato: ["Lato", "system-ui", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {

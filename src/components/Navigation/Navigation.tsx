@@ -31,7 +31,7 @@ export const Navigation = (): JSX.Element => {
               href="#patienten"
               className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors"
             >
-              Patientenstimmen
+              Qualität
             </a>
             <a
               href="#kontakt"
@@ -115,7 +115,7 @@ export const Navigation = (): JSX.Element => {
               className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
-              Patientenstimmen
+              Qualität
             </a>
             <a
               href="#kontakt"
