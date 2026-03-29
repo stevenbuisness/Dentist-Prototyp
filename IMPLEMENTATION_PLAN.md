@@ -1,0 +1,122 @@
+# Backend- & Dashboard-Implementierungsplan (Zahnarzt-App)
+
+Dieser Plan beschreibt die schrittweise Integration eines vollständigen Backends und Web-Dashboards unter Verwendung von **Supabase** (Authentifizierung, Datenbank, Edge Functions, Storage) in die bestehende Anwendung.
+
+## 1. Technologie-Stack & Architektur
+
+*   **Backend & Datenbank:** Supabase (PostgreSQL)
+*   **Authentifizierung:** Supabase Auth (E-Mail/Passwort)
+*   **Media-Speicher:** Supabase Storage Buckets
+*   **Frontend-Framework:** React (Vite) / Next.js (bisheriges Setup wird beibehalten)
+*   **UI/UX:** Shadcn UI Komponenten, reguläres Tailwind CSS
+*   **Zustandsverwaltung:** React Query / Zustand (für Server- bzw. Client-State)
+*   **Routing:** React Router (oder Next.js App Router) mit eindeutigen Slugs
+
+## 2. Branding & UI/UX Leitfaden
+
+Um konsistent zur bestehenden Startseite zu bleiben und das "Premium"-Gefühl der Marke aufrechtzuerhalten, gelten folgende Richtlinien:
+
+*   **Typografie:**
+    *   Überschriften und hervorgehobene UI-Elemente: **Montserrat**
+    *   Fließtext und Daten-Tabellen: **Lato**
+*   **Farbpalette (aus `tailwind.config.js`):**
+    *   Verwendung der HSL-Variablen (`hsl(var(--primary))`, `--secondary`, `--accent`, etc.).
+    *   Ruhige, vertrauenserweckende Tonalität (typisch für den medizinischen Bereich), gestützt auf dunklere Akzente und klare Kontraste.
+*   **Komponenten-Design (Shadcn UI Referenz):**
+    *   **Seitenstruktur:** Eindeutige URLs/Slugs für alle Hauptfunktionen (keine riesigen Modal-Fenster für große Formulare!).
+    *   **Modals/Dialoge:** Nur für destruktive Aktionen (Löschen-Bestätigung) oder sehr kleine Anpassungen (z.B. ein einzelnes Statusfeld ändern).
+    *   **Benachrichtigungen:** Toast-Meldungen (über Shadcn's `useToast`) platziert **oben rechts** (`top-right`).
+    *   **Formulare:** Klare Fehlermeldungen, Ladeindikatoren bei Submits und gut strukturierte Grid-Layouts.
+
+## 3. Datenbank-Design (Supabase)
+
+Wir verwenden Row Level Security (RLS) in Supabase, um sicherzustellen, dass Nutzer nur ihre eigenen Daten sehen und bearbeiten können.
+
+### 3.1. Tabellen-Übersicht
+
+1.  **`users` (Erweitert das Supabase `auth.users`):**
+    *   `id` (PK, referenziert `auth.users`)
+    *   `role` (Immer "user" - Administratoren werden über eine feste Liste oder eine separate `admin_roles`-Tabelle definiert, um Sicherheit zu gewährleisten)
+    *   `status` (Enum: `active`, `blocked`, `rejected`)
+    *   `first_name`, `last_name`, `date_of_birth`
+    *   `phone_number`, `address_line_1`, `post_code`, `city`
+2.  **`session_types` (Kategorien von Behandlungen):**
+    *   `id`, `name`, `description`, `base_price`, `default_duration_minutes`
+3.  **`sessions` (Spezifische Zeitschlitze / Termine):**
+    *   `id`, `session_type_id` (FK)
+    *   `title`, `description`
+    *   `start_time`, `end_time` (Dauer ergibt sich dynamisch aus dem gewählten `session_type`)
+    *   `max_slots` (Maximale Kapazität)
+    *   `price` (Überschreibt ggf. base_price)
+    *   `cancellation_reason`, `cancellation_time` (Falls abgesagt)
+    *   `booking_status` (Enum: `open`, `fully_booked`, `canceled`, `completed`)
+4.  **`bookings`:**
+    *   `id`, `user_id` (FK), `session_id` (FK)
+    *   `status` (Enum: `confirmed`, `canceled_by_user`, `canceled_by_admin`, `attended`, `no_show`)
+    *   `booking_time`
+    *   `notes`
+5.  **`availability_rules`:**
+    *   Regeln für den generellen Kalender (z.B. "Jeden Montag 08:00 - 16:00 geöffnet").
+6.  **`availability_exceptions`:**
+    *   Ausnahmen (Urlaub, Feiertage, Krankheit).
+
+### 3.2. Historien-Tabellen (Audit Logs)
+
+1.  **`login_history`:** Speichert `user_id`, `login_time`, `ip_address`, `device_info`.
+2.  **`session_history`:** Speichert jede Änderung an einer `session` (`session_id`, `changed_by`, `change_type`, `old_values`, `new_values`, `timestamp`).
+3.  **`booking_history`:** Protokolliert Statuswechsel von Buchungen.
+4.  *Vorgeschlagen:* **`user_action_history`:** Ein allgemeines Audit-Log für Administratoren (z.B. "Admin X hat User Y blockiert").
+
+## 4. Seitenstruktur & Routing
+
+### 4.1. Allgemeine Seiten (Öffentlich / Auth)
+*   `/login`: Anmeldung (Email & Passwort)
+*   `/register`: Registrierung (Nach erfolgreicher Registrierung sind Accounts automatisch `active` und Anwender können direkt buchen.)
+*   `/logout`: Abmelde-Route
+*   `/unauthorized`: Fehlerseite für fehlende Berechtigungen
+
+### 4.2. Administrator-Seiten (`/admin/...`)
+*   `/admin/dashboard`: Übersicht (Heutige Termine, anstehende Buchungen, offene Freigaben).
+*   `/admin/sessions`: Listenansicht aller Sitzungen.
+    *   `/admin/sessions/create`: Neue Sitzung anlegen.
+    *   `/admin/sessions/[id]/edit`: Sitzung bearbeiten.
+*   `/admin/session-types`: Verwaltung der Behandlungstypen.
+*   `/admin/calendar`: Kalenderansicht zur Verwaltung von Verfügbarkeitsregeln und Ausnahmen.
+*   `/admin/bookings`: Buchungsverwaltung (Liste, Filter nach Status).
+    *   `/admin/bookings/[id]`: Detailansicht einer Buchung.
+*   `/admin/clients`: Kundenverwaltung (mit Möglichkeit Nutzer zu blockieren/abzulehnen).
+    *   `/admin/clients/[id]`: Kundenprofil, Historie und Notizen.
+*   `/admin/reports`: Auswertungen (Login-Historie, Buchungshistorien, Umsatzschätzung bei Barzahlung).
+*   `/admin/settings`: Allgemeine Praxis-Einstellungen.
+
+### 4.3. Kunden-Seiten (`/dashboard/...`)
+*   `/dashboard`: Benutzer-Overview (Kommende Termine, letzte Aktivitäten).
+*   `/dashboard/profile`: Profilverwaltung (Kontaktdaten und Adressfelder, Passwort ändern).
+*   `/dashboard/bookings`: Historie und Verwaltung eigener Buchungen.
+    *   `/dashboard/bookings/[id]`: Buchungsdetails (Termine können hier bis **24 Stunden vor Beginn** online storniert werden).
+
+## 5. Implementierungs-Schritte (Vorgehensplan)
+
+1.  **Phase 1: Setup & Authentifizierung**
+    *   Supabase-Projekt initialisieren und `.env` anlegen.
+    *   Erstellung der `users` Tabelle und Anbindung an Supabase Auth via Trigger.
+    *   Implementierung der Login/Register-Seiten und Zustand-Management für die Authentifizierung.
+    *   Einrichtung der Zugangskontrollen (Protected Routes für Admin & User).
+2.  **Phase 2: UI-Grundgerüst & Branding**
+    *   Seitliche Sidebar / Topbar Navigation für Dashboards implementieren.
+    *   Shadcn-Komponenten für Formulare, Tabellen und Toasts (oben-rechts) konfigurieren.
+3.  **Phase 3: Datenbank & Kernfunktionen (Backend-Fokus)**
+    *   Migrationen/Scripte für Tabellen (`sessions`, `session_types`, `bookings`, History-Tabellen) in Supabase anlegen.
+    *   RLS (Row Level Security) Policys definieren (Admins sehen alles, User nur eigenes).
+4.  **Phase 4: Admin-Dashboard**
+    *   Kundenverwaltung (Nutzer freigeben/blockieren).
+    *   Sitzungsverwaltung (CRUD Seiten für Termine und Typen inkl. Kalender-Komponente).
+    *   Buchungsverwaltung (Bestätigen/Stornieren).
+5.  **Phase 5: User-Dashboard & Buchungsfluss**
+    *   Ansicht und Verwaltung der eigenen Buchungen (`/dashboard/bookings`).
+    *   Frontend-Buchungsfluss mit der Verfügbarkeitslogik (Regeln & Ausnahmen) verknüpfen.
+6.  **Phase 6: Logging & Historie**
+    *   Anbindung der Historien (Login, Sessions, Buchungen). Wie abgestimmt, geschieht dies sicher auf Datenbankebene über native **Postgres-Trigger** in Supabase, um eine lückenlose und fehlerfreie Historie zu gewährleisten.
+7.  **Phase 7: Testen & Polish**
+    *   Durchspielen von Edge-Cases (Stornierung zu spät, Überbuchung).
+    *   Sentry Exceptions kontrollieren.
