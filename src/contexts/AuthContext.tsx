@@ -2,21 +2,28 @@ import { createContext, useContext, ReactNode } from "react";
 import { useAuth, Profile } from "../hooks/useAuth";
 import { Session, User } from "@supabase/supabase-js";
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
   isAdmin: boolean;
+  debugInfo?: {
+    userId?: string;
+    email?: string;
+    profileRole?: string;
+    hasProfile: boolean;
+    error?: string;
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = useAuth();
+  const { user, session, profile, loading, isAdmin, debugInfo } = useAuth();
 
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={{ user, session, profile, loading, isAdmin, debugInfo }}>
       {children}
     </AuthContext.Provider>
   );
