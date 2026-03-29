@@ -12,7 +12,42 @@ Dieser Plan beschreibt die schrittweise Integration eines vollständigen Backend
 *   **Zustandsverwaltung:** React Query / Zustand (für Server- bzw. Client-State)
 *   **Routing:** React Router (oder Next.js App Router) mit eindeutigen Slugs
 
-## 2. Branding & UI/UX Leitfaden
+## 2. Umgebungsvariablen (.env)
+
+Folgende Variablen müssen in der `.env` Datei im Root-Verzeichnis konfiguriert werden. Eine `.env.example` sollte für das Team bereitgestellt werden.
+
+```bash
+# Supabase Konfiguration
+VITE_SUPABASE_URL=https://kzidkdoeddckfmaamgdj.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+
+# Sentry (für Error Tracking)
+VITE_SENTRY_DSN=your-sentry-dsn-here
+
+# App Einstellungen
+VITE_APP_NAME="Dentist Prototyp"
+VITE_APP_URL=http://localhost:5173
+```
+
+> [!IMPORTANT]
+> Die `.env` Datei ist bereits in der `.gitignore` enthalten und darf niemals in das Repository gepusht werden.
+
+## 3. Sicherheits-Best-Practices (Sicherheit & Compliance)
+
+Um die Patientendaten zu schützen und Weltklasse-Standards zu erfüllen, gelten folgende Sicherheitsvorgaben:
+
+*   **Key-Separation:**
+    *   **`anon_key`:** Wird ausschließlich im Frontend verwendet. Er unterliegt den RLS-Regeln der Datenbank.
+    *   **`service_role_key`:** Darf **NIEMALS** im Frontend (`VITE_...`) oder in Git-Repositories auftauchen. Er ist exklusiv für serverseitige Aufgaben (Edge Functions, Admin-Skripte) reserviert.
+*   **Row Level Security (RLS):**
+    *   Jede neue Tabelle in Supabase muss mit aktiviertem RLS (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY`) erstellt werden.
+    *   Keine Tabelle darf anonymen Schreibzugriff ohne Authentifizierung haben.
+*   **API-Sicherheit:**
+    *   Supabase Edge Functions müssen so konfiguriert werden, dass sie nur mit validem JWT (JSON Web Token) oder geheimen Schlüsseln aufgerufen werden können.
+*   **Audit-Logs:**
+    *   Jeder schreibende Zugriff auf Patientendaten muss über die Historien-Tabellen (Postgres Trigger) unveränderlich protokolliert werden.
+
+## 4. Branding & UI/UX Leitfaden
 
 Um konsistent zur bestehenden Startseite zu bleiben und das "Premium"-Gefühl der Marke aufrechtzuerhalten, gelten folgende Richtlinien:
 
@@ -28,11 +63,11 @@ Um konsistent zur bestehenden Startseite zu bleiben und das "Premium"-Gefühl de
     *   **Benachrichtigungen:** Toast-Meldungen (über Shadcn's `useToast`) platziert **oben rechts** (`top-right`).
     *   **Formulare:** Klare Fehlermeldungen, Ladeindikatoren bei Submits und gut strukturierte Grid-Layouts.
 
-## 3. Datenbank-Design (Supabase)
+## 5. Datenbank-Design (Supabase)
 
 Wir verwenden Row Level Security (RLS) in Supabase, um sicherzustellen, dass Nutzer nur ihre eigenen Daten sehen und bearbeiten können.
 
-### 3.1. Tabellen-Übersicht
+### 5.1. Tabellen-Übersicht
 
 1.  **`users` (Erweitert das Supabase `auth.users`):**
     *   `id` (PK, referenziert `auth.users`)
@@ -60,22 +95,22 @@ Wir verwenden Row Level Security (RLS) in Supabase, um sicherzustellen, dass Nut
 6.  **`availability_exceptions`:**
     *   Ausnahmen (Urlaub, Feiertage, Krankheit).
 
-### 3.2. Historien-Tabellen (Audit Logs)
+### 5.2. Historien-Tabellen (Audit Logs)
 
 1.  **`login_history`:** Speichert `user_id`, `login_time`, `ip_address`, `device_info`.
 2.  **`session_history`:** Speichert jede Änderung an einer `session` (`session_id`, `changed_by`, `change_type`, `old_values`, `new_values`, `timestamp`).
 3.  **`booking_history`:** Protokolliert Statuswechsel von Buchungen.
 4.  *Vorgeschlagen:* **`user_action_history`:** Ein allgemeines Audit-Log für Administratoren (z.B. "Admin X hat User Y blockiert").
 
-## 4. Seitenstruktur & Routing
+## 6. Seitenstruktur & Routing
 
-### 4.1. Allgemeine Seiten (Öffentlich / Auth)
+### 6.1. Allgemeine Seiten (Öffentlich / Auth)
 *   `/login`: Anmeldung (Email & Passwort)
 *   `/register`: Registrierung (Nach erfolgreicher Registrierung sind Accounts automatisch `active` und Anwender können direkt buchen.)
 *   `/logout`: Abmelde-Route
 *   `/unauthorized`: Fehlerseite für fehlende Berechtigungen
 
-### 4.2. Administrator-Seiten (`/admin/...`)
+### 6.2. Administrator-Seiten (`/admin/...`)
 *   `/admin/dashboard`: Übersicht (Heutige Termine, anstehende Buchungen, offene Freigaben).
 *   `/admin/sessions`: Listenansicht aller Sitzungen.
     *   `/admin/sessions/create`: Neue Sitzung anlegen.
@@ -89,13 +124,13 @@ Wir verwenden Row Level Security (RLS) in Supabase, um sicherzustellen, dass Nut
 *   `/admin/reports`: Auswertungen (Login-Historie, Buchungshistorien, Umsatzschätzung bei Barzahlung).
 *   `/admin/settings`: Allgemeine Praxis-Einstellungen.
 
-### 4.3. Kunden-Seiten (`/dashboard/...`)
+### 6.3. Kunden-Seiten (`/dashboard/...`)
 *   `/dashboard`: Benutzer-Overview (Kommende Termine, letzte Aktivitäten).
 *   `/dashboard/profile`: Profilverwaltung (Kontaktdaten und Adressfelder, Passwort ändern).
 *   `/dashboard/bookings`: Historie und Verwaltung eigener Buchungen.
     *   `/dashboard/bookings/[id]`: Buchungsdetails (Termine können hier bis **24 Stunden vor Beginn** online storniert werden).
 
-## 5. Implementierungs-Schritte (Vorgehensplan)
+## 7. Implementierungs-Schritte (Vorgehensplan)
 
 1.  **Phase 1: Setup & Authentifizierung**
     *   Supabase-Projekt initialisieren und `.env` anlegen.
