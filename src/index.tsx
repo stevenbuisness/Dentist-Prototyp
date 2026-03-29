@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import * as Sentry from "@sentry/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { AuthProvider } from "./contexts/AuthContext";
 import { App } from "./App";
 
 Sentry.init({
@@ -25,10 +26,12 @@ const root = createRoot(container);
 
 root.render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-      <Analytics />
-      <SpeedInsights />
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <App />
+        <Analytics />
+        <SpeedInsights />
+      </BrowserRouter>
+    </AuthProvider>
   </StrictMode>
 );

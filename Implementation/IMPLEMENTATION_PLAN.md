@@ -132,11 +132,13 @@ Wir verwenden Row Level Security (RLS) in Supabase, um sicherzustellen, dass Nut
 
 ## 7. Implementierungs-Schritte (Vorgehensplan)
 
-1.  **Phase 1: Setup & Authentifizierung**
+1.  **Phase 1: Setup, Datenbank & Authentifizierung**
     *   Supabase-Projekt initialisieren und `.env` anlegen.
-    *   Erstellung der `users` Tabelle und Anbindung an Supabase Auth via Trigger.
-    *   Implementierung der Login/Register-Seiten und Zustand-Management für die Authentifizierung.
-    *   Einrichtung der Zugangskontrollen (Protected Routes für Admin & User).
+    *   **Priorität:** Erstellung ALLER Datenbanktabellen (`users`, `sessions`, `session_types`, `bookings`, `availability_rules`, `history`).
+    *   Einrichtung der Postgres-Trigger für den automatischen User-Sync.
+    *   Implementierung der Login/Register-Seiten (inkl. erweiterte Profilfelder).
+    *   Erstellung von Dashboard-Mockups (Patient & Admin) zur Überprüfung der Authentifizierung und Rollen.
+    *   Einrichtung der Zugangskontrollen (Protected Routes).
 2.  **Phase 2: UI-Grundgerüst & Branding**
     *   Seitliche Sidebar / Topbar Navigation für Dashboards implementieren.
     *   Shadcn-Komponenten für Formulare, Tabellen und Toasts (oben-rechts) konfigurieren.

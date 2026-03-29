@@ -1,32 +1,34 @@
-# Phase 1: Setup & Authentifizierung
+# Phase 1: Setup, Datenbank & Authentifizierung (Neu strukturiert)
 
-Diese Phase bildet das Fundament der Anwendung. Wir richten Supabase ein, konfigurieren die Authentifizierung und erstellen die grundlegende Benutzerverwaltung.
+In dieser Phase legen wir das komplette Datenmodell in Supabase fest, bevor wir die Authentifizierung und die ersten Dashboard-Mockups umsetzen.
 
 ## 📋 Aufgabenliste
 
-### 1.1 Supabase Infrastruktur
-- [ ] Supabase Projekt erstellen
-- [ ] `.env` Datei lokal konfigurieren (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
-- [ ] Supabase Client in `src/lib/supabase.ts` initialisieren
+### 1.1 Datenbank-Setup (Vorrangig)
+- [ ] Supabase Projekt initialisieren & `.env` lokal einrichten
+- [ ] **Alle Tabellen erstellen** (SQL Migration):
+    - `users` (erweitertes Profil)
+    - `session_types` (Behandlungsarten)
+    - `sessions` (Terminslots)
+    - `bookings` (Buchungen)
+    - `availability_rules` & `availability_exceptions`
+- [ ] Postgres-Trigger für automatischen User-Sync (`auth.users` -> `public.users`) einrichten
+- [ ] RLS Policies für alle Tabellen aktivieren
 
-### 1.2 Datenbank & Auth-Sync
-- [ ] Tabelle `public.users` erstellen (mit Feldern für Profilinformationen)
-- [ ] Postgres-Trigger einrichten: Automatischer Sync von `auth.users` -> `public.users`
-- [ ] RLS (Row Level Security) für `users` Tabelle aktivieren und Policies definieren
+### 1.2 Authentifizierungs-UI
+- [ ] Registrierungs-Seite (`/register`) mit erweiterten Profilfeldern erstellen
+- [ ] Login-Seite (`/login`) implementieren
+- [ ] `useAuth` Hook zur globalen Statusverwaltung erstellen
 
-### 1.3 Authentifizierung-Logik (Frontend)
-- [ ] Authentifizierungs-Context/Hook (`useAuth`) erstellen
-- [ ] Login-Funktion implementieren
-- [ ] Registrierungs-Funktion implementieren (inkl. zusätzliche Profilfelder)
-
-### 1.4 UI & Routing
-- [ ] Login-Seite (`/login`) erstellen (Shadcn UI)
-- [ ] Registrierungs-Seite (`/register`) erstellen (Shadcn UI)
-- [ ] `ProtectedRoute` Komponente für geschützte Routen implementieren
-- [ ] `AdminRoute` Komponente für den Admin-Bereich implementieren
+### 1.3 Rollen-Management & Dashboards
+- [ ] Manuelle Zuweisung der Admin-Rolle in der Supabase DB (nach Tabellenerstellung)
+- [ ] **Dashboard Mockups erstellen:**
+    - `/dashboard` (User-Ansicht Mockup)
+    - `/admin/dashboard` (Admin-Ansicht Mockup)
+- [ ] Protected Routes (`ProtectedRoute`, `AdminRoute`) implementieren und mit Mockups testen
 
 ## 🏆 Akzeptanzkriterien
-- Nutzer können sich erfolgreich registrieren und anmelden.
-- Registrierte Nutzer landen automatisch in der `public.users` Tabelle.
-- Nicht eingeloggte Nutzer können nicht auf `/dashboard` oder `/admin` zugreifen.
-- Admins können durch ihre Rolle identifiziert werden.
+- Alle Datenbanktabellen existieren in Supabase.
+- Nutzer können sich registrieren und anmelden.
+- Das System erkennt automatisch, ob ein Nutzer Admin oder Patient ist (basierend auf der DB-Zuweisung).
+- Die Dashboard-Mockups sind erreichbar und zeigen rollenspezifische Inhalte.

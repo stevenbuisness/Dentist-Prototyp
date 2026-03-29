@@ -1,14 +1,30 @@
 import { Route, Routes } from "react-router-dom";
 import { DentalHomepage } from "./screens/DentalHomepage";
 import { PremiumLanding } from "./screens/PremiumLanding";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import Unauthorized from "./pages/auth/Unauthorized";
+import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 
 export const App = (): JSX.Element => {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<PremiumLanding />} />
-        <Route path="/old" element={<DentalHomepage />} />
-      </Routes>
-    </>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<PremiumLanding />} />
+      <Route path="/old" element={<DentalHomepage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
+
+      {/* Patient Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<div className="p-8 font-montserrat"><h1>Patient Dashboard Mockup</h1><p className="font-lato mt-4 text-muted-foreground">Willkommen in Ihrem persönlichen Bereich.</p></div>} />
+      </Route>
+
+      {/* Admin Protected Routes */}
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<div className="p-8 font-montserrat font-bold text-primary"><h1>Admin Dashboard Mockup</h1><p className="font-lato mt-4 text-muted-foreground">Willkommen im Verwaltungsbereich.</p></div>} />
+      </Route>
+    </Routes>
   );
 };
