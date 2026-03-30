@@ -4,6 +4,10 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import Unauthorized from "./pages/auth/Unauthorized";
 import ProfilePage from "./pages/dashboard/ProfilePage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import SessionsPage from "./pages/admin/SessionsPage";
+import SessionTypesPage from "./pages/admin/SessionTypesPage";
+import BookingsPage from "./pages/admin/BookingsPage";
 import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 import { useAuthContext } from "./contexts/AuthContext";
 import { supabase } from "./lib/supabase";
@@ -118,9 +122,9 @@ function AdminDashboardRedirect() {
   const { profile, loading } = useAuthContext();
   
   if (loading) return <div className="p-8">Lade Dashboard...</div>;
-  if (profile?.role === "admin") return <Navigate to="/admin" replace />;
+  if (profile?.role === "admin") return <AdminDashboard />;
   
-  return <DashboardMockup title="Patient Dashboard Mockup" />;
+  return <DashboardMockup title="Patienten Dashboard" />;
 }
 
 export default function App() {
@@ -139,7 +143,11 @@ export default function App() {
 
       {/* Admin Protected Routes */}
       <Route element={<AdminRoute />}>
-        <Route path="/admin" element={<DashboardMockup title="Admin Dashboard Mockup" />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/sessions" element={<SessionsPage />} />
+        <Route path="/admin/session-types" element={<SessionTypesPage />} />
+        <Route path="/admin/bookings" element={<BookingsPage />} />
       </Route>
 
       {/* Fallback */}
