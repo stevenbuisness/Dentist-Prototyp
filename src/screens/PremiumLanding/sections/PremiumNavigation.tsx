@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { supabase } from "../../../lib/supabase";
+import { useToast } from "../../../hooks/use-toast";
 
 const navItems = [
   { href: "#leistungen", label: "Leistungen" },
@@ -10,6 +13,26 @@ const navItems = [
 
 export const PremiumNavigation = (): JSX.Element => {
   const [open, setOpen] = useState(false);
+  const { user, profile } = useAuthContext();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Fehler beim Abmelden",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Abgemeldet",
+        description: "Auf Wiedersehen!",
+      });
+      navigate("/");
+    }
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-stone-200/80 bg-[#faf8f5]/95 backdrop-blur-md">
@@ -38,9 +61,23 @@ export const PremiumNavigation = (): JSX.Element => {
         </ul>
 
         <div className="flex items-center gap-3">
+          {user && (
+            <button
+              onClick={handleLogout}
+              className="font-lato hidden text-sm font-medium text-stone-500 hover:text-destructive sm:inline px-3 py-1 transition-all"
+            >
+              Abmelden
+            </button>
+          )}
+          <Link
+            to={user ? (profile?.role === "admin" ? "/admin" : "/dashboard") : "/login"}
+            className="font-lato hidden text-sm font-semibold text-stone-700 hover:text-stone-900 sm:inline px-3 py-1 border border-stone-300 rounded-md transition-all"
+          >
+            {user ? "Mein Bereich" : "Anmelden"}
+          </Link>
           <a
             href="tel:03012345678"
-            className="font-lato hidden text-sm text-stone-700 underline-offset-4 hover:underline sm:inline"
+            className="font-lato hidden text-sm text-stone-700 underline-offset-4 hover:underline lg:inline"
           >
             030 1234 5678
           </a>
@@ -87,6 +124,28 @@ export const PremiumNavigation = (): JSX.Element => {
                 </a>
               </li>
             ))}
+            <li>
+              <Link
+                to={user ? (profile?.role === "admin" ? "/admin" : "/dashboard") : "/login"}
+                className="font-lato block py-1 text-primary font-bold"
+                onClick={() => setOpen(false)}
+              >
+                {user ? "Mein Bereich" : "Anmelden"}
+              </Link>
+            </li>
+            {user && (
+              <li>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setOpen(false);
+                  }}
+                  className="font-lato block py-1 text-destructive font-bold"
+                >
+                  Abmelden
+                </button>
+              </li>
+            )}
             <li>
               <a
                 href="tel:03012345678"
