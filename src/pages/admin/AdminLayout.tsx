@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
@@ -13,13 +13,30 @@ import {
   Menu, 
   X,
   Stethoscope,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
 
 interface AdminLayoutProps {
   children: ReactNode;
+}
+
+interface Notification {
+  id: string;
+  message: string;
+  time: string;
+  read: boolean;
+}
+
+interface BookingNotificationData {
+  id: string;
+  booking_time: string;
+  users: {
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
 }
 
 const navItems = [
@@ -37,6 +54,66 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    // Fetch recent bookings for baseline notifications
+    const fetchRecentBookings = async () => {
+      const { data } = await supabase
+        .from("bookings")
+        .select(`
+          id, 
+          booking_time, 
+          users (first_name, last_name)
+        `)
+        .order("booking_time", { ascending: false })
+        .limit(5);
+      
+      if (data) {
+        setNotifications((data as unknown as BookingNotificationData[]).map((b) => ({
+          id: b.id,
+          message: `Buchung von ${b.users?.first_name || 'Unbekannt'} ${b.users?.last_name || ''}`,
+          time: b.booking_time ? new Date(b.booking_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---',
+          read: true
+        })));
+      }
+    };
+    
+    fetchRecentBookings();
+
+    // Subscribe to real-time changes
+    const subscription = supabase
+      .channel('bookings-channel')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, (payload) => {
+        setNotifications(prev => [{
+          id: payload.new.id,
+          message: `Neue Buchung erhalten!`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          read: false
+        }, ...prev].slice(0, 10));
+        
+        toast({
+          title: "Neue Online-Buchung!",
+          description: "Ein Patient hat gerade einen Termin gebucht.",
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [toast]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+    if (!showNotifications && unreadCount > 0) {
+      setNotifications(prev => prev.map(n => ({...n, read: true})));
+    }
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -47,10 +124,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Abgemeldet",
-        description: "Admin-Sitzung beendet.",
-      });
       navigate("/");
     }
   };
@@ -67,17 +140,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-stone-200 transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 z-50 bg-white border-r border-stone-200 transition-all duration-300 lg:static lg:translate-x-0",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full",
+        sidebarCollapsed ? "w-20" : "w-72"
       )}>
         <div className="h-full flex flex-col pt-8">
-          <div className="px-8 pb-10 flex items-center justify-between">
-            <Link to="/" className="font-montserrat text-lg font-bold tracking-tight text-stone-900">
-              Dr. Schmidt <span className="text-stone-400 font-medium">| Admin</span>
-            </Link>
-            <button className="lg:hidden p-2 -mr-2" onClick={() => setSidebarOpen(false)}>
-              <X size={20} />
-            </button>
+          <div className={cn("pb-10 flex items-center justify-between", sidebarCollapsed ? "px-4 justify-center" : "px-8")}>
+            {!sidebarCollapsed ? (
+              <Link to="/" className="font-montserrat text-lg font-bold tracking-tight text-stone-900 truncate">
+                Dr. Schmidt <span className="text-stone-400 font-medium">| Admin</span>
+              </Link>
+            ) : (
+              <Link to="/" className="font-montserrat text-xl font-bold tracking-tight text-stone-900 mx-auto">
+                DS
+              </Link>
+            )}
+            {!sidebarCollapsed && (
+              <button className="lg:hidden p-2 -mr-2" onClick={() => setSidebarOpen(false)}>
+                <X size={20} />
+              </button>
+            )}
           </div>
 
           <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
@@ -87,58 +169,118 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <Link
                   key={item.href}
                   to={item.href}
+                  title={sidebarCollapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors group",
+                    "flex items-center gap-3 py-3 rounded-lg text-sm font-medium transition-colors group",
                     active 
                       ? "bg-stone-900 text-[#faf8f5]" 
-                      : "text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+                      : "text-stone-600 hover:bg-stone-100 hover:text-stone-900",
+                    sidebarCollapsed ? "justify-center px-0" : "px-4"
                   )}
                 >
                   <item.icon size={18} className={cn(active ? "text-stone-400" : "text-stone-400 group-hover:text-stone-600")} />
-                  {item.label}
-                  {active && <ChevronRight size={14} className="ml-auto opacity-50" />}
+                  {!sidebarCollapsed && item.label}
+                  {!sidebarCollapsed && active && <ChevronRight size={14} className="ml-auto opacity-50" />}
                 </Link>
               );
             })}
           </nav>
 
           <div className="p-4 border-t border-stone-100">
-            <div className="mb-4 px-4 py-3 bg-stone-50 rounded-lg">
-              <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Angemeldet als</p>
-              <p className="text-sm font-bold text-stone-900 truncate">{profile?.first_name} {profile?.last_name}</p>
-              <p className="text-[10px] text-stone-500 truncate">{user?.email}</p>
-            </div>
+            {!sidebarCollapsed && (
+              <div className="mb-4 px-4 py-3 bg-stone-50 rounded-lg overflow-hidden">
+                <p className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Angemeldet als</p>
+                <p className="text-sm font-bold text-stone-900 truncate">{profile?.first_name} {profile?.last_name}</p>
+                <p className="text-[10px] text-stone-500 truncate">{user?.email}</p>
+              </div>
+            )}
             <Button 
               variant="ghost" 
               onClick={handleLogout}
-              className="w-full justify-start text-stone-600 hover:text-destructive hover:bg-destructive/5 gap-3"
+              title={sidebarCollapsed ? "Abmelden" : undefined}
+              className={cn("w-full text-stone-600 hover:text-destructive hover:bg-destructive/5 gap-3", sidebarCollapsed ? "justify-center px-0" : "justify-start")}
             >
               <LogOut size={18} />
-              Abmelden
+              {!sidebarCollapsed && "Abmelden"}
             </Button>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Header */}
         <header className="h-16 bg-white border-b border-stone-200 flex items-center justify-between px-4 lg:px-8 shrink-0">
           <div className="flex items-center gap-4">
             <button 
-              className="p-2 lg:hidden text-stone-600 hover:bg-stone-100 rounded-md"
+              className="p-2 lg:hidden text-stone-600 hover:bg-stone-100 rounded-md transition-colors"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={24} />
+            </button>
+            <button 
+              className="p-2 hidden lg:flex text-stone-600 hover:bg-stone-100 rounded-md transition-colors"
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            >
+              <Menu size={20} />
             </button>
             <h2 className="font-montserrat font-bold text-lg text-stone-900">
               {navItems.find(i => i.href === location.pathname)?.label || "Dashboard"}
             </h2>
           </div>
           
-          <div className="flex items-center gap-4">
-            <Link to="/" className="text-xs font-semibold text-stone-500 hover:text-stone-900 uppercase tracking-widest transition-colors">
-              Zur Website
+          <div className="flex items-center gap-4 relative">
+            <div className="relative">
+              <button 
+                onClick={toggleNotifications}
+                className="p-2 text-stone-600 hover:bg-stone-100 rounded-md transition-colors relative"
+              >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
+              </button>
+
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white border border-stone-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                  <div className="p-3 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+                    <h3 className="font-bold text-sm text-stone-900 font-montserrat">Benachrichtigungen</h3>
+                    {unreadCount > 0 && (
+                      <span className="text-xs font-semibold px-2 py-0.5 bg-stone-900 text-white rounded-full">
+                        {unreadCount} neu
+                      </span>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-stone-500">
+                        Keine Benachrichtigungen vorhanden.
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-stone-100">
+                        {notifications.map((n) => (
+                          <div key={n.id} className={cn("p-3 transition-colors hover:bg-stone-50", !n.read ? "bg-stone-50/80" : "")}>
+                            <p className={cn("text-sm", !n.read ? "font-bold text-stone-900" : "text-stone-600")}>
+                              {n.message}
+                            </p>
+                            <span className="text-xs text-stone-400 mt-1 block">{n.time}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2 border-t border-stone-100 bg-stone-50/50">
+                    <Link to="/admin/bookings" onClick={() => setShowNotifications(false)} className="text-xs text-center block w-full py-2 font-medium text-stone-600 hover:text-stone-900 transition-colors">
+                      Alle Buchungen ansehen
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <Link to="/" className="px-4 py-2 bg-white border border-stone-200 text-stone-900 rounded-md text-sm font-semibold hover:bg-stone-50 transition-colors shadow-sm hidden sm:block">
+              Zur Startseite
             </Link>
           </div>
         </header>

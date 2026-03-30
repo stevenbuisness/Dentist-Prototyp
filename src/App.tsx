@@ -49,21 +49,8 @@ function DashboardMockup({ title }: { title: string }) {
             <Link to="/profile" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
               <UserIcon size={16} /> Profil
             </Link>
-            <Link to="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
-              <svg 
-                width="16" 
-                height="16" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-                className="transition-transform group-hover:-translate-x-1"
-              >
-                <path d="M19 12H5m7 7-7-7 7-7"/>
-              </svg>
-              Homepage
+            <Link to="/" className="px-4 py-2 bg-white border border-stone-200 text-stone-900 rounded-md text-sm font-semibold hover:bg-stone-50 transition-colors shadow-sm hidden sm:block">
+              Zur Startseite
             </Link>
             <button 
               onClick={handleLogout}

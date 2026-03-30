@@ -27,10 +27,6 @@ export default function LoginPage() {
       });
       setLoading(false);
     } else {
-      toast({
-        title: "Erfolgreich angemeldet",
-        description: "Willkommen zurück!",
-      });
       // Small timeout to give Supabase time to propagate the role through the AuthStateChange
       setTimeout(() => {
         navigate("/"); // We go back to home, then Navigation logic redirects to dashboard
