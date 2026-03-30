@@ -5,27 +5,27 @@ In dieser Phase legen wir das komplette Datenmodell in Supabase fest, bevor wir 
 ## 📋 Aufgabenliste
 
 ### 1.1 Datenbank-Setup (Vorrangig)
-- [ ] Supabase Projekt initialisieren & `.env` lokal einrichten
-- [ ] **Alle Tabellen erstellen** (SQL Migration):
+- [x] Supabase Projekt initialisieren & `.env` lokal einrichten
+- [x] **Alle Tabellen erstellen** (SQL Migration):
     - `users` (erweitertes Profil)
     - `session_types` (Behandlungsarten)
     - `sessions` (Terminslots)
     - `bookings` (Buchungen)
     - `availability_rules` & `availability_exceptions`
-- [ ] Postgres-Trigger für automatischen User-Sync (`auth.users` -> `public.users`) einrichten
-- [ ] RLS Policies für alle Tabellen aktivieren
+- [x] Postgres-Trigger für automatischen User-Sync (`auth.users` -> `public.users`) einrichten
+- [x] RLS Policies für alle Tabellen aktivieren
 
 ### 1.2 Authentifizierungs-UI
-- [ ] Registrierungs-Seite (`/register`) mit erweiterten Profilfeldern erstellen
-- [ ] Login-Seite (`/login`) implementieren
-- [ ] `useAuth` Hook zur globalen Statusverwaltung erstellen
+- [x] Registrierungs-Seite (`/register`) mit erweiterten Profilfeldern erstellen
+- [x] Login-Seite (`/login`) implementieren
+- [x] `useAuth` Hook zur globalen Statusverwaltung erstellen
 
 ### 1.3 Rollen-Management & Dashboards
-- [ ] Manuelle Zuweisung der Admin-Rolle in der Supabase DB (nach Tabellenerstellung)
-- [ ] **Dashboard Mockups erstellen:**
+- [x] Manuelle Zuweisung der Admin-Rolle in der Supabase DB (nach Tabellenerstellung)
+- [x] **Dashboard Mockups erstellen:**
     - `/dashboard` (User-Ansicht Mockup)
     - `/admin/dashboard` (Admin-Ansicht Mockup)
-- [ ] Protected Routes (`ProtectedRoute`, `AdminRoute`) implementieren und mit Mockups testen
+- [x] Protected Routes (`ProtectedRoute`, `AdminRoute`) implementieren und mit Mockups testen
 
 ## 🏆 Akzeptanzkriterien
 - Alle Datenbanktabellen existieren in Supabase.

@@ -6,18 +6,18 @@ In dieser Phase bauen wir die visuelle Struktur der Dashboards auf und stellen s
 
 ### 2.1 Dashboard Layouts
 - [ ] Admin-Dashboard Layout (`/admin/*`) erstellen (Sidebar, Topbar)
-- [ ] User-Dashboard Layout (`/dashboard/*`) erstellen
-- [ ] Gemeinsame Navigations-Komponente implementing (Sidebar toggle)
+- [x] User-Dashboard Layout (`/dashboard/*`) erstellen (Header-Navigation integriert)
+- [x] Gemeinsame Navigations-Komponente implementing (PremiumNavigation & Dashboard Header)
 
 ### 2.2 Shadcn UI Integration
-- [ ] Formular-Komponenten konfigurieren (Input, Label, Button, Checkbox, Select)
+- [x] Formular-Komponenten konfigurieren (Profilseite als Referenz implementiert)
 - [ ] Daten-Tabellen-Komponente vorberereiten (`DataTable` für Listenansichten)
-- [ ] Toast-System (`useToast`) für Benachrichtigungen oben-rechts (`top-right`) einrichten
+- [x] Toast-System (`useToast`) für Benachrichtigungen oben-rechts (`top-right`) einrichten
 
 ### 2.3 Branding & Design
-- [ ] Typografie (Montserrat, Lato) global konfigurieren (Google Fonts)
-- [ ] Farbpalette in `tailwind.config.js` finalisieren (HSL-Variablen)
-- [ ] Button-Varianten (Primary, Secondary, Accent) an die Designvorgaben anpassen
+- [x] Typografie (Montserrat, Lato) global konfigurieren (Google Fonts)
+- [x] Farbpalette in `tailwind.config.js` finalisieren (HSL-Variablen)
+- [x] Button-Varianten (Primary, Secondary, Accent) an die Designvorgaben anpassen
 
 ## 🏆 Akzeptanzkriterien
 - Die Dashboards besitzen eine konsistente Sidebar/Navigation.

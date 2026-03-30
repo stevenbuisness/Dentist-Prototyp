@@ -132,16 +132,16 @@ Wir verwenden Row Level Security (RLS) in Supabase, um sicherzustellen, dass Nut
 
 ## 7. Implementierungs-Schritte (Vorgehensplan)
 
-1.  **Phase 1: Setup, Datenbank & Authentifizierung**
-    *   Supabase-Projekt initialisieren und `.env` anlegen.
-    *   **Priorität:** Erstellung ALLER Datenbanktabellen (`users`, `sessions`, `session_types`, `bookings`, `availability_rules`, `history`).
-    *   Einrichtung der Postgres-Trigger für den automatischen User-Sync.
-    *   Implementierung der Login/Register-Seiten (inkl. erweiterte Profilfelder).
-    *   Erstellung von Dashboard-Mockups (Patient & Admin) zur Überprüfung der Authentifizierung und Rollen.
-    *   Einrichtung der Zugangskontrollen (Protected Routes).
-2.  **Phase 2: UI-Grundgerüst & Branding**
-    *   Seitliche Sidebar / Topbar Navigation für Dashboards implementieren.
-    *   Shadcn-Komponenten für Formulare, Tabellen und Toasts (oben-rechts) konfigurieren.
+1.  **Phase 1: Setup, Datenbank & Authentifizierung** (✅ ABGESCHLOSSEN - 30.03.2024)
+    *   [x] Supabase-Projekt initialisieren und `.env` anlegen.
+    *   [x] **Priorität:** Erstellung ALLER Datenbanktabellen (`users`, `sessions`, `session_types`, `bookings`, `availability_rules`, `history`).
+    *   [x] Einrichtung der Postgres-Trigger für den automatischen User-Sync.
+    *   [x] Implementierung der Login/Register-Seiten.
+    *   [x] Erstellung von Dashboard-Mockups (Patient & Admin) zur Überprüfung der Authentifizierung und Rollen.
+    *   [x] Einrichtung der Zugangskontrollen (Protected Routes).
+2.  **Phase 2: UI-Grundgerüst & Branding** (🚧 IN ARBEIT)
+    *   [x] Seitliche Sidebar / Topbar Navigation für Dashboards implementieren (Mockup-Header & Navigation).
+    *   [x] Shadcn-Komponenten für Formulare, Tabellen und Toasts (oben-rechts) konfigurieren (Erstes Feature: Profilverwaltung abgeschlossen).
 3.  **Phase 3: Datenbank & Kernfunktionen (Backend-Fokus)**
     *   Migrationen/Scripte für Tabellen (`sessions`, `session_types`, `bookings`, History-Tabellen) in Supabase anlegen.
     *   RLS (Row Level Security) Policys definieren (Admins sehen alles, User nur eigenes).
