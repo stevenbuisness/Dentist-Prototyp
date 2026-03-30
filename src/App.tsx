@@ -3,10 +3,12 @@ import { PremiumLanding } from "./screens/PremiumLanding/PremiumLanding";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import Unauthorized from "./pages/auth/Unauthorized";
+import ProfilePage from "./pages/dashboard/ProfilePage";
 import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 import { useAuthContext } from "./contexts/AuthContext";
 import { supabase } from "./lib/supabase";
 import { useToast } from "./hooks/use-toast";
+import { User as UserIcon } from "lucide-react";
 
 function DashboardMockup({ title }: { title: string }) {
   const { user, profile, debugInfo } = useAuthContext();
@@ -38,6 +40,9 @@ function DashboardMockup({ title }: { title: string }) {
             Dr. Schmidt
           </Link>
           <div className="flex items-center gap-4">
+            <Link to="/profile" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
+              <UserIcon size={16} /> Profil
+            </Link>
             <Link to="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
               <svg 
                 width="16" 
@@ -129,6 +134,7 @@ export default function App() {
       {/* Patient Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<AdminDashboardRedirect />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Route>
 
       {/* Admin Protected Routes */}

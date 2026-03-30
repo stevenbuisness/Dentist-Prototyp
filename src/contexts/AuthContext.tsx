@@ -8,6 +8,7 @@ export interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   isAdmin: boolean;
+  refreshProfile: () => Promise<void>;
   debugInfo?: {
     userId?: string;
     email?: string;
@@ -20,10 +21,10 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { user, session, profile, loading, isAdmin, debugInfo } = useAuth();
+  const { user, session, profile, loading, isAdmin, refreshProfile, debugInfo } = useAuth();
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, isAdmin, debugInfo }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, isAdmin, refreshProfile, debugInfo }}>
       {children}
     </AuthContext.Provider>
   );

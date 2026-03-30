@@ -62,12 +62,20 @@ export const PremiumNavigation = (): JSX.Element => {
 
         <div className="flex items-center gap-3">
           {user && (
-            <button
-              onClick={handleLogout}
-              className="font-lato hidden text-sm font-medium text-stone-500 hover:text-destructive sm:inline px-3 py-1 transition-all"
-            >
-              Abmelden
-            </button>
+            <div className="hidden sm:flex items-center gap-1">
+              <Link
+                to="/profile"
+                className="font-lato text-sm font-medium text-stone-500 hover:text-stone-900 px-3 py-1 transition-all"
+              >
+                Profil
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="font-lato text-sm font-medium text-stone-500 hover:text-destructive px-3 py-1 transition-all"
+              >
+                Abmelden
+              </button>
+            </div>
           )}
           <Link
             to={user ? (profile?.role === "admin" ? "/admin" : "/dashboard") : "/login"}
@@ -134,17 +142,28 @@ export const PremiumNavigation = (): JSX.Element => {
               </Link>
             </li>
             {user && (
-              <li>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setOpen(false);
-                  }}
-                  className="font-lato block py-1 text-destructive font-bold"
-                >
-                  Abmelden
-                </button>
-              </li>
+              <>
+                <li>
+                  <Link
+                    to="/profile"
+                    className="font-lato block py-1 text-stone-800 font-bold"
+                    onClick={() => setOpen(false)}
+                  >
+                    Profil
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setOpen(false);
+                    }}
+                    className="font-lato block py-1 text-destructive font-bold"
+                  >
+                    Abmelden
+                  </button>
+                </li>
+              </>
             )}
             <li>
               <a

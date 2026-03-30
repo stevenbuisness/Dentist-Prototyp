@@ -8,6 +8,12 @@ export interface Profile {
   status: "active" | "blocked" | "rejected";
   first_name: string | null;
   last_name: string | null;
+  date_of_birth: string | null;
+  phone_number: string | null;
+  address_line_1: string | null;
+  post_code: string | null;
+  city: string | null;
+  updated_at: string | null;
 }
 
 export function useAuth() {
@@ -74,6 +80,7 @@ export function useAuth() {
     profile,
     loading,
     isAdmin: profile?.role === "admin",
+    refreshProfile: () => user ? fetchProfile(user.id) : Promise.resolve(),
     debugInfo: {
       userId: user?.id,
       email: user?.email,
