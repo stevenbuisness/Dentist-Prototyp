@@ -27,7 +27,7 @@ const navItems = [
   { label: "Sitzungen", href: "/admin/sessions", icon: Calendar },
   { label: "Behandlungsarten", href: "/admin/session-types", icon: Stethoscope },
   { label: "Buchungen", href: "/admin/bookings", icon: ClipboardList },
-  { label: "Klienten", href: "/admin/clients", icon: Users },
+  { label: "Patienten", href: "/admin/clients", icon: Users },
   { label: "Einstellungen", href: "/admin/settings", icon: Settings },
 ];
 
@@ -138,7 +138,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           
           <div className="flex items-center gap-4">
             <Link to="/" className="text-xs font-semibold text-stone-500 hover:text-stone-900 uppercase tracking-widest transition-colors">
-              Zur Site
+              Zur Website
             </Link>
           </div>
         </header>

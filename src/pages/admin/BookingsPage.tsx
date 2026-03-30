@@ -3,17 +3,13 @@ import AdminLayout from "./AdminLayout";
 import { supabase } from "../../lib/supabase";
 import { useToast } from "../../hooks/use-toast";
 import { 
-  ClipboardList, 
   User as UserIcon, 
   Calendar as CalendarIcon, 
   CheckCircle2, 
   XCircle, 
-  AlertCircle,
-  Clock,
-  MoreHorizontal
+  AlertCircle
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
 
 interface Profile {

@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import { supabase } from "../../lib/supabase";
 import { useToast } from "../../hooks/use-toast";
-import { Plus, Edit2, Trash2, Calendar, Clock, Euro, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Edit2, Trash2, Calendar } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../../components/ui/card";
-import { Separator } from "../../components/ui/separator";
+import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
 
 interface SessionType {
@@ -217,7 +216,11 @@ export default function SessionsPage() {
               </tr>
             </thead>
             <tbody className="text-sm border-stone-100">
-              {sessions.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-20 text-center text-stone-400 animate-pulse font-medium">Lade Termindaten...</td>
+                </tr>
+              ) : sessions.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-20 text-center text-stone-400">Keine aktiven Terminslots gefunden.</td>
                 </tr>

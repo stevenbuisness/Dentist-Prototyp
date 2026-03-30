@@ -140,15 +140,16 @@ Wir verwenden Row Level Security (RLS) in Supabase, um sicherzustellen, dass Nut
     *   [x] Erstellung von Dashboard-Mockups (Patient & Admin) zur Überprüfung der Authentifizierung und Rollen.
     *   [x] Einrichtung der Zugangskontrollen (Protected Routes).
 2.  **Phase 2: UI-Grundgerüst & Branding** (🚧 IN ARBEIT)
-    *   [x] Seitliche Sidebar / Topbar Navigation für Dashboards implementieren (Mockup-Header & Navigation).
-    *   [x] Shadcn-Komponenten für Formulare, Tabellen und Toasts (oben-rechts) konfigurieren (Erstes Feature: Profilverwaltung abgeschlossen).
-3.  **Phase 3: Datenbank & Kernfunktionen (Backend-Fokus)**
-    *   Migrationen/Scripte für Tabellen (`sessions`, `session_types`, `bookings`, History-Tabellen) in Supabase anlegen.
-    *   RLS (Row Level Security) Policys definieren (Admins sehen alles, User nur eigenes).
-4.  **Phase 4: Admin-Dashboard**
-    *   Kundenverwaltung (Nutzer freigeben/blockieren).
-    *   Sitzungsverwaltung (CRUD Seiten für Termine und Typen inkl. Kalender-Komponente).
-    *   Buchungsverwaltung (Bestätigen/Stornieren).
+    *   [x] Seitliche Sidebar / Topbar Navigation für Dashboards implementieren (Premium Admin Layout).
+    *   [x] Shadcn-Komponenten für Formulare, Tabellen und Toasts (oben-rechts) konfigurieren.
+    *   [ ] Layout-Optimierungen & Feinschliff (Logo-Integration, Dashboard-Details).
+3.  **Phase 3: Datenbank & Kernfunktionen (Backend-Fokus)** (🚧 IN ARBEIT)
+    *   [x] Migrationen/Scripte für Tabellen (`sessions`, `session_types`, `bookings`) in Supabase angelegt.
+    *   [ ] RLS (Row Level Security) Policys finalisieren (Admins haben bereits Zugriff).
+4.  **Phase 4: Admin-Dashboard** (✅ ABGESCHLOSSEN - 30.03.2024)
+    *   [x] Patientenverwaltung (Basisliste in Bookings integriert).
+    *   [x] Sitzungsverwaltung (CRUD Seiten für Termine und Typen abgeschlossen).
+    *   [x] Buchungsverwaltung (Bestätigen/Stornieren / Status-Management).
 5.  **Phase 5: User-Dashboard & Buchungsfluss**
     *   Ansicht und Verwaltung der eigenen Buchungen (`/dashboard/bookings`).
     *   Frontend-Buchungsfluss mit der Verfügbarkeitslogik (Regeln & Ausnahmen) verknüpfen.

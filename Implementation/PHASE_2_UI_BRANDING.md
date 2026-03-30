@@ -5,13 +5,14 @@ In dieser Phase bauen wir die visuelle Struktur der Dashboards auf und stellen s
 ## 📋 Aufgabenliste
 
 ### 2.1 Dashboard Layouts
-- [ ] Admin-Dashboard Layout (`/admin/*`) erstellen (Sidebar, Topbar)
+- [x] Admin-Dashboard Layout (`/admin/*`) erstellen (Sidebar, Topbar) (#17)
 - [x] User-Dashboard Layout (`/dashboard/*`) erstellen (Header-Navigation integriert)
 - [x] Gemeinsame Navigations-Komponente implementing (PremiumNavigation & Dashboard Header)
+- [ ] Layout-Optimierungen (Zusätzliche Abstände, Logo-Branding, UI-Refinement) (🚧 NEU)
 
 ### 2.2 Shadcn UI Integration
 - [x] Formular-Komponenten konfigurieren (Profilseite als Referenz implementiert)
-- [ ] Daten-Tabellen-Komponente vorberereiten (`DataTable` für Listenansichten)
+- [x] Daten-Tabellen-Komponente vorberereiten (`DataTable` für Listenansichten)
 - [x] Toast-System (`useToast`) für Benachrichtigungen oben-rechts (`top-right`) einrichten
 
 ### 2.3 Branding & Design
