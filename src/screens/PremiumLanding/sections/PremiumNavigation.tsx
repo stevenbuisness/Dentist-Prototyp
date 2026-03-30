@@ -26,10 +26,6 @@ export const PremiumNavigation = (): JSX.Element => {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Abgemeldet",
-        description: "Auf Wiedersehen!",
-      });
       navigate("/");
     }
   };

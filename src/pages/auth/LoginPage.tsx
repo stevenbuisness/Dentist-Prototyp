@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
-import { useToast } from "../../hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,13 +20,10 @@ export default function LoginPage() {
     });
 
     if (error) {
-      toast({
-        title: "Fehler beim Login",
-        description: error.message,
-        variant: "destructive",
-      });
+      setLoginError("Anmelde Daten sind falsch");
       setLoading(false);
     } else {
+      setLoginError(null);
       // Small timeout to give Supabase time to propagate the role through the AuthStateChange
       setTimeout(() => {
         navigate("/"); // We go back to home, then Navigation logic redirects to dashboard
@@ -35,9 +32,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8 bg-card p-8 rounded-2xl shadow-xl border border-border animate-in fade-in zoom-in duration-500">
-        <div className="text-center">
+    <div className="min-h-screen flex items-center justify-center bg-[#faf8f5] px-4 font-lato">
+      <div className="w-full max-w-md space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-stone-200 animate-in fade-in zoom-in duration-500 relative">
+        <Link 
+          to="/" 
+          className="absolute top-8 left-8 p-2 text-stone-400 hover:text-stone-900 transition-colors rounded-full hover:bg-stone-100"
+          title="Zurück zur Startseite"
+        >
+          <ArrowLeft size={20} />
+        </Link>
+        
+        <div className="text-center pt-4">
           <h2 className="text-3xl font-bold font-montserrat tracking-tight text-foreground">
             Anmelden
           </h2>
@@ -81,6 +86,12 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
+          {loginError && (
+            <p className="text-red-500 text-sm font-bold text-center">
+              {loginError}
+            </p>
+          )}
 
           <div>
             <button

@@ -59,12 +59,7 @@ export default function ProfilePage() {
         .eq("id", user.id);
 
       if (error) throw error;
-
       await refreshProfile();
-      toast({
-        title: "Profil aktualisiert",
-        description: "Ihre Daten wurden erfolgreich gespeichert.",
-      });
     } catch (error: any) {
       toast({
         title: "Fehler beim Speichern",
@@ -95,8 +90,11 @@ export default function ProfilePage() {
             </button>
             <h1 className="font-montserrat font-bold text-stone-900">Mein Profil</h1>
           </div>
-          <Link to="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors">
-            Homepage
+          <Link 
+            to="/" 
+            className="px-4 py-2 bg-white border border-stone-200 text-stone-900 rounded-md text-sm font-semibold hover:bg-stone-50 transition-colors shadow-sm"
+          >
+            Zur Startseite
           </Link>
         </div>
       </header>

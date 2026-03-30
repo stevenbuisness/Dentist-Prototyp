@@ -30,10 +30,6 @@ function DashboardMockup({ title }: { title: string }) {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Abgemeldet",
-        description: "Auf Wiedersehen!",
-      });
       navigate("/");
     }
   };
