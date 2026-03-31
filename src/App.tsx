@@ -10,6 +10,7 @@ import SessionTypesPage from "./pages/admin/SessionTypesPage";
 import BookingsPage from "./pages/admin/BookingsPage";
 import ClientsPage from "./pages/admin/ClientsPage";
 import SettingsPage from "./pages/admin/SettingsPage";
+import CalendarPage from "./pages/admin/CalendarPage";
 import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 import { useAuthContext } from "./contexts/AuthContext";
 import { supabase } from "./lib/supabase";
@@ -134,6 +135,7 @@ export default function App() {
         <Route path="/admin/session-types" element={<SessionTypesPage />} />
         <Route path="/admin/bookings" element={<BookingsPage />} />
         <Route path="/admin/clients" element={<ClientsPage />} />
+        <Route path="/admin/calendar" element={<CalendarPage />} />
         <Route path="/admin/settings" element={<SettingsPage />} />
       </Route>
 

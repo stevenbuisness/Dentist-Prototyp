@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminLayout from "./AdminLayout";
 import { useToast } from "../../hooks/use-toast";
 import {
@@ -8,11 +8,12 @@ import {
   useUpdateSession,
   useDeleteSession,
 } from "../../hooks/useSessions";
-import { Plus, Edit2, Trash2, Calendar } from "lucide-react";
+import { Plus, Edit2, Trash2, Calendar, Clock, AlertCircle } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
 import { cn } from "../../lib/utils";
+import { Badge } from "../../components/ui/badge";
 
 type SessionStatus = "open" | "fully_booked" | "canceled" | "completed";
 
@@ -33,6 +34,23 @@ export default function SessionsPage() {
   const [status, setStatus] = useState<SessionStatus>("open");
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  // Smart Calculation: Auto-set end time when type or start time changes
+  useEffect(() => {
+    if (typeId && startTime && !editingId) {
+      const selectedType = (types as any[]).find(t => t.id === typeId);
+      if (selectedType) {
+        const start = new Date(startTime);
+        const end = new Date(start.getTime() + selectedType.duration * 60000);
+        setEndTime(formatDateForInput(end));
+      }
+    }
+  }, [typeId, startTime, types, editingId]);
+
+  const formatDateForInput = (date: Date) => {
+    const tzoffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
+  };
+
   const resetForm = () => {
     setTypeId(""); setTitle(""); setStartTime(""); setEndTime("");
     setMaxSlots(1); setStatus("open"); setEditingId(null); setIsAdding(false);
@@ -40,6 +58,17 @@ export default function SessionsPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation: Check business hours (08:00 - 17:00)
+    const startHour = new Date(startTime).getHours();
+    const isWeekend = [0, 6].includes(new Date(startTime).getDay());
+    
+    if (startHour < 8 || startHour >= 17 || isWeekend) {
+      if (!confirm("Hinweis: Dieser Termin liegt außerhalb der regulären Öffnungszeiten (Mo-Fr, 08-17 Uhr). Trotzdem speichern?")) {
+        return;
+      }
+    }
+
     const payload = {
       session_type_id: typeId,
       title: title || null,
@@ -73,9 +102,15 @@ export default function SessionsPage() {
     });
   };
 
+  const quickSetDate = (hoursAdd: number) => {
+    const next = new Date();
+    next.setHours(next.getHours() + hoursAdd, 0, 0, 0);
+    setStartTime(formatDateForInput(next));
+  };
+
   return (
     <AdminLayout>
-      <div className="mb-10 flex items-center justify-between">
+      <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-montserrat font-bold text-stone-900">Termine & Slots</h1>
           <p className="text-stone-500 mt-1">Verwalten Sie die verfügbaren Zeitfenster für Ihre Patienten.</p>
@@ -88,47 +123,56 @@ export default function SessionsPage() {
       </div>
 
       {isAdding && (
-        <Card className="mb-10 border-stone-200 shadow-sm bg-white">
-          <CardHeader className="bg-stone-50/50 border-b border-stone-100">
+        <Card className="mb-10 border-stone-200 shadow-sm bg-white overflow-hidden">
+          <CardHeader className="bg-stone-50/50 border-b border-stone-100 flex flex-row items-center justify-between">
             <CardTitle className="text-xl font-montserrat text-stone-900">
               {editingId ? "Slot bearbeiten" : "Neuen Slot definieren"}
             </CardTitle>
+            <div className="flex gap-2">
+               <Button type="button" variant="outline" size="sm" onClick={() => quickSetDate(24)} className="text-[10px] h-7">Morgen</Button>
+               <Button type="button" variant="outline" size="sm" onClick={() => quickSetDate(48)} className="text-[10px] h-7">Übermorgen</Button>
+            </div>
           </CardHeader>
           <CardContent className="pt-8">
             <form onSubmit={handleSave} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Behandlungsart</label>
+                  <label className="text-xs font-bold text-stone-500 uppercase tracking-tighter">Behandlungsart</label>
                   <select value={typeId} onChange={(e) => setTypeId(e.target.value)} required
-                    className="w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-stone-900">
+                    className="w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 h-11">
                     <option value="">Kategorie wählen...</option>
-                    {(types as any[]).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    {(types as any[]).map((t) => <option key={t.id} value={t.id}>{t.name} ({t.duration} min)</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Interner Titel (Optional)</label>
-                  <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="z.B. Vormittags-Block" className="border-stone-200" />
+                  <label className="text-xs font-bold text-stone-500 uppercase tracking-tighter">Interner Titel (Optional)</label>
+                  <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="z.B. Vormittags-Block" className="border-stone-200 h-11" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Startzeitpunkt</label>
-                  <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="border-stone-200" />
+                  <label className="text-xs font-bold text-stone-500 uppercase tracking-tighter">Startzeitpunkt</label>
+                  <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="border-stone-200 h-11" />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Endzeitpunkt</label>
-                  <Input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="border-stone-200" />
+                <div className="space-y-2 relative">
+                  <label className="text-xs font-bold text-stone-500 uppercase tracking-tighter">Endzeitpunkt</label>
+                  <Input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="border-stone-200 h-11" />
+                  {typeId && startTime && (
+                    <span className="absolute right-3 bottom-3 text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                      <Clock size={10} /> Auto-berechnet
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Kapazität (Patienten)</label>
-                  <Input type="number" value={maxSlots} onChange={(e) => setMaxSlots(parseInt(e.target.value))} min={1} className="border-stone-200" />
+                  <label className="text-xs font-bold text-stone-500 uppercase tracking-tighter">Kapazität (Patienten)</label>
+                  <Input type="number" value={maxSlots} onChange={(e) => setMaxSlots(parseInt(e.target.value))} min={1} className="border-stone-200 h-11" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Status</label>
+                  <label className="text-xs font-bold text-stone-500 uppercase tracking-tighter">Status</label>
                   <select value={status} onChange={(e) => setStatus(e.target.value as SessionStatus)}
-                    className="w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-stone-900">
+                    className="w-full rounded-md border border-stone-200 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-stone-900 h-11">
                     <option value="open">Offen</option>
                     <option value="fully_booked">Ausgebucht</option>
                     <option value="canceled">Abgesagt</option>
@@ -136,12 +180,19 @@ export default function SessionsPage() {
                   </select>
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <Button variant="ghost" type="button" onClick={resetForm}>Abbrechen</Button>
-                <Button type="submit" disabled={createSession.isPending || updateSession.isPending}
-                  className="bg-stone-900 text-[#faf8f5] hover:bg-stone-800 px-8 font-semibold shadow-sm h-11">
-                  Speichern
-                </Button>
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-stone-50">
+                <div className="flex items-center gap-2 text-stone-400">
+                  <AlertCircle size={14} />
+                  <span className="text-[10px]">Öffnungszeiten: Mo-Fr, 08:00 - 17:00 Uhr</span>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="ghost" type="button" onClick={resetForm}>Abbrechen</Button>
+                  <Button type="submit" disabled={createSession.isPending || updateSession.isPending}
+                    className="bg-stone-900 text-[#faf8f5] hover:bg-stone-800 px-8 font-semibold shadow-sm h-11">
+                    {editingId ? "Aktualisieren" : "Veröffentlichen"}
+                  </Button>
+                </div>
               </div>
             </form>
           </CardContent>
@@ -156,7 +207,7 @@ export default function SessionsPage() {
                 <th className="px-6 py-4 border-b border-stone-100">Kategorie / Titel</th>
                 <th className="px-6 py-4 border-b border-stone-100">Datum & Uhrzeit</th>
                 <th className="px-6 py-4 border-b border-stone-100">Status</th>
-                <th className="px-6 py-4 border-b border-stone-100">Slots</th>
+                <th className="px-6 py-4 border-b border-stone-100">Kapazität</th>
                 <th className="px-6 py-4 border-b border-stone-100 text-right">Aktionen</th>
               </tr>
             </thead>
@@ -167,7 +218,7 @@ export default function SessionsPage() {
                 <tr><td colSpan={5} className="px-6 py-20 text-center text-stone-400">Keine aktiven Terminslots gefunden.</td></tr>
               ) : (
                 (sessions as any[]).map((s) => (
-                  <tr key={s.id} className="hover:bg-stone-50/50 transition-colors">
+                  <tr key={s.id} className="hover:bg-stone-50/50 transition-colors group">
                     <td className="px-6 py-4 border-b border-stone-50">
                       <div className="font-bold text-stone-900 font-montserrat">{s.session_type?.name || "Unbekannt"}</div>
                       <div className="text-xs text-stone-500">{s.title || "Standardtermin"}</div>
@@ -175,29 +226,29 @@ export default function SessionsPage() {
                     <td className="px-6 py-4 border-b border-stone-50">
                       <div className="flex items-center gap-2 text-stone-700">
                         <Calendar size={14} className="text-stone-300" />
-                        {new Date(s.start_time).toLocaleDateString("de-DE")}
+                        {new Date(s.start_time).toLocaleDateString("de-DE", { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </div>
-                      <div className="text-xs text-stone-500 mt-1">
+                      <div className="text-xs text-stone-500 mt-1 font-medium">
                         {new Date(s.start_time).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} –{" "}
                         {new Date(s.end_time).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}
                       </div>
                     </td>
                     <td className="px-6 py-4 border-b border-stone-50">
-                      <span className={cn(
-                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest",
-                        s.status === "open" ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
-                        s.status === "canceled" ? "bg-red-50 text-red-700 border border-red-100" :
-                        s.status === "fully_booked" ? "bg-stone-100 text-stone-700 border border-stone-200" :
-                        "bg-blue-50 text-blue-700 border border-blue-100"
+                      <Badge variant="outline" className={cn(
+                        "text-[9px] uppercase tracking-widest px-2 py-0.5",
+                        s.status === "open" ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                        s.status === "canceled" ? "bg-red-50 text-red-700 border-red-100" :
+                        s.status === "fully_booked" ? "bg-stone-100 text-stone-700 border-stone-200" :
+                        "bg-blue-50 text-blue-700 border-blue-100"
                       )}>
-                        {s.status === "open" ? "Offen" : s.status === "canceled" ? "Abgesagt" : s.status === "fully_booked" ? "Ausgebucht" : "Beendet"}
-                      </span>
+                        {s.status === "open" ? "Offen" : s.status === "canceled" ? "Abgesagt" : s.status === "fully_booked" ? "Voll" : "Ende"}
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 border-b border-stone-50 text-stone-600 font-medium">
-                      {s.max_slots > 1 ? `${s.max_slots} Patienten` : "1 Patient"}
+                       <span className="text-xs">{s.max_slots} {s.max_slots > 1 ? "Slots" : "Slot"}</span>
                     </td>
                     <td className="px-6 py-4 border-b border-stone-50 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" onClick={() => {
                           setEditingId(s.id); setTypeId(s.session_type_id); setTitle(s.title || "");
                           setStartTime(s.start_time.slice(0, 16)); setEndTime(s.end_time.slice(0, 16));
