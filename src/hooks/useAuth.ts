@@ -35,7 +35,23 @@ export function useAuth() {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        // Stale/invalid refresh token: clear everything and redirect to login
+        if (event === "TOKEN_REFRESHED" && !session) {
+          supabase.auth.signOut();
+          return;
+        }
+
+        // Explicit sign-out or token invalidated
+        if (event === "SIGNED_OUT") {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          setErrorMsg(undefined);
+          setLoading(false);
+          return;
+        }
+
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {

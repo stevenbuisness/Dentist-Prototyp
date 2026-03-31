@@ -5,7 +5,17 @@ import * as Sentry from "@sentry/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { AuthProvider } from "./contexts/AuthContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 Sentry.init({
   dsn: "https://97e9b5dfead6dacc473ce14488423f76@o4511123518652416.ingest.de.sentry.io/4511123536412752",
@@ -27,11 +37,13 @@ const root = createRoot(container);
 root.render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <App />
-        <Analytics />
-        <SpeedInsights />
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+          <Analytics />
+          <SpeedInsights />
+        </BrowserRouter>
+      </QueryClientProvider>
     </AuthProvider>
   </StrictMode>
 );

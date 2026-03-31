@@ -13,8 +13,9 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setLoginError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -22,12 +23,25 @@ export default function LoginPage() {
     if (error) {
       setLoginError("Anmelde Daten sind falsch");
       setLoading(false);
+      return;
+    }
+
+    // Fetch role directly after login to decide where to redirect
+    const userId = authData.user?.id;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+      if (profile?.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } else {
-      setLoginError(null);
-      // Small timeout to give Supabase time to propagate the role through the AuthStateChange
-      setTimeout(() => {
-        navigate("/"); // We go back to home, then Navigation logic redirects to dashboard
-      }, 500);
+      navigate("/dashboard");
     }
   };
 

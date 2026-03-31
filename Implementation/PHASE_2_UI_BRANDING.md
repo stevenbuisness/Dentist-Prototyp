@@ -8,7 +8,7 @@ In dieser Phase bauen wir die visuelle Struktur der Dashboards auf und stellen s
 - [x] Admin-Dashboard Layout (`/admin/*`) erstellen (Sidebar, Topbar) (#17)
 - [x] User-Dashboard Layout (`/dashboard/*`) erstellen (Header-Navigation integriert)
 - [x] Gemeinsame Navigations-Komponente implementing (PremiumNavigation & Dashboard Header)
-- [ ] Layout-Optimierungen (Zusätzliche Abstände, Logo-Branding, UI-Refinement) (🚧 NEU)
+- [x] Layout-Optimierungen (Zusätzliche Abstände, Logo-Branding, UI-Refinement) (✅ ABGESCHLOSSEN)
 
 ### 2.2 Shadcn UI Integration
 - [x] Formular-Komponenten konfigurieren (Profilseite als Referenz implementiert)
