@@ -5,12 +5,14 @@ import { cn } from "../../lib/utils";
 interface MonthlyOccupancyChartProps {
   selectedMonth: Date;
   onMonthChange: (date: Date) => void;
+  onDayClick: (dateStr: string) => void;
   data: Record<string, any>; // Record<dateStr, { percentage, statusColor, bookedMinutes }>
 }
 
 export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({ 
   selectedMonth, 
   onMonthChange, 
+  onDayClick,
   data 
 }) => {
   const year = selectedMonth.getFullYear();
@@ -81,9 +83,10 @@ export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({
            return (
              <div 
                key={dateStr}
+               onClick={() => onDayClick(dateStr)}
                style={{ gridColumnStart: column }}
                className={cn(
-                 "relative aspect-square flex flex-col items-center justify-center rounded-lg border transition-all group",
+                 "relative aspect-square flex flex-col items-center justify-center rounded-lg border transition-all group cursor-pointer",
                  isToday ? "border-stone-900 bg-stone-50" : "border-stone-100 hover:border-stone-300 bg-white"
                )}
              >
@@ -103,8 +106,8 @@ export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({
                     "bg-red-500"
                   )} />
                   {/* Tooltip */}
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-stone-900 text-white text-[8px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-30">
-                    {dayStats.percentage}% ({dayStats.bookedMinutes}m)
+                  <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-2.5 py-1 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-30 scale-75 group-hover:scale-100 border border-white/5 backdrop-blur-md">
+                    <div className="text-[10px] font-bold font-montserrat">{dayStats.percentage}%</div>
                   </div>
                 </>
                ) : (

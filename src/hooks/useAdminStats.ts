@@ -39,11 +39,13 @@ export const useAdminStats = (selectedDate: Date = new Date()) => {
       const { data: bookings } = await supabase
         .from("bookings")
         .select(`
+          id,
           status,
           session:sessions!inner(
             start_time,
-            session_type:session_types(duration_minutes)
-          )
+            session_type:session_types(name, duration_minutes)
+          ),
+          user:users(first_name, last_name)
         `)
         .gte("session.start_time", fetchStart)
         .lte("session.start_time", fetchEnd)
@@ -132,9 +134,11 @@ export const useAdminStats = (selectedDate: Date = new Date()) => {
         occupancyToday: todayStats.percentage, 
         bookedMinutesToday: todayStats.bookedMinutes,
         weeklyOccupancy,
-        monthlyOccupancy
+        monthlyOccupancy,
+        allBookings: (bookings || []) as any[] // Alle Buchungen für die Timeline
       };
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 10, 
+    refetchInterval: 5000, // True Live-Dashboard feel
   });
 };

@@ -1,6 +1,6 @@
 # GRAFIK_PLAN — Praxis-Auslastung: Redesign & Erweiterung 📋
 
-> Status: **IN ARBEIT 🛠️ (Phase 6)** | Letztes Update: 2026-04-01
+> Status: **ABGESCHLOSSEN (Phase 6b) ✅** | Letztes Update: 2026-04-01
 
 ---
 
@@ -14,26 +14,32 @@
 
 ---
 
-## 🚀 Neue Phase 6: Detailansicht & Usability-Polishing (Aktuell)
+## 🚀 Phase 6: Detailansicht & Manual Booking Workflow (Finished)
 
-- [ ] **Tooltip-Optimierung (Hover)**
-  - [ ] **Minuten entfernen**: Nur noch die Prozentuale Auslastung anzeigen für maximale Klarheit.
-  - [ ] **Größe anpassen**: Tooltip-Fenster deutlich vergrößern und Schriftgrad erhöhen für bessere Lesbarkeit.
-
-- [ ] **Interaktives Detail-Panel (Klick-Event)**
-  - [ ] **Slide-in Animation**: Implementierung eines Side-Panels (Right Drawer), das die Hauptansicht zur Seite schiebt (kein Overlay!).
-  - [ ] **Tagesschau**: Beim Klick auf einen Tag (Woche oder Monat) wird dieser im Panel geladen.
-  - [ ] **Visualisierte Timeline**: Vertikaler Tagesablauf mit:
-    - [ ] Markierten Behandlungen.
-    - [ ] **Free Slot Finder**: Klare Hervorhebung von Lücken ("Slot frei: 45 Min") für schnelle telefonische Auskunft.
-    - [ ] Mittagspausen-Sperre (12-13 Uhr) visuell ausgegraut.
-
-- [ ] **Navigation-Polishing**
-  - [ ] Reibungsloser Wechsel zwischen Wochen- und Detailansicht ohne Layout-Springen.
+- [x] **Minute-based Timeline (DailyDetailPanel)**
+    - [x] Prozentuales Layout (kein Scrollen)
+    - [x] Vertikale Skalierung nach Behandlungsdauer
+    - [x] Side-by-Side Darstellung bei Überlappungen
+- [x] **Manueller Buchungs-Workflow**
+    - [x] `ManualBookingModal` (Uhrzeit-Berechnung per Timeline-Klick)
+    - [x] Patienten-Suche (Live-Autocomplete per Supabase)
+    - [x] Behandlungsauswahl mit DB-Dauersynchronisation (120 Min Veneers, 20 Min Kontrolle etc.)
+- [x] **Interaktives Status-Management**
+    - [x] `BookingEditModal` (Status-Eingabe: Bestätigt, Erschienen, Nicht erschienen)
+    - [x] Deutsche Bezeichnungen (Stornierung & Praxis-Absage)
+    - [x] Permanenter "Minuten"-Hinweis entfernt für saubereres Design
+- [x] **Echtzeit-Synchronisierung**
+    - [x] RefetchInterval (5s) für Live-DB-Updates
+    - [x] Cache-Invalidierung nach manueller Buchung
+- [x] **UI/UX Polishing**
+    - [x] Namensformat: **Nachname Vorname** (Systemweit Admin)
+    - [x] Tooltip-Optimierung & Overlay-Backdrop
 
 ---
 
-## ✅ Finale Validierung (Ausstehend)
-- [ ] Hover-Tooltips sind groß und "Minuten-frei".
-- [ ] Side-Panel öffnet sich flüssig per Klick.
-- [ ] Lücken sind in der Timeline sofort ersichtlich.
+## ✅ Finale Validierung (Erfolgreich)
+- [x] Timeline skaliert 180min und 120min Blöcke visuell korrekt.
+- [x] Überlappende Termine werden nebeneinander angezeigt (keine "Geister-Termine" mehr).
+- [x] "Heute"-Markierung in der Statistik ist ein Smaragd-Punkt, kein Kasten.
+- [x] Mittagspause (12-13 Uhr) ist eine Sperrzone ohne Überschneidungen.
+- [x] Dashboard-Refetch spiegelt DB-Tabellenänderungen fast in Echtzeit wider.
