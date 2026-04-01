@@ -59,12 +59,17 @@ export default function SessionsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation: Check business hours (08:00 - 17:00)
-    const startHour = new Date(startTime).getHours();
-    const isWeekend = [0, 6].includes(new Date(startTime).getDay());
+    // Validation: Check business hours (08:00 - 17:00) and lunch break (12:00 - 13:00)
+    const startDate = new Date(startTime);
+    const startHour = startDate.getHours();
+    const startMin = startDate.getMinutes();
+    const isWeekend = [0, 6].includes(startDate.getDay());
     
-    if (startHour < 8 || startHour >= 17 || isWeekend) {
-      if (!confirm("Hinweis: Dieser Termin liegt außerhalb der regulären Öffnungszeiten (Mo-Fr, 08-17 Uhr). Trotzdem speichern?")) {
+    const isLunchBreak = (startHour === 12) || (startHour === 11 && startMin > 45); // Approximate check for lunch
+    
+    if (startHour < 8 || startHour >= 17 || isWeekend || isLunchBreak) {
+      const reason = isWeekend ? "Wochenende" : isLunchBreak ? "Mittagspause (12-13 Uhr)" : "außerhalb der Kernzeit (8-17 Uhr)";
+      if (!confirm(`Hinweis: Dieser Termin liegt im Bereich: ${reason}. Trotzdem speichern?`)) {
         return;
       }
     }
@@ -184,7 +189,7 @@ export default function SessionsPage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-4 border-t border-stone-50">
                 <div className="flex items-center gap-2 text-stone-400">
                   <AlertCircle size={14} />
-                  <span className="text-[10px]">Öffnungszeiten: Mo-Fr, 08:00 - 17:00 Uhr</span>
+                  <span className="text-[10px]">Öffnungszeiten: Mo-Fr, 08:00 - 17:00 Uhr (Pause: 12-13 Uhr)</span>
                 </div>
                 <div className="flex gap-3">
                   <Button variant="ghost" type="button" onClick={resetForm}>Abbrechen</Button>

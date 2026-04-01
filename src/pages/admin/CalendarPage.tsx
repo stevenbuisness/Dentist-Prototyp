@@ -15,8 +15,6 @@ const DAYS = [
   { id: 3, name: "Mittwoch" },
   { id: 4, name: "Donnerstag" },
   { id: 5, name: "Freitag" },
-  { id: 6, name: "Samstag" },
-  { id: 0, name: "Sonntag" },
 ];
 
 export default function CalendarPage() {
@@ -26,7 +24,7 @@ export default function CalendarPage() {
   const [newEx, setNewEx] = useState({ start_date: "", end_date: "", reason: "", is_closed: true });
 
   // 1. Fetch Availability Rules
-  const { data: rules = [], isLoading: loadingRules } = useQuery({
+  const { data: rules = [] } = useQuery({
     queryKey: ["availability-rules"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -39,7 +37,7 @@ export default function CalendarPage() {
   });
 
   // 2. Fetch Exceptions
-  const { data: exceptions = [], isLoading: loadingEx } = useQuery({
+  const { data: exceptions = [] } = useQuery({
     queryKey: ["availability-exceptions"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -108,31 +106,53 @@ export default function CalendarPage() {
             <div className="space-y-4">
               {DAYS.map((day) => {
                 const rule = rules.find((r) => r.day_of_week === day.id);
+                const startTime = rule?.start_time?.slice(0, 5) || "08:00";
+                const endTime = rule?.end_time?.slice(0, 5) || "17:00";
+                
                 return (
-                  <div key={day.id} className="flex items-center justify-between p-3 border border-stone-100 rounded-xl hover:bg-stone-50/50 transition-colors">
-                    <span className="font-bold text-sm text-stone-700 w-24">{day.name}</span>
-                    <div className="flex items-center gap-2">
+                  <div key={day.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-stone-100 rounded-2xl hover:bg-stone-50/80 transition-all bg-white shadow-sm group">
+                    <div className="flex items-center gap-4">
+                      {/* Day Avatar/Icon */}
+                      <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
+                        {day.name.substring(0, 2)}
+                      </div>
+                      
+                      {/* Day Details */}
+                      <div className="flex flex-col">
+                        <span className="font-montserrat font-bold text-base text-stone-900">{day.name}</span>
+                        <div className="flex items-center gap-1.5 mt-0.5 text-stone-400 text-[10px] uppercase font-bold tracking-wider">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 
+                          inkl. Pause 12—13 Uhr
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Time Inputs */}
+                    <div className="flex items-center gap-2 bg-stone-50/50 p-1.5 rounded-xl border border-stone-100 group-hover:border-stone-200 transition-colors">
                       <Input 
                         type="time" 
-                        value={rule?.start_time?.slice(0, 5) || "08:00"} 
-                        onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: e.target.value, end_time: rule?.end_time || "17:00" })}
-                        className="w-24 h-9 text-xs" 
+                        value={startTime} 
+                        onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: e.target.value, end_time: endTime })}
+                        className="h-9 w-24 text-sm font-bold bg-white border-stone-200 text-stone-800 focus-visible:ring-1 focus-visible:ring-emerald-500 text-center shadow-sm" 
                       />
-                      <span className="text-stone-400 text-xs">-</span>
+                      <span className="text-stone-300 font-bold px-1">–</span>
                       <Input 
                         type="time" 
-                        value={rule?.end_time?.slice(0, 5) || "17:00"} 
-                        onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: rule?.start_time || "08:00", end_time: e.target.value })}
-                        className="w-24 h-9 text-xs" 
+                        value={endTime} 
+                        onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: startTime, end_time: e.target.value })}
+                        className="h-9 w-24 text-sm font-bold bg-white border-stone-200 text-stone-800 focus-visible:ring-1 focus-visible:ring-emerald-500 text-center shadow-sm" 
                       />
                     </div>
                   </div>
                 );
               })}
             </div>
-            <div className="mt-4 p-4 bg-blue-50/50 rounded-lg text-[10px] text-blue-700 leading-relaxed flex gap-2">
-              <ShieldAlert size={16} className="shrink-0" />
-              <span>Hinweis: Änderungen an den Standard-Öffnungszeiten wirken sich nicht auf bereits erstellte Termine aus.</span>
+            <div className="mt-8 p-5 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 leading-relaxed flex gap-4">
+              <ShieldAlert size={24} className="shrink-0 text-blue-500" />
+              <div className="space-y-1">
+                <p className="font-bold uppercase tracking-wider text-[10px]">Wichtiger Hinweis</p>
+                <p>Es ist eine feste Mittagspause von 12:00 - 13:00 Uhr hinterlegt. Änderungen hier wirken sich nur auf zukünftige Planung aus.</p>
+              </div>
             </div>
           </CardContent>
         </Card>

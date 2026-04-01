@@ -8,11 +8,14 @@ import { Skeleton } from "../../components/ui/skeleton";
 import { useState } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
+import { MonthlyOccupancyChart } from "../../components/admin/MonthlyOccupancyChart";
 
 export default function AdminDashboard() {
   const { profile } = useAuthContext();
-  const { data: stats, isLoading, isError } = useAdminStats();
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const { data: stats, isLoading, isError } = useAdminStats(selectedMonth);
   const [isNextApptsExpanded, setIsNextApptsExpanded] = useState(false);
+  const [isMonthView, setIsMonthView] = useState(false);
 
   const upcoming = stats?.upcomingBookings || [];
   const nextBooking = upcoming[0];
@@ -218,42 +221,67 @@ export default function AdminDashboard() {
             </div>
             
             <div className="mt-6 pt-6 border-t border-stone-50">
-              <h4 className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-6">Wochenanalyse (Auslastung)</h4>
-              <div className="flex items-end justify-between h-32 gap-2 px-2">
-                {stats?.weeklyOccupancy?.map((day: any, i: number) => {
-                  const isToday = day.date === new Date().toISOString().split("T")[0];
-                  return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                      <div className="relative w-full flex flex-col justify-end h-24">
-                        {/* Hover Tooltip */}
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-stone-800 text-white text-[8px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                          {day.percentage}% ({day.bookedSlots}/{day.totalSlots})
-                        </div>
-                        {/* Bar Background */}
-                        <div className="absolute inset-0 bg-stone-100 rounded-sm" />
-                        {/* Bar Fill */}
-                        <div
-                          className={cn(
-                            "relative w-full rounded-sm transition-all duration-700 ease-out",
-                            isToday
-                              ? "bg-emerald-500 group-hover:bg-emerald-600"
-                              : day.percentage > 0
-                              ? "bg-emerald-400/70 group-hover:bg-emerald-500/80"
-                              : "bg-stone-200"
-                          )}
-                          style={{ height: `${Math.max(day.percentage, 2)}%` }}
-                        />
-                      </div>
-                      <span className={cn(
-                        "text-[9px] font-bold uppercase tracking-tighter",
-                        isToday ? "text-emerald-600" : "text-stone-400"
-                      )}>
-                        {day.dayName}
-                      </span>
-                    </div>
-                  );
-                })}
+              <div className="flex items-center justify-between mb-6">
+                <h4 className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Wochenanalyse (Forecast)</h4>
+                <button 
+                  onClick={() => setIsMonthView(!isMonthView)}
+                  className="text-[9px] font-bold text-stone-500 hover:text-stone-900 flex items-center gap-1 transition-colors uppercase tracking-wider"
+                >
+                  {isMonthView ? "Zur Woche" : "Monatsansicht"} 
+                  <Calendar size={10} />
+                </button>
               </div>
+
+              {isMonthView ? (
+                <MonthlyOccupancyChart 
+                  selectedMonth={selectedMonth}
+                  onMonthChange={setSelectedMonth}
+                  data={stats?.monthlyOccupancy || {}}
+                />
+              ) : (
+                <div className="flex items-end justify-between h-32 gap-2 px-2">
+                  {stats?.weeklyOccupancy?.map((day: any, i: number) => {
+                    const isToday = day.date === new Date().toLocaleDateString("en-CA");
+                    
+                    const colorClasses: Record<string, string> = {
+                      emerald: isToday ? "bg-emerald-500" : "bg-emerald-400/80 group-hover:bg-emerald-500",
+                      orange: isToday ? "bg-orange-500" : "bg-orange-400/80 group-hover:bg-orange-500",
+                      red: isToday ? "bg-red-500" : "bg-red-400/80 group-hover:bg-red-500"
+                    };
+
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
+                        <div className={cn(
+                          "relative w-full flex flex-col justify-end h-24 p-0.5 rounded-sm transition-all",
+                          isToday && "ring-2 ring-stone-900 ring-offset-2 ring-offset-white scale-105 z-10"
+                        )}>
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-stone-900 text-white text-[9px] px-2 py-1 rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-20">
+                            <div className="font-bold">{day.percentage}% Auslastung</div>
+                            <div className="text-stone-400">{day.bookedMinutes} / 480 min</div>
+                          </div>
+                          <div className="absolute inset-0 bg-stone-100/50 rounded-sm" />
+                          <div
+                            className={cn(
+                              "relative w-full rounded-sm transition-all duration-700 ease-out",
+                              colorClasses[day.statusColor] || "bg-stone-300"
+                            )}
+                            style={{ height: `${Math.max(day.percentage, 4)}%` }}
+                          />
+                        </div>
+                        <div className="flex flex-col items-center">
+                          <span className={cn(
+                            "text-[9px] font-bold uppercase tracking-tighter",
+                            isToday ? "text-stone-900" : "text-stone-400"
+                          )}>
+                            {day.dayName}
+                          </span>
+                          {isToday && <div className="w-1 h-1 bg-stone-900 rounded-full mt-0.5" />}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

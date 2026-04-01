@@ -1,0 +1,39 @@
+# GRAFIK_PLAN — Praxis-Auslastung: Redesign & Erweiterung 📋
+
+> Status: **IN ARBEIT 🛠️ (Phase 6)** | Letztes Update: 2026-04-01
+
+---
+
+## 🎯 Abgeschlossene Meilensteine
+
+- [x] **Phase 1: Datenmodell-Grundlage** (Minuten-Auslastung implemented)
+- [x] **Phase 2: Hook – Logik-Update** (Occupancy Logic)
+- [x] **Phase 3: UI – Wochen-Forecast** (Heute-Ring fixiert)
+- [x] **Phase 4: UI – Monatsansicht** (Calendar-Grid + Nav)
+- [x] **Phase 5: Öffnungszeiten & Mittagspause** (Sa/So entfernt, 12-13 Uhr fixiert)
+
+---
+
+## 🚀 Neue Phase 6: Detailansicht & Usability-Polishing (Aktuell)
+
+- [ ] **Tooltip-Optimierung (Hover)**
+  - [ ] **Minuten entfernen**: Nur noch die Prozentuale Auslastung anzeigen für maximale Klarheit.
+  - [ ] **Größe anpassen**: Tooltip-Fenster deutlich vergrößern und Schriftgrad erhöhen für bessere Lesbarkeit.
+
+- [ ] **Interaktives Detail-Panel (Klick-Event)**
+  - [ ] **Slide-in Animation**: Implementierung eines Side-Panels (Right Drawer), das die Hauptansicht zur Seite schiebt (kein Overlay!).
+  - [ ] **Tagesschau**: Beim Klick auf einen Tag (Woche oder Monat) wird dieser im Panel geladen.
+  - [ ] **Visualisierte Timeline**: Vertikaler Tagesablauf mit:
+    - [ ] Markierten Behandlungen.
+    - [ ] **Free Slot Finder**: Klare Hervorhebung von Lücken ("Slot frei: 45 Min") für schnelle telefonische Auskunft.
+    - [ ] Mittagspausen-Sperre (12-13 Uhr) visuell ausgegraut.
+
+- [ ] **Navigation-Polishing**
+  - [ ] Reibungsloser Wechsel zwischen Wochen- und Detailansicht ohne Layout-Springen.
+
+---
+
+## ✅ Finale Validierung (Ausstehend)
+- [ ] Hover-Tooltips sind groß und "Minuten-frei".
+- [ ] Side-Panel öffnet sich flüssig per Klick.
+- [ ] Lücken sind in der Timeline sofort ersichtlich.
