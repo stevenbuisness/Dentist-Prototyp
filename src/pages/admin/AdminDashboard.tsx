@@ -306,6 +306,7 @@ export default function AdminDashboard() {
           dateStr={selectedDay}
           bookings={stats?.allBookings || []}
           onClose={() => setSelectedDay(null)}
+          onDateChange={setSelectedDay}
         />
       </div>
     </AdminLayout>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, CheckCircle2, AlertCircle, Plus } from "lucide-react";
+import { X, CheckCircle2, AlertCircle, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { ManualBookingModal } from "./ManualBookingModal";
 import { BookingEditModal } from "./BookingEditModal";
@@ -9,18 +9,46 @@ interface DailyDetailPanelProps {
   dateStr: string | null;
   bookings: any[];
   onClose: () => void;
+  onDateChange?: (date: string | null) => void;
 }
 
 export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({ 
   dateStr, 
   bookings, 
-  onClose 
+  onClose,
+  onDateChange
 }) => {
   const isOpen = !!dateStr;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTime, setModalTime] = useState<string | null>(null);
   const [selectedEditBooking, setSelectedEditBooking] = useState<any | null>(null);
   const queryClient = useQueryClient();
+
+  const handlePrevDay = () => {
+    if (!dateStr || !onDateChange) return;
+    const current = new Date(dateStr);
+    current.setDate(current.getDate() - 1);
+    
+    // Skip weekends (0 = Sunday, 6 = Saturday)
+    while (current.getDay() === 0 || current.getDay() === 6) {
+      current.setDate(current.getDate() - 1);
+    }
+    
+    onDateChange(current.toLocaleDateString("en-CA"));
+  };
+
+  const handleNextDay = () => {
+    if (!dateStr || !onDateChange) return;
+    const current = new Date(dateStr);
+    current.setDate(current.getDate() + 1);
+    
+    // Skip weekends (0 = Sunday, 6 = Saturday)
+    while (current.getDay() === 0 || current.getDay() === 6) {
+      current.setDate(current.getDate() + 1);
+    }
+    
+    onDateChange(current.toLocaleDateString("en-CA"));
+  };
 
   // Filter bookings for the selected day - ensuring exact match with useAdminStats logic
   const filteredBookings = React.useMemo(() => {
@@ -83,15 +111,31 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
       )}>
         {/* Header */}
         <div className="p-8 pb-5 border-b border-stone-50 flex items-center justify-between bg-white shrink-0">
-          <div>
-            <h2 className="text-2xl font-montserrat font-black text-stone-900 tracking-tight">Tagesansicht</h2>
-            <p className="text-[13px] text-emerald-500 font-bold mt-1 uppercase tracking-widest">
+          <div className="flex-1 flex flex-col">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={handlePrevDay}
+                className="p-1.5 hover:bg-stone-50 rounded-lg text-stone-300 hover:text-stone-900 transition-all"
+                title="Vorheriger Tag"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <h2 className="text-2xl font-montserrat font-black text-stone-900 tracking-tight leading-none">Tagesansicht</h2>
+              <button 
+                onClick={handleNextDay}
+                className="p-1.5 hover:bg-stone-50 rounded-lg text-stone-300 hover:text-stone-900 transition-all"
+                title="Nächster Tag"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+            <p className="text-[13px] text-emerald-500 font-bold mt-2 uppercase tracking-widest pl-1">
               {dateStr ? new Date(dateStr).toLocaleDateString("de-DE", { weekday: 'long', day: 'numeric', month: 'long' }) : ""}
             </p>
           </div>
           <button 
             onClick={onClose}
-            className="p-3 hover:bg-stone-50 rounded-2xl transition-all text-stone-400 hover:text-stone-900 border border-stone-100/50"
+            className="p-3 hover:bg-stone-50 rounded-2xl transition-all text-stone-300 hover:text-stone-900 border border-stone-100/50 ml-4"
           >
             <X size={22} />
           </button>
