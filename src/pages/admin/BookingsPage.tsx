@@ -35,6 +35,7 @@ import {
 } from "../../components/ui/alert-dialog";
 
 type TimeFilter = "all" | "today" | "this_week" | "this_month" | "custom";
+type StatusFilter = "all" | "confirmed" | "attended" | "no_show" | "canceled";
 
 export default function BookingsPage() {
   const { toast } = useToast();
@@ -42,8 +43,17 @@ export default function BookingsPage() {
   const updateStatus = useUpdateBookingStatus();
   
   const [dateFilter, setDateFilter] = useState<TimeFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [customRange, setCustomRange] = useState({ start: "", end: "" });
   const [pendingUpdate, setPendingUpdate] = useState<{ id: string; status: BookingStatus } | null>(null);
+
+  const statusFilters: { id: StatusFilter; label: string }[] = [
+    { id: "all", label: "In jedem Status" },
+    { id: "confirmed", label: "Bestätigt" },
+    { id: "attended", label: "Erschienen" },
+    { id: "no_show", label: "Nicht erschienen" },
+    { id: "canceled", label: "Storniert" },
+  ];
 
   // 🔴 Realtime: auto-refresh whenever bookings/sessions change
   useBookingsRealtime();
@@ -81,7 +91,19 @@ export default function BookingsPage() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
-    return bookings.filter((b: any) => {
+    // 1. Status Filter
+    let filtered = bookings;
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(b => {
+        if (statusFilter === "canceled") {
+          return b.status === "canceled_by_user" || b.status === "canceled_by_admin";
+        }
+        return b.status === statusFilter;
+      });
+    }
+
+    // 2. Date Filter
+    return filtered.filter((b: any) => {
       if (!b.session?.start_time) return dateFilter === "all";
       const start = new Date(b.session.start_time);
       const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
@@ -119,7 +141,7 @@ export default function BookingsPage() {
 
       return true;
     });
-  }, [bookings, dateFilter, customRange]);
+  }, [bookings, dateFilter, customRange, statusFilter]);
 
   return (
     <AdminLayout>
@@ -147,48 +169,72 @@ export default function BookingsPage() {
           </Button>
         </div>
 
-        {/* ── FILTER BUTTON ROW ──────────────────────────────────────────────── */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex p-1 bg-stone-100 rounded-lg border border-stone-200">
-            {[
-              { id: "all", label: "Alle Termine" },
-              { id: "today", label: "Heute" },
-              { id: "this_week", label: "Diese Woche" },
-              { id: "this_month", label: "Diesen Monat" },
-              { id: "custom", label: "Eigener Zeitraum" },
-            ].map((f) => (
-              <button
-                key={f.id}
-                onClick={() => setDateFilter(f.id as TimeFilter)}
-                className={cn(
-                  "px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-all",
-                  dateFilter === f.id 
-                    ? "bg-white text-stone-900 shadow-sm" 
-                    : "text-stone-500 hover:text-stone-700 hover:bg-stone-50/50"
-                )}
-              >
-                {f.label}
-              </button>
-            ))}
+        {/* ── FILTER BUTTON ROWS ────────────────────────────────────────────── */}
+        <div className="flex flex-col gap-4">
+          {/* Zeitebene */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest min-w-[70px]">Zeitraum:</span>
+            <div className="flex p-0.5 bg-stone-100 rounded-lg border border-stone-200">
+              {[
+                { id: "all", label: "Alle Termine" },
+                { id: "today", label: "Heute" },
+                { id: "this_week", label: "Diese Woche" },
+                { id: "this_month", label: "Diesen Monat" },
+                { id: "custom", label: "Eigener" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setDateFilter(f.id as TimeFilter)}
+                  className={cn(
+                    "px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
+                    dateFilter === f.id 
+                      ? "bg-white text-stone-900 shadow-sm" 
+                      : "text-stone-400 hover:text-stone-600 hover:bg-stone-50/50"
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            {dateFilter === "custom" && (
+              <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+                <input 
+                  type="date" 
+                  value={customRange.start}
+                  onChange={(e) => setCustomRange(prev => ({ ...prev, start: e.target.value }))}
+                  className="bg-white border border-stone-200 rounded-md px-3 py-1.5 text-xs focus:ring-1 focus:ring-stone-900 outline-none" 
+                />
+                <span className="text-stone-400 text-xs">bis</span>
+                <input 
+                  type="date" 
+                  value={customRange.end}
+                  onChange={(e) => setCustomRange(prev => ({ ...prev, end: e.target.value }))}
+                  className="bg-white border border-stone-200 rounded-md px-3 py-1.5 text-xs focus:ring-1 focus:ring-stone-900 outline-none" 
+                />
+              </div>
+            )}
           </div>
 
-          {dateFilter === "custom" && (
-            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
-              <input 
-                type="date" 
-                value={customRange.start}
-                onChange={(e) => setCustomRange(prev => ({ ...prev, start: e.target.value }))}
-                className="bg-white border border-stone-200 rounded-md px-3 py-1.5 text-xs focus:ring-1 focus:ring-stone-900 outline-none" 
-              />
-              <span className="text-stone-400 text-xs">bis</span>
-              <input 
-                type="date" 
-                value={customRange.end}
-                onChange={(e) => setCustomRange(prev => ({ ...prev, end: e.target.value }))}
-                className="bg-white border border-stone-200 rounded-md px-3 py-1.5 text-xs focus:ring-1 focus:ring-stone-900 outline-none" 
-              />
+          {/* Statusebene */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest min-w-[70px]">Status:</span>
+            <div className="flex p-0.5 bg-stone-100 rounded-lg border border-stone-200">
+              {statusFilters.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setStatusFilter(f.id)}
+                  className={cn(
+                    "px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-md transition-all",
+                    statusFilter === f.id 
+                      ? "bg-white text-stone-900 shadow-sm" 
+                      : "text-stone-400 hover:text-stone-600 hover:bg-stone-50/50"
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
