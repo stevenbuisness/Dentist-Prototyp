@@ -268,7 +268,13 @@ export default function BookingsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 border-b border-stone-50 text-xs text-stone-400 font-bold uppercase tracking-widest">
-                      {new Date(b.booking_time).toLocaleDateString("de-DE")}
+                      {new Date(b.booking_time).toLocaleString("de-DE", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </td>
                     <td className="px-6 py-4 border-b border-stone-50 text-right">
                       <DropdownMenu>
