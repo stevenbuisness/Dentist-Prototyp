@@ -33,15 +33,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 
-type TimeFilter = "today" | "tomorrow" | "this_week" | "next_week" | "all";
+type TimeFilter = "all" | "today" | "this_week" | "this_month" | "custom";
 
 export default function BookingsPage() {
   const { toast } = useToast();
@@ -49,6 +42,7 @@ export default function BookingsPage() {
   const updateStatus = useUpdateBookingStatus();
   
   const [dateFilter, setDateFilter] = useState<TimeFilter>("all");
+  const [customRange, setCustomRange] = useState({ start: "", end: "" });
   const [pendingUpdate, setPendingUpdate] = useState<{ id: string; status: BookingStatus } | null>(null);
 
   // 🔴 Realtime: auto-refresh whenever bookings/sessions change
@@ -94,70 +88,107 @@ export default function BookingsPage() {
 
       if (dateFilter === "today") return startDay.getTime() === today.getTime();
       
-      if (dateFilter === "tomorrow") {
-        const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 1);
-        return startDay.getTime() === tomorrow.getTime();
-      }
-
       if (dateFilter === "this_week") {
-        const sunday = new Date(today);
-        sunday.setDate(today.getDate() + (7 - today.getDay()));
-        return startDay >= today && startDay <= sunday;
+        // Start of week (Monday)
+        const monday = new Date(today);
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        monday.setDate(diff);
+        
+        // End of week (Sunday)
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        
+        return startDay >= monday && startDay <= sunday;
       }
 
-      if (dateFilter === "next_week") {
-        const nextMonday = new Date(today);
-        nextMonday.setDate(today.getDate() + (8 - today.getDay()));
-        const nextSunday = new Date(nextMonday);
-        nextSunday.setDate(nextMonday.getDate() + 6);
-        return startDay >= nextMonday && startDay <= nextSunday;
+      if (dateFilter === "this_month") {
+        return start.getMonth() === now.getMonth() && start.getFullYear() === now.getFullYear();
+      }
+
+      if (dateFilter === "custom") {
+        if (!customRange.start && !customRange.end) return true;
+        const startR = customRange.start ? new Date(customRange.start) : null;
+        const endR = customRange.end ? new Date(customRange.end) : null;
+        
+        if (startR) startR.setHours(0, 0, 0, 0);
+        if (endR) endR.setHours(23, 59, 59, 999);
+        
+        return (!startR || start >= startR) && (!endR || start <= endR);
       }
 
       return true;
     });
-  }, [bookings, dateFilter]);
+  }, [bookings, dateFilter, customRange]);
 
   return (
     <AdminLayout>
-      <div className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-montserrat font-bold text-stone-900">Patienten-Buchungen</h1>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase tracking-widest">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Live
-            </span>
-          </div>
-          <p className="text-stone-500 mt-1">Überwachen und verwalten Sie alle eingehenden Terminreservierungen.</p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 bg-white rounded-lg border border-stone-200 p-1 shadow-sm">
-            <Select value={dateFilter} onValueChange={(v: TimeFilter) => setDateFilter(v)}>
-              <SelectTrigger className="w-[180px] border-none shadow-none focus:ring-0">
-                <CalendarIcon size={14} className="mr-2 text-stone-400" />
-                <SelectValue placeholder="Zeitraum filtern" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle Termine</SelectItem>
-                <SelectItem value="today">Heute</SelectItem>
-                <SelectItem value="tomorrow">Morgen</SelectItem>
-                <SelectItem value="this_week">Diese Woche</SelectItem>
-                <SelectItem value="next_week">Nächste Woche</SelectItem>
-              </SelectContent>
-            </Select>
+      <div className="mb-10 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-montserrat font-bold text-stone-900">Patienten-Buchungen</h1>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase tracking-widest">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live
+              </span>
+            </div>
+            <p className="text-stone-500 mt-1">Überwachen und verwalten Sie alle eingehenden Terminreservierungen.</p>
           </div>
 
           <Button
             variant="ghost"
             size="icon"
             onClick={() => refetch()}
-            className="text-stone-400 hover:text-stone-900 h-9 w-9 bg-white border border-stone-200 shadow-sm"
+            className="text-stone-400 hover:text-stone-900 h-9 w-9 bg-white border border-stone-200 shadow-sm self-end"
             title="Aktualisieren"
           >
             <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
           </Button>
+        </div>
+
+        {/* ── FILTER BUTTON ROW ──────────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex p-1 bg-stone-100 rounded-lg border border-stone-200">
+            {[
+              { id: "all", label: "Alle Termine" },
+              { id: "today", label: "Heute" },
+              { id: "this_week", label: "Diese Woche" },
+              { id: "this_month", label: "Diesen Monat" },
+              { id: "custom", label: "Eigener Zeitraum" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setDateFilter(f.id as TimeFilter)}
+                className={cn(
+                  "px-4 py-1.5 text-xs font-bold uppercase tracking-widest rounded-md transition-all",
+                  dateFilter === f.id 
+                    ? "bg-white text-stone-900 shadow-sm" 
+                    : "text-stone-500 hover:text-stone-700 hover:bg-stone-50/50"
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {dateFilter === "custom" && (
+            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2 duration-300">
+              <input 
+                type="date" 
+                value={customRange.start}
+                onChange={(e) => setCustomRange(prev => ({ ...prev, start: e.target.value }))}
+                className="bg-white border border-stone-200 rounded-md px-3 py-1.5 text-xs focus:ring-1 focus:ring-stone-900 outline-none" 
+              />
+              <span className="text-stone-400 text-xs">bis</span>
+              <input 
+                type="date" 
+                value={customRange.end}
+                onChange={(e) => setCustomRange(prev => ({ ...prev, end: e.target.value }))}
+                className="bg-white border border-stone-200 rounded-md px-3 py-1.5 text-xs focus:ring-1 focus:ring-stone-900 outline-none" 
+              />
+            </div>
+          )}
         </div>
       </div>
 
