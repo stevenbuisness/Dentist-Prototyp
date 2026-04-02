@@ -52,13 +52,13 @@ export const useDeleteSessionType = () => {
 
 // ── SESSIONS ───────────────────────────────────────────────────────────────────
 
-export const useSessions = (filters?: { session_type_id?: string; status?: string }) => {
+export const useSessions = (filters?: { session_type_id?: string; status?: string; ascending?: boolean }) => {
   return useQuery({
     queryKey: ["sessions", filters],
     queryFn: async () => {
       let query = supabase
         .from("sessions")
-        .select("*, session_type:session_types(*)");
+        .select("*, session_type:session_types(*), bookings:bookings(*, user:users(id, first_name, last_name, email))");
 
       if (filters?.session_type_id) {
         query = query.eq("session_type_id", filters.session_type_id);
@@ -67,7 +67,7 @@ export const useSessions = (filters?: { session_type_id?: string; status?: strin
         query = query.eq("status", filters.status);
       }
 
-      const { data, error } = await query.order("start_time");
+      const { data, error } = await query.order("start_time", { ascending: filters?.ascending ?? true });
       if (error) throw error;
       return data;
     },

@@ -3,8 +3,8 @@ import AdminLayout from "./AdminLayout";
 import { supabase } from "../../lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../../hooks/use-toast";
+import { useMyBookings } from "../../hooks/useBookings";
 import {
-  User as UserIcon,
   Search,
   Mail,
   Phone,
@@ -19,7 +19,6 @@ import {
   Archive,
   Users,
   UserPlus,
-  Trash,
   ChevronRight,
   Loader2,
   Clock,
@@ -27,6 +26,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils";
 
 interface Patient {
@@ -107,6 +107,89 @@ function useSoftDeletePatient() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["clients"] }),
   });
+}
+
+function PatientTimeline({ patientId }: { patientId: string }) {
+  const { data: history = [], isLoading } = useMyBookings(patientId);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Auto-expand the most recent one
+  useState(() => {
+    if (history.length > 0 && !expandedId) {
+        setExpandedId(history[0].id);
+    }
+  });
+
+  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin text-stone-300" /></div>;
+  if (history.length === 0) return (
+    <div className="bg-stone-50 rounded-2xl p-8 text-center border border-dashed border-stone-200">
+      <p className="text-stone-400 text-sm">Noch keine Behandlungen dokumentiert.</p>
+    </div>
+  );
+
+  return (
+    <div className="space-y-4 relative before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-0.5 before:bg-stone-100 pb-4 mt-6">
+      {history.map((booking: any, idx: number) => {
+        const isExpanded = expandedId === booking.id || (idx === 0 && expandedId === null);
+        return (
+          <div key={booking.id} className="relative pl-12 group">
+            <div className={cn(
+              "absolute left-0 top-1.5 w-9 h-9 rounded-xl flex items-center justify-center border-4 border-[#faf8f5] z-10 transition-all shadow-sm",
+              booking.notes ? "bg-emerald-500 text-white" : "bg-stone-200 text-stone-500"
+            )}>
+              <CalendarIcon size={14} />
+            </div>
+            
+            <div 
+              onClick={() => setExpandedId(isExpanded ? null : booking.id)}
+              className={cn(
+                "bg-white rounded-2xl border border-stone-100 shadow-sm transition-all cursor-pointer overflow-hidden group/item",
+                isExpanded ? "ring-2 ring-stone-900/5 shadow-md" : "hover:border-stone-200"
+              )}
+            >
+               {/* Header / Summary */}
+               <div className="p-5 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-2 mb-0.5">
+                        <h5 className="font-bold text-stone-900 truncate">{booking.session?.session_type?.name || "Termin"}</h5>
+                        {isExpanded && <Badge className="bg-stone-50 text-stone-400 text-[8px] h-4 px-1.5 border-none font-black uppercase">Detail</Badge>}
+                     </div>
+                     <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                       {new Date(booking.session?.start_time).toLocaleDateString("de-DE", { day: '2-digit', month: 'long', year: 'numeric' })}
+                     </p>
+                  </div>
+                  <div className="flex items-center gap-4 flex-shrink-0">
+                     <div className={cn(
+                       "px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider hidden sm:block",
+                       booking.status === "attended" ? "bg-emerald-50 text-emerald-600" : "bg-stone-50 text-stone-400"
+                     )}>
+                       {booking.status === "attended" ? "Erschienen" : "Geplant"}
+                     </div>
+                     <ChevronRight size={16} className={cn("text-stone-300 transition-transform duration-300", isExpanded && "rotate-90 text-stone-900")} />
+                  </div>
+               </div>
+               
+               {/* Content (Notes) */}
+               <div className={cn(
+                  "px-5 pb-5 transition-all duration-300 origin-top",
+                  isExpanded ? "max-h-[500px] opacity-100 visible" : "max-h-0 opacity-0 invisible overflow-hidden"
+               )}>
+                  <div className="pt-2 border-t border-stone-50">
+                    {booking.notes ? (
+                      <div className="text-sm text-stone-600 leading-relaxed bg-stone-50/50 p-4 rounded-xl border border-stone-100/50 italic font-medium">
+                        "{booking.notes}"
+                      </div>
+                    ) : (
+                      <p className="text-xs text-stone-400 italic bg-stone-50/30 p-4 rounded-xl border border-dashed border-stone-200">Keine Dokumentation vorhanden.</p>
+                    )}
+                  </div>
+               </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function ClientsPage() {
@@ -442,6 +525,14 @@ export default function ClientsPage() {
                           </div>
                        </section>
                     </div>
+
+                    <section className="space-y-6">
+                       <div className="flex items-center justify-between border-b border-stone-200 pb-2">
+                          <h4 className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em]">Behandlungshistorie (Karteikarte)</h4>
+                          <span className="text-[10px] text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full font-bold">Live</span>
+                       </div>
+                       <PatientTimeline patientId={selectedPatient.id} />
+                    </section>
 
                     {/* Action Bar with "Löschen" button restricted to this info view only */}
                     <div className="bg-stone-900 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden">

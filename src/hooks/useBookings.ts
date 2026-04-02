@@ -82,6 +82,36 @@ export const useCreateBooking = () => {
 
 // ── UPDATE BOOKING STATUS (with Optimistic Update) ────────────────────────────
 
+export const useUpdateBooking = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...payload
+    }: {
+      id: string;
+      status?: BookingStatus;
+      notes?: string | null;
+    }) => {
+      const { data, error } = await supabase
+        .from("bookings")
+        .update(payload)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    },
+  });
+};
+
+// Legacy alias for status only
 export const useUpdateBookingStatus = () => {
   const queryClient = useQueryClient();
 

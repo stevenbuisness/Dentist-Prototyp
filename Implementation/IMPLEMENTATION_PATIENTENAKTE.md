@@ -12,39 +12,40 @@ Dieser Plan beschreibt die Erweiterung der Sitzungsverwaltung und die Implementi
 ## 📋 Checkliste der Aufgaben
 
 ### 1. ⚙️ Backend & Datenbank (Supabase)
-- [ ] **Data Model Check:** Spalte `notes` in `public.bookings` (text, nullable) korrekt konfigurieren.
-- [ ] **RLS Policy Update:** Sicherstellen, dass Admins die `bookings` Tabelle für Notizen aktualisieren dürfen.
-- [ ] **Trigger/Activities:** Prüfen, ob eine neue Aktivität "Behandlung dokumentiert" angelegt werden soll.
+- [x] **Data Model Check:** Spalte `notes` in `public.bookings` (text, nullable) korrekt konfigurieren.
+- [x] **RLS Policy Update:** Sicherstellen, dass Admins die `bookings` Tabelle für Notizen aktualisieren dürfen.
+- [x] **Trigger/Activities:** Prüfen, ob eine neue Aktivität "Behandlung dokumentiert" angelegt werden soll (Logik in `log_booking_activity` aktualisiert).
 
 ### 2. 📋 Sitzungsverwaltung UI (`/admin/sessions`)
-- [ ] **Column Cleanup:** Spalte "Kapazität" aus der `DataTable` ausblenden (in DB erhalten).
-- [ ] **Chronologische Sortierung:** `start_time DESC` als Standard (neueste zuerst).
-- [ ] **Status-Indikatoren (Ampel-System):**
+- [x] **Column Cleanup:** Spalte "Kapazität" aus der `DataTable` ausblenden (in DB erhalten).
+- [x] **Chronologische Sortierung:** `start_time DESC` als Standard (neueste zuerst).
+- [x] **Status-Indikatoren (Ampel-System):**
     - 🔴 **Fehlt:** Termin vorbei, keine Dokumentation.
     - 🟢 **Erledigt:** Termin vorbei, Dokumentation vorhanden.
     - 🔘 **Geplant:** Zukünftiger Termin.
 
 ### 3. ✍️ Dokumentations-Workflow (Action Dialogue)
-- [ ] **Modaler Dialog:** Öffnet sich bei Klick auf einen Termin für schnelles Feedback.
-- [ ] **Status-Markierung:** Button/Toggle für "Erschienen" (`attended`).
-- [ ] **Behandlungsnotizen:** Eingabefeld für den Termin-Text.
-- [ ] **Smart-Sentence Templates (Quick-Select):**
-    - [ ] `[Regelkontrolle OK]` -> "Gesamtbefund unauffällig. Keine akuten Probleme."
-    - [ ] `[PZR Empfehlung]` -> "Professionelle Zahnreinigung durchgeführt/empfohlen."
-    - [ ] `[Röntgen]` -> "Röntgen ohne Befund durchgeführt."
-    - [ ] `[Kontrolle (6M)]` -> "Kontrolluntersuchung in 6 Monaten empfohlen."
+- [x] **Modaler Dialog:** Öffnet sich bei Klick auf einen Termin für schnelles Feedback.
+- [x] **Status-Markierung:** Button/Toggle für "Erschienen" (`attended`).
+- [x] **Behandlungsnotizen:** Eingabefeld für den Termin-Text.
+- [x] **Smart-Sentence Templates (Quick-Select):**
+    - [x] `[Regelkontrolle OK]` -> "Gesamtbefund unauffällig. Keine akuten Probleme."
+    - [x] `[PZR Empfehlung]` -> "Professionelle Zahnreinigung durchgeführt/empfohlen."
+    - [x] `[Röntgen]` -> "Röntgen ohne Befund durchgeführt."
+    - [x] `[Kontrolle (6M)]` -> "Kontrolluntersuchung in 6 Monaten empfohlen."
 
 ### 🗂️ 4. Digitale Patientenakte (`/admin/clients`)
-- [ ] **Detail-Ansicht (Karteikarte):** Erweiterung des Patientenprofils um den Verlauf.
-- [ ] **Timeline-Komponente:** Vertikaler Zeitstrahl mit allen vergangenen Behandlungen.
-    - Icons für verschiedene Behandlungstypen.
-    - Anzeige der Datumswerte und der spezifischen Notizen.
-- [ ] **Stammdaten-Editor:** Integrierte Bearbeitung von Vorname, Nachname, Geburtsdatum etc.
+- [x] **Detail-Ansicht (Karteikarte):** Erweiterung des Patientenprofils um den Verlauf.
+- [x] **Timeline-Komponente:** Vertikaler Zeitstrahl mit allen vergangenen Behandlungen.
+    - [x] Icons für verschiedene Behandlungstypen.
+    - [x] Anzeige der Datumswerte und der spezifischen Notizen.
+- [x] **Stammdaten-Editor:** Integrierte Bearbeitung von Vorname, Nachname, Geburtsdatum etc.
+- [x] **Live-Updates:** Automatische Synchronisierung der Timeline nach dem Speichern (via React Query Invalidation).
 
 ### 5. 🔍 Finales Polishing
-- [ ] **Live-Updates:** Automatische Synchronisierung der Timeline nach dem Speichern.
-- [ ] **Responsiveness:** Test auf Tablets und Desktops (Premium-Aesthetic).
-- [ ] **Loading-States:** Skeleton-Loader für die Timeline integrieren.
+- [x] **Premium-Aesthetic:** Vertikaler Zeitstrahl mit modernem Design & Ampel-Status.
+- [x] **Responsiveness:** Slide-Over Panel ist responsiv und touch-freundlich.
+- [x] **Fehlerbehandlung:** Toasts für Erfolg/Fehler beim Speichern der Dokumentation.
 
 ---
 

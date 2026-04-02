@@ -1,7 +1,7 @@
 import AdminLayout from "./AdminLayout";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
-import { Calendar, CalendarCheck, ClipboardList, TrendingUp, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar, CalendarCheck, ClipboardList, Clock, ChevronDown, ChevronUp, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useAdminStats } from "../../hooks/useAdminStats";
 import { Badge } from "../../components/ui/badge";
 import { Skeleton } from "../../components/ui/skeleton";
@@ -50,12 +50,12 @@ export default function AdminDashboard() {
       description: "Letzte 7 Tage"
     },
     {
-      label: "Zuwachs",
-      value: "+12%",
-      icon: TrendingUp,
-      color: "text-purple-600",
-      bg: "bg-purple-50",
-      description: "Im Vergleich zum Vormonat"
+      label: "Offene Dokus",
+      value: stats?.missingDocsCount ?? 0,
+      icon: (stats?.missingDocsCount ?? 0) > 0 ? AlertCircle : CheckCircle2,
+      color: (stats?.missingDocsCount ?? 0) > 0 ? "text-red-600" : "text-emerald-600",
+      bg: (stats?.missingDocsCount ?? 0) > 0 ? "bg-red-50" : "bg-emerald-50",
+      description: (stats?.missingDocsCount ?? 0) > 0 ? "Behandlungen dokumentieren" : "Alles dokumentiert"
     },
   ];
 

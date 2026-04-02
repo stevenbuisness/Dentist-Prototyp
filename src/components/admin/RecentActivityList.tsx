@@ -9,7 +9,8 @@ import {
   Clock, 
   AlertCircle, 
   PlusCircle, 
-  UserCheck
+  UserCheck,
+  ClipboardList
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -95,6 +96,14 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
           color: "text-amber-600",
           bg: "bg-amber-50",
           border: "border-amber-100"
+        };
+      case "treatment_recorded":
+        return {
+          label: "Dokumentiert",
+          icon: ClipboardList,
+          color: "text-blue-600",
+          bg: "bg-blue-50",
+          border: "border-blue-100"
         };
       default:
         return {

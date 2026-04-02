@@ -144,6 +144,14 @@ export const useAdminStats = (selectedDate: Date = new Date()) => {
         .order("created_at", { ascending: false })
         .limit(20);
 
+      // 6. Missing Documentations (Past Bookings with no notes)
+      const { count: missingDocsCount } = await supabase
+        .from("bookings")
+        .select("id, notes, session:sessions!inner(start_time)", { count: "exact", head: true })
+        .lt("session.start_time", new Date().toISOString())
+        .is("notes", null)
+        .not("status", "in", '("canceled_by_user","canceled_by_admin")');
+
       const todayStr = formatDate(now);
       const todayStats = monthlyOccupancy[todayStr] || calculateDayStats(todayStr);
 
@@ -154,13 +162,14 @@ export const useAdminStats = (selectedDate: Date = new Date()) => {
         patientCount: patientCount || 0,
         todayCount: todayStats.count,
         openCountToday,
+        missingDocsCount: missingDocsCount || 0,
         newSevenDays: newCount || 0,
         upcomingBookings: (upcomingBookings || []) as any[], 
         occupancyToday: todayStats.percentage, 
         bookedMinutesToday: todayStats.bookedMinutes,
         weeklyOccupancy,
         monthlyOccupancy,
-        allBookings: (bookings || []) as any[], // Alle Buchungen für die Timeline
+        allBookings: (bookings || []) as any[], 
         activities: (activities || []) as any[]
       };
     },
