@@ -86,11 +86,16 @@ export const useCreateSession = () => {
       max_slots?: number;
       price?: number | null;
       status?: "open" | "fully_booked" | "canceled" | "completed";
+      locked_by?: string | null;
+      locked_at?: string | null;
     }) => {
       const { data, error } = await supabase
         .from("sessions")
         .insert(session)
-        .select()
+        .select(`
+          *,
+          session_type:session_types(*)
+        `)
         .single();
       if (error) throw error;
       return data;
@@ -127,3 +132,70 @@ export const useDeleteSession = () => {
   });
 };
 
+
+export const useLockSession = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ sessionId, userId }: { sessionId: string; userId: string }) => {
+      const { data, error } = await supabase.rpc("acquire_session_lock", {
+        p_session_id: sessionId,
+        p_user_id: userId,
+      });
+      if (error) throw error;
+      return data as boolean;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
+  });
+};
+
+export const useUnlockSession = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ sessionId, userId }: { sessionId: string; userId: string }) => {
+      const { error } = await supabase.rpc("release_session_lock", {
+        p_session_id: sessionId,
+        p_user_id: userId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
+  });
+};
+
+export const useAvailabilityRules = () => {
+  return useQuery({
+    queryKey: ["availabilityRules"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("availability_rules")
+        .select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+export const useCreateOnDemandSession = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ typeId, startTime, endTime }: { typeId: string; startTime: string; endTime: string }) => {
+      const { data: sessionId, error } = await supabase.rpc("create_on_demand_session", {
+        p_session_type_id: typeId,
+        p_start_time: startTime,
+        p_end_time: endTime,
+      });
+      if (error) throw error;
+      
+      // Fetch the full session object back to be consistent with the rest of the app
+      const { data: session, error: fetchError } = await supabase
+        .from("sessions")
+        .select("*, session_type:session_types(*)")
+        .eq("id", sessionId)
+        .single();
+      if (fetchError) throw fetchError;
+      
+      return session;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
+  });
+};

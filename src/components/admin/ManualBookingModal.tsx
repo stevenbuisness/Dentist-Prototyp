@@ -62,9 +62,7 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
 
   const createPatient = useMutation({
     mutationFn: async (payload: any) => {
-      const tempId = globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
       const { data, error } = await supabase.from("users").insert({ 
-        id: tempId,
         first_name: payload.first_name, 
         last_name: payload.last_name, 
         role: "patient",

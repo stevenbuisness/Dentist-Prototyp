@@ -85,12 +85,12 @@ export const PremiumNavigation = (): JSX.Element => {
           >
             030 1234 5678
           </a>
-          <a
-            href="#kontakt"
+          <Link
+            to="/dashboard"
             className="font-montserrat inline-flex items-center rounded-sm border border-stone-800 bg-stone-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#faf8f5] transition-colors hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
           >
-            Termin
-          </a>
+            Termin buchen
+          </Link>
           <button
             type="button"
             className="inline-flex p-2 md:hidden"
