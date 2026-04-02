@@ -11,6 +11,9 @@ import { Button } from "../../components/ui/button";
 import { MonthlyOccupancyChart } from "../../components/admin/MonthlyOccupancyChart";
 import { DailyDetailPanel } from "../../components/admin/DailyDetailPanel";
 import { RecentActivityList } from "../../components/admin/RecentActivityList";
+import { useSessionTypes, useUpsertSessionType } from "../../hooks/useSessions";
+import { useEffect } from "react";
+
 
 export default function AdminDashboard() {
   const { profile } = useAuthContext();
@@ -19,6 +22,30 @@ export default function AdminDashboard() {
   const [isNextApptsExpanded, setIsNextApptsExpanded] = useState(false);
   const [isMonthView, setIsMonthView] = useState(false);
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  
+  // --- Data Correction Logic (Fixing Kontrolluntersuchung Duration) ---
+  const { data: sessionTypes } = useSessionTypes();
+  const upsertType = useUpsertSessionType();
+  
+  useEffect(() => {
+    if (!sessionTypes || sessionTypes.length === 0) return;
+    
+    // Find Kontrolluntersuchung that needs fix (duration < 30)
+    const needsFix = sessionTypes.find(t => 
+      (t.name.toLowerCase().includes("kontroll") || t.name.toLowerCase().includes("untersuchung")) && 
+      t.default_duration_minutes !== 30
+    );
+    
+    if (needsFix) {
+      console.log("Fixing session type duration:", needsFix.name);
+      upsertType.mutate({
+        ...needsFix,
+        default_duration_minutes: 30
+      });
+    }
+  }, [sessionTypes, upsertType]);
+  // ----------------------------------------------------------------------
+
 
   const upcoming = stats?.upcomingBookings || [];
   const nextBooking = upcoming[0];

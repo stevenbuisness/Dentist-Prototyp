@@ -17,6 +17,10 @@ export function BookingEditModal({ isOpen, onClose, booking }: BookingEditModalP
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isKontroll = booking?.session?.session_type?.name?.toLowerCase().includes("kontroll") || 
+                    booking?.session?.session_type?.name?.toLowerCase().includes("untersuchung");
+  const currentDuration = booking?.session?.session_type?.default_duration_minutes || 30;
+
   if (!isOpen || !booking) return null;
 
   const updateStatus = async (newStatus: string) => {
@@ -42,6 +46,33 @@ export function BookingEditModal({ isOpen, onClose, booking }: BookingEditModalP
       setIsSubmitting(false);
     }
   };
+
+  const fixDuration = async () => {
+    try {
+      setIsSubmitting(true);
+      if (!booking?.session?.session_type?.id) return;
+
+      const { error } = await supabase
+        .from("session_types")
+        .update({ default_duration_minutes: 30 })
+        .eq("id", booking.session.session_type.id);
+
+      if (error) throw error;
+
+      toast({ 
+        title: "Dauer korrigiert", 
+        description: `Die Behandlungsart "${booking.session.session_type.name}" wurde auf 30 Min angepasst.` 
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["sessionTypes"] });
+    } catch (err: any) {
+      toast({ title: "Fehler", description: err.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 
   const deleteBooking = async () => {
     if (!confirm("Möchten Sie diesen Termin wirklich endgültig löschen?")) return;
@@ -132,6 +163,25 @@ export function BookingEditModal({ isOpen, onClose, booking }: BookingEditModalP
               </button>
             ))}
           </div>
+
+          {isKontroll && currentDuration !== 30 && (
+            <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl space-y-3 animate-in slide-in-from-top-1 duration-300">
+               <div className="flex items-start gap-3">
+                  <AlertCircle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-amber-900 leading-relaxed font-medium">
+                    Dieser Termin wird aktuell mit <span className="font-bold">{currentDuration} Min</span> angezeigt. Für Kontrolluntersuchungen wird ein Slot (30 Min) empfohlen.
+                  </p>
+               </div>
+               <Button 
+                onClick={fixDuration} 
+                disabled={isSubmitting}
+                className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs gap-2 rounded-xl"
+               >
+                  Auf 30 Min (1 Slot) anpassen
+               </Button>
+            </div>
+          )}
+
 
           <div className="pt-2">
             <button 

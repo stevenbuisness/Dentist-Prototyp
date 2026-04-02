@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
+import { useIdleTimeout } from "../../hooks/useIdleTimeout";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -55,9 +56,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem("adminSidebarCollapsed");
+    return saved === "true";
+  });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // Auto Logoff after 30 minutes of inactivity
+  useIdleTimeout(30 * 60 * 1000);
+
+  useEffect(() => {
+    localStorage.setItem("adminSidebarCollapsed", sidebarCollapsed.toString());
+  }, [sidebarCollapsed]);
 
   useEffect(() => {
     // Fetch recent bookings for baseline notifications

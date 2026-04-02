@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { X, Calendar, Clock, User, ClipboardList, Search, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Calendar, Clock, User, ClipboardList, Search, Check, UserPlus } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -7,6 +7,14 @@ import { supabase } from "../../lib/supabase";
 import { useSessionTypes, useCreateSession } from "../../hooks/useSessions";
 import { useCreateBooking } from "../../hooks/useBookings";
 import { useToast } from "../../hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../components/ui/dialog";
 
 interface Patient {
   id: string;
@@ -25,6 +33,7 @@ interface ManualBookingModalProps {
 
 export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTimeStr, onSuccess }: ManualBookingModalProps) {
   const { toast } = useToast();
+
   const { data: sessionTypes } = useSessionTypes();
   const createSession = useCreateSession();
   const createBooking = useCreateBooking();
@@ -38,6 +47,44 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // New Patient Dialog State
+  const [isNewPatientDialogOpen, setIsNewPatientDialogOpen] = useState(false);
+  const [newPatientForm, setNewPatientForm] = useState({ 
+    first_name: "", 
+    last_name: "", 
+    email: "", 
+    phone_number: "", 
+    address_line_1: "", 
+    post_code: "", 
+    city: "" 
+  });
+
+  const createPatient = useMutation({
+    mutationFn: async (payload: any) => {
+      const tempId = globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const { data, error } = await supabase.from("users").insert({ 
+        id: tempId,
+        first_name: payload.first_name, 
+        last_name: payload.last_name, 
+        role: "patient",
+        email: payload.email || null,
+        phone_number: payload.phone_number || null,
+        address_line_1: payload.address_line_1 || null,
+        post_code: payload.post_code || null,
+        city: payload.city || null
+      }).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      setSelectedPatient(data);
+      setIsNewPatientDialogOpen(false);
+      setNewPatientForm({ first_name: "", last_name: "", email: "", phone_number: "", address_line_1: "", post_code: "", city: "" });
+      toast({ title: "Patient angelegt!" });
+    },
+    onError: (err: any) => toast({ title: "Fehler beim Anlegen", description: err.message, variant: "destructive" })
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -47,8 +94,11 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
       setPatients([]);
       setSelectedPatient(null);
       setTypeId("");
+      setIsNewPatientDialogOpen(false);
+      setNewPatientForm({ first_name: "", last_name: "", email: "", phone_number: "", address_line_1: "", post_code: "", city: "" });
     }
   }, [isOpen, defaultDateStr, defaultTimeStr]);
+
 
   useEffect(() => {
     if (search.length < 2) {
@@ -78,7 +128,10 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
     return () => clearTimeout(timer);
   }, [search]);
 
+
+
   const handleSubmit = async () => {
+
     if (!date || !time || !typeId || !selectedPatient) {
       toast({ title: "Fehlt", description: "Bitte füllen Sie alle Felder aus.", variant: "destructive" });
       return;
@@ -140,44 +193,9 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
             <label className="text-[10px] font-bold text-stone-500 uppercase tracking-widest flex items-center gap-2">
               <User size={14} /> Patient / Kunde
             </label>
-            {!selectedPatient ? (
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-                <Input 
-                  value={search} 
-                  onChange={e => setSearch(e.target.value)} 
-                  placeholder="Namen tippen..." 
-                  className="pl-10 h-12 bg-stone-50 border-stone-100 rounded-xl"
-                  autoFocus
-                />
-                {search.length >= 2 && (
-                  <div className="absolute top-14 left-0 right-0 bg-white border border-stone-100 shadow-xl rounded-xl overflow-hidden z-10">
-                    {isSearching ? (
-                      <div className="p-4 text-sm text-stone-400 text-center">Suche...</div>
-                    ) : patients.length > 0 ? (
-                      patients.map(p => (
-                        <div 
-                          key={p.id} 
-                          onClick={() => { setSelectedPatient(p); setSearch(""); }}
-                          className="px-4 py-3 hover:bg-stone-50 cursor-pointer flex items-center justify-between group border-b border-stone-50 last:border-0"
-                        >
-                          <div>
-                            <div className="font-bold text-stone-900 group-hover:text-emerald-600 transition-colors">{p.first_name} {p.last_name}</div>
-                            <div className="text-[10px] text-stone-400">{p.email}</div>
-                          </div>
-                          <button className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
-                            Auswählen
-                          </button>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-4 text-sm text-stone-400 text-center">Kein Patient gefunden.</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center justify-between bg-emerald-50 border border-emerald-100 p-3 rounded-xl">
+            
+            {selectedPatient ? (
+              <div className="flex items-center justify-between bg-emerald-50 border border-emerald-100 p-3 rounded-xl animate-in fade-in zoom-in-95 duration-300">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold">
                     {(selectedPatient.first_name?.[0] || "?").toUpperCase()}
@@ -194,8 +212,61 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
                   Ändern
                 </button>
               </div>
+            ) : (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                    <Search size={16} className="text-stone-400" />
+                  </div>
+                  <Input 
+                    value={search} 
+                    onChange={e => setSearch(e.target.value)} 
+                    placeholder="Patient suchen..." 
+                    className="pl-10 h-12 bg-stone-50 border-stone-100 rounded-xl w-full"
+                    autoFocus
+                  />
+                  {(search.length >= 2 || isSearching) && (
+                    <div className="absolute top-14 left-0 right-0 bg-white border border-stone-100 shadow-xl rounded-xl overflow-hidden z-10">
+                      {isSearching ? (
+                        <div className="p-4 text-sm text-stone-400 text-center italic">Suche Patienten...</div>
+                      ) : (
+                        <>
+                          {patients.length > 0 ? (
+                            patients.map(p => (
+                              <div 
+                                key={p.id} 
+                                onClick={() => { setSelectedPatient(p); setSearch(""); }}
+                                className="px-4 py-3 hover:bg-stone-50 cursor-pointer flex items-center justify-between group border-b border-stone-50 last:border-0"
+                              >
+                                <div>
+                                  <div className="font-bold text-stone-900 group-hover:text-emerald-600 transition-colors">{p.first_name} {p.last_name}</div>
+                                  <div className="text-[10px] text-stone-400">{p.email}</div>
+                                </div>
+                                <button className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all">
+                                  Auswählen
+                                </button>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="p-4 text-sm text-stone-400 text-center">Kein Patient gefunden.</div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <Button 
+                  type="button" 
+                  onClick={() => setIsNewPatientDialogOpen(true)}
+                  className="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-600 border border-stone-200 transition-colors shadow-sm"
+                  title="Neuen Patienten anlegen"
+                >
+                  <UserPlus size={18} />
+                </Button>
+              </div>
             )}
           </div>
+
 
           <div className="grid grid-cols-2 gap-4">
             {/* Date */}
@@ -270,6 +341,50 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
           </Button>
         </div>
       </div>
+
+      {/* New Patient Dialog (same as in SessionsPage) */}
+      <Dialog open={isNewPatientDialogOpen} onOpenChange={setIsNewPatientDialogOpen}>
+        <DialogContent className="sm:max-w-xl rounded-3xl p-0 overflow-hidden border-0 z-[100]">
+          <DialogHeader className="bg-stone-50 px-8 py-6 border-b border-stone-100">
+            <DialogTitle className="font-montserrat font-black text-xl text-stone-900">Neuen Patienten anlegen</DialogTitle>
+          </DialogHeader>
+          <div className="p-8 grid grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Vorname</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.first_name} onChange={e => setNewPatientForm({...newPatientForm, first_name: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Nachname</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.last_name} onChange={e => setNewPatientForm({...newPatientForm, last_name: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">E-Mail (optional)</label>
+              <Input type="email" className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.email} onChange={e => setNewPatientForm({...newPatientForm, email: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Telefon</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.phone_number} onChange={e => setNewPatientForm({...newPatientForm, phone_number: e.target.value})} />
+            </div>
+            <div className="col-span-2 space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Straße & Hausnummer</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.address_line_1} onChange={e => setNewPatientForm({...newPatientForm, address_line_1: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">PLZ</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.post_code} onChange={e => setNewPatientForm({...newPatientForm, post_code: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Stadt</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.city} onChange={e => setNewPatientForm({...newPatientForm, city: e.target.value})} />
+            </div>
+          </div>
+          <DialogFooter className="bg-stone-50 px-8 py-5 border-t border-stone-100 flex items-center justify-end gap-3">
+            <Button variant="ghost" onClick={() => setIsNewPatientDialogOpen(false)} className="font-bold text-stone-500">Abbrechen</Button>
+            <Button onClick={() => createPatient.mutate({...newPatientForm})} disabled={createPatient.isPending || !newPatientForm.first_name || !newPatientForm.last_name} className="bg-stone-900 text-white hover:bg-stone-800 rounded-xl px-6 font-bold shadow-xl shadow-stone-200">Patient anlegen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+

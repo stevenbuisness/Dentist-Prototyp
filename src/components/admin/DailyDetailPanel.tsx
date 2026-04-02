@@ -79,19 +79,48 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
     return (durationMin / TOTAL_MINUTES) * 100;
   };
 
+  const [hoverTime, setHoverTime] = useState<string | null>(null);
+  const [hoverTop, setHoverTop] = useState<number>(0);
+
+  const calculateSnappedTime = (y: number, height: number) => {
+    const percentage = y / height;
+    const totalMinutesSince8 = percentage * TOTAL_MINUTES;
+    const hour = START_HOUR + Math.floor(totalMinutesSince8 / 60);
+    const mins = Math.floor(totalMinutesSince8 % 60);
+    const snappedMins = mins < 30 ? 0 : 30;
+    
+    // Check lunch break (12:00 - 13:00)
+    if (hour === 12) return null;
+    if (hour < START_HOUR || hour >= END_HOUR) return null;
+    
+    return {
+      hour,
+      mins: snappedMins,
+      timeStr: `${hour.toString().padStart(2, "0")}:${snappedMins.toString().padStart(2, "0")}`,
+      topPercent: (((hour - START_HOUR) * 60 + snappedMins) / TOTAL_MINUTES) * 100
+    };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const snapped = calculateSnappedTime(e.clientY - rect.top, rect.height);
+    
+    if (snapped) {
+      setHoverTime(snapped.timeStr);
+      setHoverTop(snapped.topPercent);
+    } else {
+      setHoverTime(null);
+    }
+  };
+
   const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const percentage = y / rect.height;
+    const snapped = calculateSnappedTime(e.clientY - rect.top, rect.height);
     
-    const totalMinutesSince8 = percentage * TOTAL_MINUTES;
-    const exactHour = START_HOUR + Math.floor(totalMinutesSince8 / 60);
-    const exactMins = Math.floor(totalMinutesSince8 % 60);
-    const roundedMins = exactMins < 30 ? "00" : "30"; 
-
-    const formattedHour = exactHour.toString().padStart(2, "0");
-    setModalTime(`${formattedHour}:${roundedMins}`);
-    setIsModalOpen(true);
+    if (snapped) {
+      setModalTime(snapped.timeStr);
+      setIsModalOpen(true);
+    }
   };
 
   return (
@@ -161,45 +190,61 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
 
             {/* Lunch Break visualization (12:00 - 13:00) */}
             <div 
-              className="absolute left-[72px] right-0 bg-stone-50/40 border-y border-stone-100/50 flex items-center justify-center pointer-events-none"
+              className="absolute left-[72px] right-0 bg-stone-50/60 border-y border-stone-100/50 flex flex-col items-center justify-center pointer-events-none z-10"
               style={{ 
                 top: `${((12 - START_HOUR) * 60 / TOTAL_MINUTES) * 100}%`, 
                 height: `${(60 / TOTAL_MINUTES) * 100}%` 
               }}
             >
-              <div className="text-[11px] font-black text-stone-300 uppercase tracking-[0.2em] flex items-center gap-3">
-                <div className="w-8 h-[1px] bg-stone-200" />
-                Mittagspause
-                <div className="w-8 h-[1px] bg-stone-200" />
+              <div className="text-[10px] font-black text-stone-300 uppercase tracking-[0.2em] flex items-center gap-3">
+                <div className="w-6 h-[1px] bg-stone-200" />
+                Pause
+                <div className="w-6 h-[1px] bg-stone-200" />
               </div>
             </div>
-            {/* Bookings Overlay */}
-            <div className="absolute left-[72px] right-0 h-full cursor-pointer hover:bg-stone-50/10 transition-colors group/timeline" onClick={handleTimelineClick}>
-              {/* Timeline hover indicator */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/timeline:opacity-10 pointer-events-none transition-opacity">
-                <Plus size={48} className="text-emerald-500" />
+
+            {/* Ghost Slot Hover Indicator */}
+            {hoverTime && (
+              <div 
+                className="absolute left-[72px] right-0 bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl border-dashed pointer-events-none flex items-center justify-center animate-in fade-in duration-200"
+                style={{ 
+                  top: `${hoverTop}%`, 
+                  height: `${(30 / TOTAL_MINUTES) * 100}%`,
+                  zIndex: 5
+                }}
+              >
+                <div className="flex items-center gap-1.5 text-emerald-600/60 font-black text-[10px] uppercase tracking-wider">
+                  <Plus size={12} /> {hoverTime} Uhr buchen
+                </div>
               </div>
+            )}
 
+            {/* Bookings Overlay */}
+            <div 
+              className="absolute left-[72px] right-0 h-full cursor-pointer hover:bg-stone-50/5 transition-colors group/timeline" 
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setHoverTime(null)}
+              onClick={handleTimelineClick}
+            >
               {filteredBookings.map((booking, index) => {
-                const top = getPositionPercent(booking.session.start_time);
-                const duration = booking.session.session_type?.duration_minutes || booking.session.duration_minutes || 30;
-                const height = getDurationPercent(duration);
-                const actualHeight = Math.max(height, 7);
+                const startTime = booking.session?.start_time;
+                if (!startTime) return null;
 
-                // German Status mapping
-                const statusLabels: Record<string, string> = {
-                  confirmed: "Bestätigt",
-                  attended: "Erschienen",
-                  no_show: "Nicht erschienen",
-                  canceled_by_admin: "Abgesagt",
-                  canceled_by_user: "Storniert"
-                };
+                const top = getPositionPercent(startTime);
+                
+                // Visual Override: Past bookings for "Kontroll" might be 20, but we force 30 for the timeline slot layout
+                const isKontroll = booking.session?.session_type?.name?.toLowerCase().includes("kontroll") || 
+                                  booking.session?.session_type?.name?.toLowerCase().includes("untersuchung");
+                const duration = isKontroll ? 30 : (booking.session?.session_type?.duration_minutes || 30);
+                
+                const height = getDurationPercent(duration);
+                const actualHeight = height; // Set purely based on duration for correct visual sizing
 
                 // Simple overlap detection (check if any other booking starts at the same time)
                 const concurrent = filteredBookings.filter(b => b.session.start_time === booking.session.start_time);
                 const width = concurrent.length > 1 ? `${100 / concurrent.length}%` : "100%";
                 const left = concurrent.length > 1 ? `${(concurrent.indexOf(booking) * 100) / concurrent.length}%` : "0%";
-                const zIndex = 10 + index;
+                const zIndex = 20 + index;
 
                 return (
                   <div 
@@ -209,10 +254,10 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
                       setSelectedEditBooking(booking);
                     }}
                     className={cn(
-                      "absolute rounded-2xl p-2.5 shadow-sm hover:shadow-lg transition-all group overflow-hidden cursor-pointer border-2",
-                      booking.status === "confirmed" ? "bg-emerald-50/90 border-emerald-100/50" : 
-                      booking.status === "attended" ? "bg-blue-50/90 border-blue-100/50" :
-                      booking.status === "no_show" ? "bg-amber-50/90 border-amber-100/50" :
+                      "absolute rounded-2xl p-2.5 shadow-sm hover:shadow-xl transition-all group overflow-hidden cursor-pointer border-2 hover:scale-[1.01]",
+                      booking.status === "confirmed" ? "bg-emerald-50/90 border-emerald-100" : 
+                      booking.status === "attended" ? "bg-blue-50/90 border-blue-100" :
+                      booking.status === "no_show" ? "bg-amber-50/90 border-amber-100" :
                       "bg-stone-50/90 border-stone-100"
                     )}
                     style={{ 
@@ -225,24 +270,19 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
                   >
                     <div className="flex items-start justify-between h-full">
                       <div className="flex flex-col h-full justify-center overflow-hidden">
-                        <span className="text-[13.5px] font-bold text-stone-900 leading-tight block">
+                        <span className="text-[13.5px] font-bold text-stone-900 leading-tight block truncate">
                           {booking.user?.last_name} {booking.user?.first_name}
                         </span>
                         <div className="flex flex-col mt-0.5">
-                          <span className="text-[10px] text-emerald-600 font-extrabold uppercase tracking-widest leading-tight block whitespace-normal pr-1 max-h-[2.4em] overflow-hidden">
+                          <span className="text-[9px] text-emerald-600 font-black uppercase tracking-widest leading-tight block truncate">
                             {booking.session.session_type?.name}
                           </span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
-                        <div className="text-[10px] text-emerald-700 font-bold bg-white px-2 py-0.5 rounded-lg border border-emerald-100/50 shadow-sm tabular-nums whitespace-nowrap">
+                        <div className="text-[9px] text-emerald-700 font-bold bg-white px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm tabular-nums whitespace-nowrap">
                           {new Date(booking.session.start_time).toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                        {booking.status !== "confirmed" && (
-                           <div className="text-[8.5px] font-black uppercase tracking-tighter text-stone-400 bg-stone-900/5 px-1.5 rounded-md py-0.5">
-                             {statusLabels[booking.status] || booking.status}
-                           </div>
-                        )}
                       </div>
                     </div>
                   </div>
