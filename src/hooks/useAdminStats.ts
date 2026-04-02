@@ -123,19 +123,45 @@ export const useAdminStats = (selectedDate: Date = new Date()) => {
         .order("session(start_time)", { ascending: true })
         .limit(5);
 
+      // 5. Recent Activities
+      const { data: activities } = await supabase
+        .from("activities")
+        .select(`
+          id,
+          action,
+          entity_id,
+          created_at,
+          actor:users(first_name, last_name, role),
+          booking:bookings(
+            id,
+            user:users(first_name, last_name),
+            session:sessions(
+              start_time,
+              session_type:session_types(name)
+            )
+          )
+        `)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
       const todayStr = formatDate(now);
       const todayStats = monthlyOccupancy[todayStr] || calculateDayStats(todayStr);
+
+      const dayBookings = bookings?.filter(b => (b as any).session.start_time.startsWith(todayStr)) || [];
+      const openCountToday = dayBookings.filter(b => b.status === "confirmed" || b.status === "created").length;
 
       return {
         patientCount: patientCount || 0,
         todayCount: todayStats.count,
+        openCountToday,
         newSevenDays: newCount || 0,
         upcomingBookings: (upcomingBookings || []) as any[], 
         occupancyToday: todayStats.percentage, 
         bookedMinutesToday: todayStats.bookedMinutes,
         weeklyOccupancy,
         monthlyOccupancy,
-        allBookings: (bookings || []) as any[] // Alle Buchungen für die Timeline
+        allBookings: (bookings || []) as any[], // Alle Buchungen für die Timeline
+        activities: (activities || []) as any[]
       };
     },
     staleTime: 1000 * 10, 
