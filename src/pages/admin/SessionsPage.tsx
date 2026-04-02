@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import AdminLayout from "./AdminLayout";
 import { useToast } from "../../hooks/use-toast";
+import { supabase } from "../../lib/supabase";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   useSessionTypes,
   useSessions,
@@ -8,7 +10,7 @@ import {
   useUpdateSession,
   useDeleteSession,
 } from "../../hooks/useSessions";
-import { useUpdateBooking } from "../../hooks/useBookings";
+import { useUpdateBooking, useCreateBooking } from "../../hooks/useBookings";
 import { 
   Plus, 
   Edit2, 
@@ -20,7 +22,8 @@ import {
   Sparkles, 
   Search, 
   MoreVertical, 
-  Timer
+  Timer,
+  UserPlus
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -47,11 +50,26 @@ type TabType = "todo" | "today" | "upcoming" | "history";
 
 export default function SessionsPage() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: types = [] } = useSessionTypes();
   const { data: sessions = [], isLoading } = useSessions({ ascending: true });
   const createSession = useCreateSession();
   const updateSession = useUpdateSession();
   const deleteSession = useDeleteSession();
+  const createBooking = useCreateBooking();
+
+  const { data: adminPatients = [] } = useQuery({
+    queryKey: ["admin_clients_lookup"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("id, first_name, last_name, email")
+        .neq("role", "admin")
+        .is("deleted_at", null);
+      if (error) throw error;
+      return data;
+    }
+  });
 
   // Navigation & Tabs
   const [activeTab, setActiveTab] = useState<TabType>("todo");
@@ -63,12 +81,71 @@ export default function SessionsPage() {
   const [selectedSessionData, setSelectedSessionData] = useState<any>(null);
   const [docNotes, setDocNotes] = useState("");
   const updateBooking = useUpdateBooking();
+  const [selectedPatientId, setSelectedPatientId] = useState<string>("");
+  const [patientSearchQuery, setPatientSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isCreatingPatient, setIsCreatingPatient] = useState(false);
+  const [newPatientForm, setNewPatientForm] = useState({ first_name: "", last_name: "", email: "", phone_number: "", address_line_1: "", post_code: "", city: "" });
+
+  const createPatient = useMutation({
+    mutationFn: async (payload: any) => {
+      const tempId = globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36);
+      const { data, error } = await supabase.from("users").insert({ 
+        id: tempId,
+        first_name: payload.first_name, 
+        last_name: payload.last_name, 
+        role: "patient",
+        email: payload.email || null,
+        phone_number: payload.phone_number || null,
+        address_line_1: payload.address_line_1 || null,
+        post_code: payload.post_code || null,
+        city: payload.city || null
+      }).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin_clients_lookup"] });
+      setPatientSearchQuery(`${data.first_name} ${data.last_name}`);
+      setSelectedPatientId(data.id);
+      setTitle("");
+      setIsCreatingPatient(false);
+      setNewPatientForm({ first_name: "", last_name: "", email: "", phone_number: "", address_line_1: "", post_code: "", city: "" });
+      toast({ title: "Patient angelegt!" });
+    },
+    onError: (err: any) => toast({ title: "Fehler beim Anlegen", description: err.message, variant: "destructive" })
+  });
+
+  const filteredPatients = useMemo(() => {
+     if (!patientSearchQuery) return adminPatients;
+     return adminPatients.filter((p: any) => `${p.first_name} ${p.last_name}`.toLowerCase().includes(patientSearchQuery.toLowerCase()));
+  }, [adminPatients, patientSearchQuery]);
+
+  const handlePatientSearch = (val: string) => {
+     setPatientSearchQuery(val);
+     setShowDropdown(true);
+     const found = adminPatients.find((p: any) => `${p.first_name} ${p.last_name}`.toLowerCase() === val.toLowerCase());
+     if (found && `${found.first_name} ${found.last_name}` === val) {
+         setSelectedPatientId(found.id);
+         setTitle("");
+     } else {
+         setSelectedPatientId("");
+         setTitle(val);
+     }
+  };
+
+  const handleSelectPatient = (p: any) => {
+      setPatientSearchQuery(`${p.first_name} ${p.last_name}`);
+      setSelectedPatientId(p.id);
+      setTitle("");
+      setShowDropdown(false);
+  };
 
   const [isAdding, setIsAdding] = useState(false);
   const [typeId, setTypeId] = useState("");
   const [title, setTitle] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [selectedTime, setSelectedTime] = useState<string>("");
   const [maxSlots, setMaxSlots] = useState(1);
   const [status, setStatus] = useState<SessionStatus>("open");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -121,35 +198,72 @@ export default function SessionsPage() {
     return { todo, today, upcoming, history };
   }, [sessions]);
 
-  // Smart Calculation: Auto-set end time
-  useEffect(() => {
-    if (typeId && startTime && !editingId) {
-      const selectedType = (types as any[]).find(t => t.id === typeId);
-      if (selectedType) {
-        const start = new Date(startTime);
-        const end = new Date(start.getTime() + selectedType.duration * 60000);
-        setEndTime(formatDateForInput(end));
-      }
+  const availableSlots = useMemo(() => {
+    if (!selectedDate) return [];
+    const selectedType = (types as any[]).find(t => t.id === typeId);
+    
+    const startHour = 8;
+    const endHour = 18;
+    const durationMin = selectedType ? selectedType.duration : 30;
+    const slots = [];
+    
+    for (let h = startHour; h < endHour; h++) {
+        for (let m = 0; m < 60; m += 30) {
+            slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+        }
     }
-  }, [typeId, startTime, types, editingId]);
+    
+    return slots.map(timeStr => {
+        const slotStart = new Date(`${selectedDate}T${timeStr}:00`);
+        const slotEnd = new Date(slotStart.getTime() + durationMin * 60000);
+        
+        if (slotEnd > new Date(`${selectedDate}T18:00:00`)) {
+            return { time: timeStr, disabled: true, reason: "Feierabend" };
+        }
 
-  const formatDateForInput = (date: Date) => {
-    const tzoffset = date.getTimezoneOffset() * 60000;
-    return new Date(date.getTime() - tzoffset).toISOString().slice(0, 16);
-  };
+        const now = new Date();
+        if (slotStart < now) {
+            return { time: timeStr, disabled: true, reason: "Vergangen" };
+        }
+        
+        const conflict = sessions.find((s: any) => {
+            if (s.id === editingId) return false;
+            const sStart = new Date(s.start_time);
+            const sEnd = new Date(s.end_time);
+            return slotStart < sEnd && slotEnd > sStart;
+        });
+        
+        return { time: timeStr, disabled: !!conflict, reason: conflict ? "Belegt" : null };
+    });
+  }, [typeId, selectedDate, types, sessions, editingId]);
 
   const resetForm = () => {
-    setTypeId(""); setTitle(""); setStartTime(""); setEndTime("");
-    setMaxSlots(1); setStatus("open"); setEditingId(null); setIsAdding(false);
+    setTypeId(""); setTitle(""); setSelectedDate(new Date().toISOString().slice(0, 10)); setSelectedTime("");
+    setMaxSlots(1); setStatus("open"); setEditingId(null); setIsAdding(false); setSelectedPatientId(""); setPatientSearchQuery("");
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedTime) {
+      toast({ title: "Fehler", description: "Bitte wähle eine freie Uhrzeit aus.", variant: "destructive" });
+      return;
+    }
+    if (!editingId && !selectedPatientId && !title) {
+      toast({ title: "Fehler", description: "Bitte wähle einen Patienten aus oder gib einen Gast-Namen ein.", variant: "destructive" });
+      return;
+    }
+    
+    const startObj = new Date(`${selectedDate}T${selectedTime}:00`);
+    const selectedType = (types as any[]).find(t => t.id === typeId);
+    if (!selectedType) return;
+    
+    const endObj = new Date(startObj.getTime() + selectedType.duration * 60000);
+
     const payload = {
       session_type_id: typeId,
       title: title || null,
-      start_time: new Date(startTime).toISOString(),
-      end_time: new Date(endTime).toISOString(),
+      start_time: startObj.toISOString(),
+      end_time: endObj.toISOString(),
       max_slots: maxSlots,
       status,
     };
@@ -161,7 +275,21 @@ export default function SessionsPage() {
       });
     } else {
       createSession.mutate(payload, {
-        onSuccess: () => { toast({ title: "Termin erstellt" }); resetForm(); },
+        onSuccess: (newSession: any) => { 
+          if (selectedPatientId) {
+            createBooking.mutate({
+               session_id: newSession.id,
+               user_id: selectedPatientId,
+               notes: ""
+            }, {
+               onSuccess: () => { toast({ title: "Termin erfolgreich angelegt!" }); resetForm(); },
+               onError: (err: any) => toast({ title: "Termin erstellt, aber Patientenzuweisung fehlgeschlagen", description: err.message, variant: "destructive" })
+            });
+          } else {
+             toast({ title: "Gast-Termin erstellt" }); 
+             resetForm(); 
+          }
+        },
         onError: (err: any) => toast({ title: "Fehler", description: err.message, variant: "destructive" }),
       });
     }
@@ -213,8 +341,21 @@ export default function SessionsPage() {
     setEditingId(session.id); 
     setTypeId(session.session_type_id); 
     setTitle(session.title || "");
-    setStartTime(session.start_time.slice(0, 16)); 
-    setEndTime(session.end_time.slice(0, 16));
+    const st = new Date(session.start_time);
+    setSelectedDate(st.toISOString().slice(0, 10));
+    setSelectedTime(`${st.getHours().toString().padStart(2, '0')}:${st.getMinutes().toString().padStart(2, '0')}`);
+    
+    // Attempt to map an existing booking to 'patientSearchQuery' and ID
+    if (session.bookings && session.bookings.length > 0 && session.bookings[0].user) {
+        const u = session.bookings[0].user;
+        setPatientSearchQuery(`${u.first_name} ${u.last_name}`);
+        setSelectedPatientId(u.id);
+        setTitle(""); // Reset title if patient is active
+    } else {
+        setPatientSearchQuery(session.title || "");
+        setSelectedPatientId("");
+    }
+    
     setMaxSlots(session.max_slots); 
     setStatus(session.status); 
     setIsAdding(true);
@@ -242,7 +383,7 @@ export default function SessionsPage() {
         <div className="flex gap-3">
           {!isAdding && (
             <Button onClick={() => setIsAdding(true)} className="bg-stone-900 text-white hover:bg-stone-800 gap-2 shadow-xl shadow-stone-200 h-14 px-8 rounded-2xl font-bold group">
-              <Plus size={20} className="group-hover:rotate-90 transition-transform" /> Neuer Slot
+              <Plus size={20} className="group-hover:rotate-90 transition-transform" /> Neuer Termin
             </Button>
           )}
         </div>
@@ -271,7 +412,7 @@ export default function SessionsPage() {
         <Card className="mb-10 border-stone-200 shadow-2xl rounded-3xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
           <CardHeader className="bg-stone-50 border-b border-stone-100 px-8 py-6 flex flex-row items-center justify-between">
             <CardTitle className="text-xl font-black text-stone-900">
-              {editingId ? "Slot bearbeiten" : "Neuer Behandlungs-Slot"}
+              {editingId ? "Termin bearbeiten" : "Neuer Termin"}
             </CardTitle>
             <Button variant="ghost" size="icon" onClick={() => setIsAdding(false)} className="rounded-full"><AlertCircle size={20} /></Button>
           </CardHeader>
@@ -287,25 +428,71 @@ export default function SessionsPage() {
                   </select>
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Name der Sitzung</label>
-                  <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Interne Bezeichnung..." className="border-stone-200 h-14 rounded-2xl shadow-sm font-bold px-4" />
+                  <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Patient Name</label>
+                  <div className="flex gap-2">
+                    <div className="relative w-full">
+                      <Input 
+                        value={patientSearchQuery} 
+                        onChange={(e) => handlePatientSearch(e.target.value)}
+                        onFocus={() => setShowDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                        placeholder="Name eingeben oder auswählen..." 
+                        className="h-14 rounded-2xl border-stone-200 font-bold px-4 w-full text-stone-900 bg-white" 
+                      />
+                      {showDropdown && filteredPatients.length > 0 && (
+                        <div className="absolute z-50 mt-2 w-full bg-white rounded-2xl shadow-xl border border-stone-100 max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                          {filteredPatients.map((p: any) => (
+                            <div 
+                              key={p.id} 
+                              onClick={() => handleSelectPatient(p)}
+                              className="px-4 py-3 hover:bg-stone-50 cursor-pointer text-sm font-bold text-stone-900 border-b border-stone-50 last:border-0"
+                            >
+                              {p.first_name} {p.last_name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <Button type="button" onClick={() => setIsCreatingPatient(true)} className="h-14 w-14 flex-shrink-0 flex items-center justify-center rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold shadow-sm border border-stone-200" title="Neuen Patienten anlegen">
+                       <UserPlus size={20} />
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Startzeitpunkt</label>
-                  <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className="h-14 rounded-2xl border-stone-200 font-bold px-4" />
+              <div className="grid grid-cols-1 gap-8">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Datum</label>
+                  <Input type="date" value={selectedDate} onChange={(e) => { setSelectedDate(e.target.value); setSelectedTime(""); }} required className="h-14 rounded-2xl border-stone-200 font-bold text-stone-900 bg-white px-4 md:w-1/2 shadow-sm" />
                 </div>
-                <div className="space-y-3 relative">
-                  <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Endzeitpunkt</label>
-                  <Input type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className="h-14 rounded-2xl border-stone-200 font-bold px-4" />
-                  {typeId && startTime && (
-                    <span className="absolute right-4 bottom-4 text-[10px] text-emerald-500 font-black flex items-center gap-1.5 uppercase">
-                      <Clock size={12} /> Live-Berechnung
-                    </span>
-                  )}
-                </div>
+                
+                {typeId && selectedDate ? (
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Freie Terminslots ({((types as any[]).find(t => t.id === typeId)?.duration || 30)} Min. Raster)</label>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                      {availableSlots.map((slot) => (
+                        <button
+                          key={slot.time}
+                          type="button"
+                          disabled={slot.disabled}
+                          onClick={() => setSelectedTime(slot.time)}
+                          className={cn(
+                            "py-3 rounded-2xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed border flex flex-col items-center justify-center gap-1 min-h-[70px]",
+                            slot.disabled ? "bg-stone-50 border-stone-100 text-stone-400" : 
+                            selectedTime === slot.time ? "bg-stone-900 border-stone-900 text-white shadow-xl shadow-stone-200 scale-105" : "bg-white border-stone-200 text-stone-600 hover:border-stone-900 hover:shadow-md"
+                          )}
+                        >
+                          <span className="leading-none">{slot.time}</span>
+                          {slot.disabled && <span className="text-[8px] font-black uppercase tracking-widest mt-1 text-center leading-tight mx-1">{slot.reason}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-stone-50 rounded-3xl border border-dashed border-stone-200 mt-2">
+                      <span className="text-stone-400 font-bold text-sm">Bitte wähle zuerst eine Behandlungsart und ein Datum.</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-4 pt-6 border-t border-stone-100 flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -317,7 +504,7 @@ export default function SessionsPage() {
                     <Button variant="ghost" type="button" onClick={resetForm} className="rounded-xl h-14 px-8 font-bold text-stone-400">Verwerfen</Button>
                     <Button type="submit" disabled={createSession.isPending || updateSession.isPending}
                         className="bg-stone-900 text-white hover:bg-stone-800 px-10 h-14 rounded-2xl font-black shadow-xl shadow-stone-100">
-                        {editingId ? "Änderungen sichern" : "Slot veröffentlichen"}
+                        {editingId ? "Änderungen sichern" : "Termin buchen"}
                     </Button>
                  </div>
               </div>
@@ -450,6 +637,48 @@ export default function SessionsPage() {
                   Dokumentieren & Abschließen
                 </Button>
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isCreatingPatient} onOpenChange={setIsCreatingPatient}>
+        <DialogContent className="sm:max-w-xl rounded-3xl p-0 overflow-hidden border-0">
+          <DialogHeader className="bg-stone-50 px-8 py-6 border-b border-stone-100">
+            <DialogTitle className="font-montserrat font-black text-xl text-stone-900">Neuen Patienten anlegen</DialogTitle>
+          </DialogHeader>
+          <div className="p-8 grid grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Vorname</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.first_name} onChange={e => setNewPatientForm({...newPatientForm, first_name: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Nachname</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.last_name} onChange={e => setNewPatientForm({...newPatientForm, last_name: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">E-Mail (optional)</label>
+              <Input type="email" className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.email} onChange={e => setNewPatientForm({...newPatientForm, email: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Telefon</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.phone_number} onChange={e => setNewPatientForm({...newPatientForm, phone_number: e.target.value})} />
+            </div>
+            <div className="col-span-2 space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Straße & Hausnummer</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.address_line_1} onChange={e => setNewPatientForm({...newPatientForm, address_line_1: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">PLZ</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.post_code} onChange={e => setNewPatientForm({...newPatientForm, post_code: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-stone-500 uppercase tracking-widest pl-1">Stadt</label>
+              <Input className="h-12 rounded-xl bg-stone-50 border-transparent focus:bg-white focus:border-stone-900 font-medium px-4 text-stone-900" value={newPatientForm.city} onChange={e => setNewPatientForm({...newPatientForm, city: e.target.value})} />
+            </div>
+          </div>
+          <DialogFooter className="bg-stone-50 px-8 py-5 border-t border-stone-100 flex items-center justify-end gap-3">
+            <Button variant="ghost" onClick={() => setIsCreatingPatient(false)} className="font-bold text-stone-500">Abbrechen</Button>
+            <Button onClick={() => createPatient.mutate({...newPatientForm})} disabled={createPatient.isPending || !newPatientForm.first_name || !newPatientForm.last_name} className="bg-stone-900 text-white hover:bg-stone-800 rounded-xl px-6 font-bold shadow-xl shadow-stone-200">Patient anlegen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
