@@ -71,6 +71,7 @@ export function useAuth() {
 
   async function fetchProfile(userId: string) {
     try {
+      setLoading(true);
       setErrorMsg(undefined);
       const { data, error } = await supabase
         .from("users")

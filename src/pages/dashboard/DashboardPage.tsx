@@ -308,167 +308,190 @@ export default function DashboardPage() {
                </div>
 
                <div className="flex-1 p-8">
-                  {bookingStep === 1 && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <h3 className="font-montserrat font-bold text-stone-900 text-lg mb-4">Was können wir für Sie tun?</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {sessionTypes?.map((type) => (
-                          <button
-                            key={type.id}
-                            onClick={() => { setSelectedType(type); setBookingStep(2); }}
-                            className="group p-6 rounded-3xl border border-stone-100 bg-stone-50/50 hover:bg-white hover:border-emerald-500 hover:ring-4 hover:ring-emerald-500/10 transition-all text-left"
-                          >
-                            <div className="flex justify-between items-start mb-4">
-                              <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                <ClipboardList size={20} />
-                              </div>
-                              <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest bg-white px-2 py-1 rounded-full border border-stone-100">
-                                {type.duration_minutes || type.default_duration_minutes} Min
-                              </span>
-                            </div>
-                            <h3 className="font-montserrat font-bold text-stone-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight text-xs">{type.name}</h3>
-                            <p className="text-stone-500 mt-2 line-clamp-2 leading-relaxed text-[11px] font-medium">{type.description || "Professionelle Behandlung durch unser Team."}</p>
-                          </button>
-                        ))}
+                  {upcomingBooking ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                      <div className="w-20 h-20 bg-emerald-50 rounded-[2.5rem] flex items-center justify-center text-emerald-500 shadow-inner">
+                         <CheckCircle2 size={40} />
+                      </div>
+                      <div className="max-w-md">
+                        <h3 className="text-2xl font-montserrat font-black text-stone-900 uppercase tracking-tight leading-none mb-4">Ein Termin ist bereits reserviert</h3>
+                        <p className="text-stone-500 text-sm leading-relaxed font-medium">
+                          Um die Qualität unserer Planung zu sichern, kann pro Patient aktuell nur ein anstehender Termin gebucht werden. 
+                          Sie können Ihren bestehenden Termin in der Sidebar rechts verwalten oder stornieren, um einen neuen zu wählen.
+                        </p>
+                      </div>
+                      <div className="pt-4 flex flex-col items-center gap-2">
+                        <span className="text-[10px] font-black text-stone-300 uppercase tracking-[0.2em]">Ihr nächster Besuch</span>
+                        <div className="bg-stone-50 px-6 py-3 rounded-2xl border border-stone-100 font-bold text-stone-900">
+                          {format(new Date(upcomingBooking.session.start_time), "EEEE, d. MMMM • HH:mm", { locale: de })} Uhr
+                        </div>
                       </div>
                     </div>
-                  )}
-
-                  {bookingStep === 2 && (
-                    <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 h-full flex flex-col">
-                      <div className="flex items-center gap-4">
-                         <button onClick={() => setBookingStep(1)} className="p-2 hover:bg-stone-100 rounded-full transition-colors">
-                           <ChevronLeft size={20} className="text-stone-600" />
-                         </button>
-                         <div>
-                           <h3 className="font-bold text-stone-900">{selectedType?.name}</h3>
-                           <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest leading-none mt-1">Geben Sie Ihre gewünschte Zeit an</p>
-                         </div>
-                      </div>
-                      
-                        <div className="flex items-center justify-between px-1 mb-2">
-                           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
-                              {format(selectedDate, "MMMM yyyy", { locale: de })}
-                           </p>
-                        </div>
-                        
-                       {/* Date Scroller */}
-                      <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide px-1">
-                        {dates.map((date) => (
-                          <button
-                            key={date.toISOString()}
-                            onClick={() => setSelectedDate(startOfDay(date))}
-                            className={cn(
-                              "flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center transition-all border",
-                              isSameDay(selectedDate, date)
-                                ? "bg-stone-900 border-stone-800 text-white shadow-lg shadow-stone-200"
-                                : "bg-white border-stone-100 text-stone-600 hover:border-stone-300"
-                            )}
-                          >
-                            <span className="text-[10px] font-black uppercase tracking-tighter mb-1">
-                              {format(date, "EEE", { locale: de })}
-                            </span>
-                            <span className="text-lg font-montserrat font-black leading-none">
-                              {format(date, "d")}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Time Slots */}
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Verfügbare Slots</h4>
-                            <div className="flex items-center gap-2 text-[10px] text-stone-400 font-bold">
-                               <Timer size={12} /> Mittagspause 12-13h gesperrt
-                            </div>
-                        </div>
-                        
-                        {filteredSlots.length > 0 ? (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                            {filteredSlots.map((slot) => (
+                  ) : (
+                    <>
+                      {/* Step 1: Treatment Type */}
+                      {bookingStep === 1 && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                          <h3 className="font-montserrat font-bold text-stone-900 text-lg mb-4">Was können wir für Sie tun?</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {sessionTypes?.map((type) => (
                               <button
-                                key={slot.id}
-                                onClick={() => handleSelectSlot(slot)}
-                                className="h-14 rounded-2xl bg-white border border-stone-100 text-stone-900 font-bold text-sm hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 transition-all shadow-sm active:scale-95"
+                                key={type.id}
+                                onClick={() => { setSelectedType(type); setBookingStep(2); }}
+                                className="group p-6 rounded-3xl border border-stone-100 bg-stone-50/50 hover:bg-white hover:border-emerald-500 hover:ring-4 hover:ring-emerald-500/10 transition-all text-left"
                               >
-                                {format(new Date(slot.start_time), "HH:mm")}
+                                <div className="flex justify-between items-start mb-4">
+                                  <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                    <ClipboardList size={20} />
+                                  </div>
+                                  <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest bg-white px-2 py-1 rounded-full border border-stone-100">
+                                    {type.duration_minutes || type.default_duration_minutes} Min
+                                  </span>
+                                </div>
+                                <h3 className="font-montserrat font-bold text-stone-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight text-xs">{type.name}</h3>
+                                <p className="text-stone-500 mt-2 line-clamp-2 leading-relaxed text-[11px] font-medium">{type.description || "Professionelle Behandlung durch unser Team."}</p>
                               </button>
                             ))}
                           </div>
-                        ) : (
-                          <div className="bg-stone-50 rounded-3xl p-12 text-center border-2 border-dashed border-stone-200 flex flex-col items-center gap-4">
-                             <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-stone-400">
-                                <X size={24} />
-                             </div>
-                             <p className="text-stone-500 text-sm font-medium">Bisher keine Slots für diesen Tag freigegeben.</p>
-                             <button onClick={() => setSelectedDate(addDays(selectedDate, 1))} className="text-emerald-600 text-xs font-black uppercase tracking-widest hover:underline">
-                                Nächsten Tag prüfen
+                        </div>
+                      )}
+
+                      {/* Step 2: Slot Selection */}
+                      {bookingStep === 2 && (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 h-full flex flex-col">
+                          <div className="flex items-center gap-4">
+                             <button onClick={() => setBookingStep(1)} className="p-2 hover:bg-stone-100 rounded-full transition-colors">
+                               <ChevronLeft size={20} className="text-stone-600" />
                              </button>
+                             <div>
+                               <h3 className="font-bold text-stone-900">{selectedType?.name}</h3>
+                               <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest leading-none mt-1">Geben Sie Ihre gewünschte Zeit an</p>
+                             </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {bookingStep === 3 && (
-                    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500 h-full flex flex-col justify-center">
-                       <div className="bg-stone-50 border border-stone-100 rounded-[2.5rem] p-10 space-y-8 relative overflow-hidden max-w-lg mx-auto w-full">
-                          <div className="absolute top-0 right-0 p-8">
-                             {lockExpiresAt && (
-                               <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-4 ring-emerald-100/50">
-                                 <Timer size={14} className="animate-pulse" />
-                                 Wird gebucht...
-                               </div>
-                             )}
+                          
+                            <div className="flex items-center justify-between px-1 mb-2">
+                               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
+                                  {format(selectedDate, "MMMM yyyy", { locale: de })}
+                               </p>
+                            </div>
+                            
+                           {/* Date Scroller */}
+                          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide px-1">
+                            {dates.map((date) => (
+                              <button
+                                key={date.toISOString()}
+                                onClick={() => setSelectedDate(startOfDay(date))}
+                                className={cn(
+                                  "flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center transition-all border",
+                                  isSameDay(selectedDate, date)
+                                    ? "bg-stone-900 border-stone-800 text-white shadow-lg shadow-stone-200"
+                                    : "bg-white border-stone-100 text-stone-600 hover:border-stone-300"
+                                )}
+                              >
+                                <span className="text-[10px] font-black uppercase tracking-tighter mb-1">
+                                  {format(date, "EEE", { locale: de })}
+                                </span>
+                                <span className="text-lg font-montserrat font-black leading-none">
+                                  {format(date, "d")}
+                                </span>
+                              </button>
+                            ))}
                           </div>
 
-                          <div>
-                             <h3 className="font-montserrat font-black text-stone-900 uppercase tracking-tight text-2xl leading-none">Termin Bestätigen</h3>
-                             <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-2 px-1 border-l-2 border-stone-300">Fast am Ziel</p>
-                          </div>
-
+                          {/* Time Slots */}
                           <div className="space-y-4">
-                             <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
-                                      <ClipboardList size={20} />
-                                   </div>
-                                   <div>
-                                      <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-0.5">Leistung</span>
-                                      <span className="font-bold text-stone-900 text-sm">{selectedType?.name}</span>
-                                   </div>
-                                </div>
-                             </div>
-
-                             <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
-                                <div className="flex items-center gap-4">
-                                   <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
-                                      <CalendarIcon size={20} />
-                                   </div>
-                                   <div>
-                                      <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-0.5">Zeitpunkt</span>
-                                      <span className="font-bold text-stone-900 text-sm">
-                                        {format(new Date(selectedSlot?.start_time), "EEEE, d. MMMM • HH:mm", { locale: de })} Uhr
-                                      </span>
-                                   </div>
-                                </div>
-                             </div>
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Verfügbare Slots</h4>
+                            </div>
+                            
+                            {filteredSlots.length > 0 ? (
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {filteredSlots.map((slot) => (
+                                  <button
+                                    key={slot.id}
+                                    onClick={() => handleSelectSlot(slot)}
+                                    className="h-14 rounded-2xl bg-white border border-stone-100 text-stone-900 font-bold text-sm hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 transition-all shadow-sm active:scale-95"
+                                  >
+                                    {format(new Date(slot.start_time), "HH:mm")}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="bg-stone-50 rounded-3xl p-12 text-center border-2 border-dashed border-stone-200 flex flex-col items-center gap-4">
+                                 <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-stone-400">
+                                    <X size={24} />
+                                 </div>
+                                 <p className="text-stone-500 text-sm font-medium">Bisher keine Slots für diesen Tag freigegeben.</p>
+                                 <button onClick={() => setSelectedDate(addDays(selectedDate, 1))} className="text-emerald-600 text-xs font-black uppercase tracking-widest hover:underline">
+                                    Nächsten Tag prüfen
+                                 </button>
+                              </div>
+                            )}
                           </div>
+                        </div>
+                      )}
 
-                          <div className="space-y-3">
-                            <Button 
-                              onClick={handleConfirmBooking}
-                              className="w-full h-16 bg-stone-900 hover:bg-stone-800 text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-2xl transition-all active:scale-[0.98]"
-                            >
-                               Verbindlich buchen
-                            </Button>
-                            <button onClick={handleCancelBooking} className="w-full text-center text-[10px] font-black uppercase text-stone-400 tracking-[0.2em] hover:text-stone-900 pt-2">
-                               Abbrechen
-                            </button>
-                          </div>
-                       </div>
-                    </div>
+                      {/* Step 3: Confirmation */}
+                      {bookingStep === 3 && (
+                        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500 h-full flex flex-col justify-center">
+                           <div className="bg-stone-50 border border-stone-100 rounded-[2.5rem] p-10 space-y-8 relative overflow-hidden max-w-lg mx-auto w-full">
+                              <div className="absolute top-0 right-0 p-8">
+                                 {lockExpiresAt && (
+                                   <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-4 ring-emerald-100/50">
+                                     <Timer size={14} className="animate-pulse" />
+                                     Wird gebucht...
+                                   </div>
+                                 )}
+                              </div>
+
+                              <div>
+                                 <h3 className="font-montserrat font-black text-stone-900 uppercase tracking-tight text-2xl leading-none">Termin Bestätigen</h3>
+                                 <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-2 px-1 border-l-2 border-stone-300">Fast am Ziel</p>
+                              </div>
+
+                              <div className="space-y-4">
+                                 <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
+                                    <div className="flex items-center gap-4">
+                                       <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
+                                          <ClipboardList size={20} />
+                                       </div>
+                                       <div>
+                                          <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-0.5">Leistung</span>
+                                          <span className="font-bold text-stone-900 text-sm">{selectedType?.name}</span>
+                                       </div>
+                                    </div>
+                                 </div>
+
+                                 <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
+                                    <div className="flex items-center gap-4">
+                                       <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
+                                          <CalendarIcon size={20} />
+                                       </div>
+                                       <div>
+                                          <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-0.5">Zeitpunkt</span>
+                                          <span className="font-bold text-stone-900 text-sm">
+                                            {format(new Date(selectedSlot?.start_time), "EEEE, d. MMMM • HH:mm", { locale: de })} Uhr
+                                          </span>
+                                       </div>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <Button 
+                                  onClick={handleConfirmBooking}
+                                  className="w-full h-16 bg-stone-900 hover:bg-stone-800 text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-2xl transition-all active:scale-[0.98]"
+                                >
+                                   Verbindlich buchen
+                                </Button>
+                                <button onClick={handleCancelBooking} className="w-full text-center text-[10px] font-black uppercase text-stone-400 tracking-[0.2em] hover:text-stone-900 pt-2">
+                                   Abbrechen
+                                </button>
+                              </div>
+                           </div>
+                        </div>
+                      )}
+                    </>
                   )}
                </div>
             </div>

@@ -56,29 +56,30 @@ export const PremiumNavigation = (): JSX.Element => {
           ))}
         </ul>
 
-        <div className="flex items-center gap-3">
-          {user && (
-            <div className="hidden sm:flex items-center gap-1">
+        <div className="flex items-center gap-4">
+          {!user ? (
+            <Link
+              to="/login"
+              className="font-lato hidden text-sm font-semibold text-stone-700 hover:text-stone-900 sm:inline px-3 py-1 border border-stone-300 rounded-md transition-all"
+            >
+              Anmelden
+            </Link>
+          ) : (
+            <div className="hidden sm:flex items-center gap-3">
               <Link
-                to="/profile"
-                className="font-lato text-sm font-medium text-stone-500 hover:text-stone-900 px-3 py-1 transition-all"
+                to={profile?.role === "admin" ? "/admin" : "/profile"}
+                className="font-lato text-sm font-semibold text-stone-700 hover:text-stone-900 px-3 py-1 border border-stone-300 rounded-md transition-all"
               >
-                Profil
+                Mein Bereich
               </Link>
               <button
                 onClick={handleLogout}
-                className="font-lato text-sm font-medium text-stone-500 hover:text-destructive px-3 py-1 transition-all"
+                className="font-lato text-sm font-medium text-stone-500 hover:text-destructive px-2 py-1 transition-all"
               >
                 Abmelden
               </button>
             </div>
           )}
-          <Link
-            to={user ? (profile?.role === "admin" ? "/admin" : "/dashboard") : "/login"}
-            className="font-lato hidden text-sm font-semibold text-stone-700 hover:text-stone-900 sm:inline px-3 py-1 border border-stone-300 rounded-md transition-all"
-          >
-            {user ? "Mein Bereich" : "Anmelden"}
-          </Link>
           <a
             href="tel:03012345678"
             className="font-lato hidden text-sm text-stone-700 underline-offset-4 hover:underline lg:inline"
@@ -87,7 +88,7 @@ export const PremiumNavigation = (): JSX.Element => {
           </a>
           <Link
             to="/dashboard"
-            className="font-montserrat inline-flex items-center rounded-sm border border-stone-800 bg-stone-900 px-4 py-1.5 text-xs font-semibold tracking-wide text-[#faf8f5] transition-colors hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
+            className="font-montserrat inline-flex items-center rounded-sm border border-stone-800 bg-stone-900 px-3 py-1 text-sm font-semibold tracking-wide text-[#faf8f5] transition-colors hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
           >
             Termin buchen
           </Link>

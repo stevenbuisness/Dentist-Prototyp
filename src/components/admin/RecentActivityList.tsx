@@ -51,7 +51,11 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
 
   const filteredActivities = activities.filter(activity => {
     if (filter === 'all') return true;
-    return activity.actor?.role === filter;
+    const actorRole = activity.actor?.role;
+    
+    if (filter === 'admin') return actorRole === 'admin';
+    if (filter === 'patient') return actorRole === 'patient' || actorRole === 'user' || !actorRole;
+    return false;
   });
 
   const getActionConfig = (action: string) => {

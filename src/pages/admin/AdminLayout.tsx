@@ -249,7 +249,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               >
                 <Bell size={20} />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center px-1 shadow-sm border-2 border-white animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
                 )}
               </button>
 
