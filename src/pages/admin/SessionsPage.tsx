@@ -454,7 +454,7 @@ export default function SessionsPage() {
                   <select value={typeId} onChange={(e) => setTypeId(e.target.value)} required
                     className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 h-14 shadow-sm font-bold">
                     <option value="">Kategorie wählen...</option>
-                    {(types as any[]).map((t) => <option key={t.id} value={t.id}>{t.name} ({t.duration} min)</option>)}
+                    {(types as any[]).map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-3">

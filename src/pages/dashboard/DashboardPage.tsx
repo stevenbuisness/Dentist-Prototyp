@@ -21,6 +21,16 @@ import { cn } from "../../lib/utils";
 import { useSessionTypes, useSessions, useLockSession, useUnlockSession, useAvailabilityRules, useCreateOnDemandSession } from "../../hooks/useSessions";
 import { useAvailabilityExceptions } from "../../hooks/useAvailability";
 import { useMyBookings, useCreateBooking, useUpdateBooking } from "../../hooks/useBookings";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../components/ui/alert-dialog";
 import { format, addDays, isSameDay, startOfDay, isAfter, subHours, differenceInMinutes, setHours, setMinutes, isBefore, addMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths } from "date-fns";
 import { de } from "date-fns/locale";
 
@@ -303,6 +313,8 @@ export default function DashboardPage() {
     setLockExpiresAt(null);
   };
 
+  const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
+
   const handleCancelExisting = async (bookingId: string, startTime: string) => {
     const startsAt = new Date(startTime);
     const limit = subHours(startsAt, 24);
@@ -316,10 +328,14 @@ export default function DashboardPage() {
       return;
     }
 
-    if (confirm("Möchten Sie diesen Termin wirklich stornieren?")) {
-      await updateBooking.mutateAsync({ id: bookingId, status: "canceled_by_user" });
-      toast({ title: "Storniert", description: "Ihr Termin wurde erfolgreich abgesagt." });
-    }
+    setCancelBookingId(bookingId);
+  };
+
+  const confirmCancellation = async () => {
+    if (!cancelBookingId) return;
+    await updateBooking.mutateAsync({ id: cancelBookingId, status: "canceled_by_user" });
+    toast({ title: "Storniert", description: "Ihr Termin wurde erfolgreich abgesagt." });
+    setCancelBookingId(null);
   };
 
   // Calendar days generation (Mo-Fr) for the visible month
@@ -829,6 +845,33 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      <AlertDialog open={cancelBookingId !== null} onOpenChange={(open) => !open && setCancelBookingId(null)}>
+        <AlertDialogContent className="rounded-[2.5rem] border-stone-200 p-8 sm:rounded-[2.5rem]">
+          <AlertDialogHeader>
+            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-4 mx-auto md:mx-0">
+              <AlertCircle size={32} />
+            </div>
+            <AlertDialogTitle className="text-2xl font-montserrat font-black text-stone-900">
+              Termin stornieren?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-stone-500 font-medium">
+              Möchten Sie diesen anstehenden Termin wirklich absagen? Diese Aktion kann nicht rückgängig gemacht werden.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-3 sm:gap-0">
+            <AlertDialogCancel className="h-14 rounded-2xl font-bold uppercase tracking-widest text-xs border-stone-200 hover:bg-stone-50">
+              Abbrechen
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmCancellation}
+              className="h-14 rounded-2xl bg-red-500 text-white hover:bg-red-600 font-bold uppercase tracking-widest text-xs border-none"
+            >
+              Ja, stornieren
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

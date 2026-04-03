@@ -62,6 +62,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [adminDarkMode, setAdminDarkMode] = useState(() => {
+    return localStorage.getItem("adminDarkMode") === "true";
+  });
+
+  useEffect(() => {
+    const handleDarkModeChange = () => {
+      setAdminDarkMode(localStorage.getItem("adminDarkMode") === "true");
+    };
+    window.addEventListener("storage", handleDarkModeChange);
+    // Custom event for internal changes
+    window.addEventListener("admin-dark-mode-toggled", handleDarkModeChange);
+    
+    return () => {
+      window.removeEventListener("storage", handleDarkModeChange);
+      window.removeEventListener("admin-dark-mode-toggled", handleDarkModeChange);
+    };
+  }, []);
 
   // Auto Logoff after 30 minutes of inactivity
   useIdleTimeout(30 * 60 * 1000);
@@ -141,11 +158,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex font-lato">
+    <div className={cn("min-h-screen bg-[#faf8f5] flex font-lato", adminDarkMode ? "dark-admin" : "")}>
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
           onClick={() => setSidebarOpen(false)}
         />
       )}
