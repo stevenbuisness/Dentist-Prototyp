@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import AdminLayout from "./AdminLayout";
 import { useToast } from "../../hooks/use-toast";
 import { supabase } from "../../lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAvailabilityExceptions } from "../../hooks/useAvailability";
 import {
   useSessionTypes,
   useSessions,
@@ -57,6 +58,19 @@ export default function SessionsPage() {
   const updateSession = useUpdateSession();
   const deleteSession = useDeleteSession();
   const createBooking = useCreateBooking();
+
+  // Fetch exceptions to block closed days
+  const { data: availabilityExceptions = [] } = useAvailabilityExceptions();
+
+  // Helper: is a given date (YYYY-MM-DD string) blocked?
+  const isDateBlocked = (dateStr: string): { blocked: boolean; reason: string } => {
+    const matchingEx = (availabilityExceptions as any[]).find(
+      (ex) => ex.is_closed && dateStr >= ex.start_date && dateStr <= ex.end_date
+    );
+    return matchingEx
+      ? { blocked: true, reason: matchingEx.reason || 'Geschlossen' }
+      : { blocked: false, reason: '' };
+  };
 
   const { data: adminPatients = [] } = useQuery({
     queryKey: ["admin_clients_lookup"],
@@ -200,6 +214,10 @@ export default function SessionsPage() {
 
   const availableSlots = useMemo(() => {
     if (!selectedDate) return [];
+
+    // Block exception days — return no slots
+    if (isDateBlocked(selectedDate).blocked) return [];
+
     const selectedType = (types as any[]).find(t => t.id === typeId);
     
     const startHour = 8;
@@ -244,6 +262,18 @@ export default function SessionsPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Hard block: prevent saving on exception days
+    const { blocked, reason } = isDateBlocked(selectedDate);
+    if (blocked) {
+      toast({
+        title: "Buchung nicht möglich",
+        description: `Die Praxis ist an diesem Tag geschlossen: "${reason}". Bitte ein anderes Datum wählen.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!selectedTime) {
       toast({ title: "Fehler", description: "Bitte wähle eine freie Uhrzeit aus.", variant: "destructive" });
       return;
@@ -469,6 +499,19 @@ export default function SessionsPage() {
                 {typeId && selectedDate ? (
                   <div className="space-y-4">
                     <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Freie Terminslots ({((types as any[]).find(t => t.id === typeId)?.duration || 30)} Min. Raster)</label>
+
+                    {/* Exception Day Banner */}
+                    {isDateBlocked(selectedDate).blocked ? (
+                      <div className="flex items-start gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl">
+                        <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-500 shrink-0">
+                          <AlertCircle size={20} />
+                        </div>
+                        <div>
+                          <p className="font-black text-red-700 text-sm uppercase tracking-wide">{isDateBlocked(selectedDate).reason}</p>
+                          <p className="text-red-500 text-xs mt-1 font-medium">Die Praxis ist an diesem Tag geschlossen. Bitte wählen Sie ein anderes Datum.</p>
+                        </div>
+                      </div>
+                    ) : (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
                       {availableSlots.map((slot) => (
                         <button
@@ -487,6 +530,7 @@ export default function SessionsPage() {
                         </button>
                       ))}
                     </div>
+                    )}
                   </div>
                 ) : (
                   <div className="p-8 text-center bg-stone-50 rounded-3xl border border-dashed border-stone-200 mt-2">

@@ -4,6 +4,7 @@ import { cn } from "../../lib/utils";
 import { ManualBookingModal } from "./ManualBookingModal";
 import { BookingEditModal } from "./BookingEditModal";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAvailabilityExceptions } from "../../hooks/useAvailability";
 
 interface DailyDetailPanelProps {
   dateStr: string | null;
@@ -23,6 +24,16 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
   const [modalTime, setModalTime] = useState<string | null>(null);
   const [selectedEditBooking, setSelectedEditBooking] = useState<any | null>(null);
   const queryClient = useQueryClient();
+
+  // Exception check for the currently displayed day
+  const { data: availabilityExceptions = [] } = useAvailabilityExceptions();
+  const exceptionForDay = React.useMemo(() => {
+    if (!dateStr) return null;
+    return (availabilityExceptions as any[]).find(
+      (ex) => ex.is_closed && dateStr >= ex.start_date && dateStr <= ex.end_date
+    ) || null;
+  }, [dateStr, availabilityExceptions]);
+  const isDayBlocked = !!exceptionForDay;
 
   const handlePrevDay = () => {
     if (!dateStr || !onDateChange) return;
@@ -102,6 +113,7 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDayBlocked) return; // No hover on blocked days
     const rect = e.currentTarget.getBoundingClientRect();
     const snapped = calculateSnappedTime(e.clientY - rect.top, rect.height);
     
@@ -114,6 +126,7 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
   };
 
   const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDayBlocked) return; // Block booking on exception days
     const rect = e.currentTarget.getBoundingClientRect();
     const snapped = calculateSnappedTime(e.clientY - rect.top, rect.height);
     
@@ -172,6 +185,20 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
 
         {/* Timeline Content - Flex-1 makes it fill the space dynamically */}
         <div className="flex-1 p-8 pt-10 pb-12 relative bg-white flex flex-col min-h-0">
+
+          {/* Exception / Holiday Banner */}
+          {isDayBlocked && (
+            <div className="mb-6 flex items-start gap-4 p-5 bg-red-50 border border-red-200 rounded-2xl shrink-0 animate-in fade-in duration-300">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-500 shrink-0">
+                <AlertCircle size={20} />
+              </div>
+              <div>
+                <p className="font-black text-red-700 text-sm uppercase tracking-wide">{exceptionForDay?.reason || 'Geschlossen'}</p>
+                <p className="text-red-500 text-xs mt-1">Die Praxis ist an diesem Tag geschlossen. Es können keine Termine gebucht werden.</p>
+              </div>
+            </div>
+          )}
+
           <div className="relative flex-1 w-full">
             {/* Time markers */}
             {hours.map((h) => {
@@ -203,8 +230,8 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
               </div>
             </div>
 
-            {/* Ghost Slot Hover Indicator */}
-            {hoverTime && (
+            {/* Ghost Slot Hover Indicator - only on non-blocked days */}
+            {hoverTime && !isDayBlocked && (
               <div 
                 className="absolute left-[72px] right-0 bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl border-dashed pointer-events-none flex items-center justify-center animate-in fade-in duration-200"
                 style={{ 
@@ -221,7 +248,12 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
 
             {/* Bookings Overlay */}
             <div 
-              className="absolute left-[72px] right-0 h-full cursor-pointer hover:bg-stone-50/5 transition-colors group/timeline" 
+              className={cn(
+                "absolute left-[72px] right-0 h-full transition-colors group/timeline",
+                isDayBlocked 
+                  ? "cursor-not-allowed" 
+                  : "cursor-pointer hover:bg-stone-50/5"
+              )}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setHoverTime(null)}
               onClick={handleTimelineClick}
@@ -246,19 +278,26 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
                 const left = concurrent.length > 1 ? `${(concurrent.indexOf(booking) * 100) / concurrent.length}%` : "0%";
                 const zIndex = 20 + index;
 
+                const isShort = duration <= 30;
+
                 return (
                   <div 
                     key={booking.id}
+                    title={`${booking.user?.first_name} ${booking.user?.last_name} – ${booking.session.session_type?.name}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedEditBooking(booking);
                     }}
+                    onMouseMove={(e) => {
+                      e.stopPropagation();
+                      setHoverTime(null);
+                    }}
                     className={cn(
-                      "absolute rounded-2xl p-2.5 shadow-sm hover:shadow-xl transition-all group overflow-hidden cursor-pointer border-2 hover:scale-[1.01]",
-                      booking.status === "confirmed" ? "bg-emerald-50/90 border-emerald-100" : 
-                      booking.status === "attended" ? "bg-blue-50/90 border-blue-100" :
-                      booking.status === "no_show" ? "bg-amber-50/90 border-amber-100" :
-                      "bg-stone-50/90 border-stone-100"
+                      "absolute rounded-xl p-2 px-3 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer border-2",
+                      booking.status === "confirmed" ? "bg-emerald-50/95 border-emerald-100 hover:bg-emerald-100/50" : 
+                      booking.status === "attended" ? "bg-blue-50/95 border-blue-100 hover:bg-blue-100/50" :
+                      booking.status === "no_show" ? "bg-amber-50/95 border-amber-100 hover:bg-amber-100/50" :
+                      "bg-stone-50/95 border-stone-100 hover:bg-stone-100/50"
                     )}
                     style={{ 
                       top: `${top}%`, 
@@ -268,19 +307,25 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
                       zIndex: zIndex
                     }}
                   >
-                    <div className="flex items-start justify-between h-full">
-                      <div className="flex flex-col h-full justify-center overflow-hidden">
-                        <span className="text-[13.5px] font-bold text-stone-900 leading-tight block truncate">
+                    <div className="flex items-center justify-between h-full gap-2">
+                      <div className={cn("flex flex-1 overflow-hidden", isShort ? "flex-row items-center gap-2" : "flex-col h-full justify-center")}>
+                        <span className={cn("font-bold text-stone-900 leading-tight block truncate", isShort ? "text-[12px] shrink-0" : "text-[13px]")}>
                           {booking.user?.last_name} {booking.user?.first_name}
                         </span>
-                        <div className="flex flex-col mt-0.5">
-                          <span className="text-[9px] text-emerald-600 font-black uppercase tracking-widest leading-tight block truncate">
+                        {!isShort ? (
+                          <div className="flex flex-col mt-0.5">
+                            <span className="text-[9px] text-emerald-600 font-black uppercase tracking-widest leading-tight block truncate">
+                              {booking.session.session_type?.name}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[9px] text-emerald-600 font-black uppercase tracking-widest leading-none truncate bg-white/50 px-1.5 py-0.5 rounded-md border border-white flex-1 min-w-0 text-right">
                             {booking.session.session_type?.name}
                           </span>
-                        </div>
+                        )}
                       </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
-                        <div className="text-[9px] text-emerald-700 font-bold bg-white px-2 py-0.5 rounded-lg border border-emerald-100 shadow-sm tabular-nums whitespace-nowrap">
+                      <div className="flex flex-col items-end shrink-0 justify-center">
+                        <div className="text-[10px] text-emerald-700 font-bold bg-white/80 px-2 py-0.5 rounded-lg border border-emerald-100/50 shadow-sm tabular-nums whitespace-nowrap">
                           {new Date(booking.session.start_time).toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>

@@ -47,9 +47,16 @@ export default function AdminDashboard() {
   // ----------------------------------------------------------------------
 
 
-  const upcoming = stats?.upcomingBookings || [];
-  const nextBooking = upcoming[0];
-  const others = upcoming.slice(1);
+  // Filter upcoming bookings to ONLY include today's appointments
+  const upcomingToday = (stats?.upcomingBookings || []).filter(booking => {
+    if (!booking.session?.start_time) return false;
+    const bookingDate = new Date(booking.session.start_time).toLocaleDateString("de-DE");
+    const todayDate = new Date().toLocaleDateString("de-DE");
+    return bookingDate === todayDate;
+  });
+  
+  const nextBooking = upcomingToday[0];
+  const others = upcomingToday.slice(1);
 
   const metrics = [
     {

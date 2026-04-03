@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, Calendar, Clock, User, ClipboardList, Search, Check, UserPlus } from "lucide-react";
+import { X, Calendar, Clock, User, ClipboardList, Search, Check, UserPlus, AlertCircle } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -8,6 +8,7 @@ import { useSessionTypes, useCreateSession } from "../../hooks/useSessions";
 import { useCreateBooking } from "../../hooks/useBookings";
 import { useToast } from "../../hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
+import { useAvailabilityExceptions } from "../../hooks/useAvailability";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,15 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
   const { data: sessionTypes } = useSessionTypes();
   const createSession = useCreateSession();
   const createBooking = useCreateBooking();
+  const { data: availabilityExceptions = [] } = useAvailabilityExceptions();
+
+  // Helper: check if a date string (YYYY-MM-DD) is blocked by an exception
+  const getBlockedReason = (dateStr: string): string | null => {
+    const ex = (availabilityExceptions as any[]).find(
+      (e) => e.is_closed && dateStr >= e.start_date && dateStr <= e.end_date
+    );
+    return ex ? (ex.reason || 'Geschlossen') : null;
+  };
 
   const [date, setDate] = useState(defaultDateStr || "");
   const [time, setTime] = useState(defaultTimeStr || "09:00");
@@ -129,6 +139,17 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
 
 
   const handleSubmit = async () => {
+
+    // Block exception days
+    const blockedReason = getBlockedReason(date);
+    if (blockedReason) {
+      toast({
+        title: "Buchung nicht möglich",
+        description: `Die Praxis ist an diesem Tag geschlossen: "${blockedReason}". Bitte ein anderes Datum wählen.`,
+        variant: "destructive"
+      });
+      return;
+    }
 
     if (!date || !time || !typeId || !selectedPatient) {
       toast({ title: "Fehlt", description: "Bitte füllen Sie alle Felder aus.", variant: "destructive" });
@@ -276,8 +297,21 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
                 type="date" 
                 value={date} 
                 onChange={e => setDate(e.target.value)}
-                className="h-12 bg-stone-50 border-stone-100 rounded-xl font-medium"
+                className={cn(
+                  "h-12 bg-stone-50 border-stone-100 rounded-xl font-medium",
+                  getBlockedReason(date) && "border-red-300 bg-red-50 text-red-700 focus-visible:ring-red-300"
+                )}
               />
+              {/* Exception warning below date input */}
+              {date && getBlockedReason(date) && (
+                <div className="flex items-start gap-2 bg-red-50 border border-red-200 rounded-xl p-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-red-700 font-black text-[11px] uppercase tracking-wide">{getBlockedReason(date)}</p>
+                    <p className="text-red-500 text-[10px] mt-0.5">Praxis geschlossen — bitte anderen Tag wählen.</p>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Time */}

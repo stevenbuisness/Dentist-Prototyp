@@ -18,8 +18,9 @@ import {
 import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
 import { useSessionTypes, useSessions, useLockSession, useUnlockSession, useAvailabilityRules, useCreateOnDemandSession } from "../../hooks/useSessions";
+import { useAvailabilityExceptions } from "../../hooks/useAvailability";
 import { useMyBookings, useCreateBooking, useUpdateBooking } from "../../hooks/useBookings";
-import { format, addDays, isSameDay, startOfDay, isAfter, subHours, differenceInMinutes, setHours, setMinutes, isBefore, addMinutes } from "date-fns";
+import { format, addDays, isSameDay, startOfDay, isAfter, subHours, differenceInMinutes, setHours, setMinutes, isBefore, addMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths } from "date-fns";
 import { de } from "date-fns/locale";
 
 export default function DashboardPage() {
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const { data: myBookings } = useMyBookings(user?.id);
   const { data: allSessions } = useSessions(); // Fetch all sessions to see occupied times
   const { data: availabilityRules } = useAvailabilityRules();
+  const { data: availabilityExceptions = [] } = useAvailabilityExceptions();
   const createOnDemandSession = useCreateOnDemandSession();
   
   // Mutations
@@ -44,8 +46,10 @@ export default function DashboardPage() {
   const [bookingStep, setBookingStep] = useState(1); 
   const [selectedType, setSelectedType] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
+  const [calendarViewMonth, setCalendarViewMonth] = useState(startOfMonth(new Date()));
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [lockExpiresAt, setLockExpiresAt] = useState<Date | null>(null);
+  const [tooltipDate, setTooltipDate] = useState<string | null>(null); // for date button tooltip
 
   // Derived Data
   const upcomingBooking = useMemo(() => {
@@ -55,8 +59,26 @@ export default function DashboardPage() {
       .sort((a, b) => new Date(a.session.start_time).getTime() - new Date(b.session.start_time).getTime())[0];
   }, [myBookings]);
 
+  // Helper: check if a given date (local midnight) falls within any closed exception
+  const isDateBlocked = (date: Date): { blocked: boolean; reason: string } => {
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const matchingEx = (availabilityExceptions as any[]).find(
+      (ex) => ex.is_closed && dateStr >= ex.start_date && dateStr <= ex.end_date
+    );
+    return matchingEx
+      ? { blocked: true, reason: matchingEx.reason || 'Geschlossen' }
+      : { blocked: false, reason: '' };
+  };
+
   const filteredSlots = useMemo(() => {
     if (!sessionTypes || !selectedType || !availabilityRules || !allSessions) return [];
+
+    // Block exception days — return no slots for closed days
+    const dateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+    const isExceptionDay = (availabilityExceptions as any[]).some(
+      (ex) => ex.is_closed && dateStr >= ex.start_date && dateStr <= ex.end_date
+    );
+    if (isExceptionDay) return [];
     
     // 1. Get Practice Rules for the selected day
     const dayOfWeek = selectedDate.getDay(); // 0-6 (Sun-Sat)
@@ -128,7 +150,56 @@ export default function DashboardPage() {
 
     // Return combined (preferring manual if same start time, though unlikely)
     return [...slots, ...manualOpenSessions].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-  }, [allSessions, selectedDate, selectedType, availabilityRules, user?.id]);
+  }, [allSessions, selectedDate, selectedType, availabilityRules, user?.id, availabilityExceptions]);
+
+  // Helper: get status for a date in the scroller
+  // Returns: { status: 'blocked' | 'full' | 'available', label: string }
+  const getDateStatus = (date: Date): { status: 'blocked' | 'full' | 'available'; label: string } => {
+    // 1. Check exception
+    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const ex = (availabilityExceptions as any[]).find(
+      (e) => e.is_closed && dateStr >= e.start_date && dateStr <= e.end_date
+    );
+    if (ex) return { status: 'blocked', label: ex.reason || 'Geschlossen' };
+
+    // 2. Check if fully booked (no free slots for ANY session type)
+    if (availabilityRules && allSessions && sessionTypes && sessionTypes.length > 0) {
+      const dayOfWeek = date.getDay();
+      const rule = (availabilityRules as any[]).find(r => r.day_of_week === dayOfWeek);
+      if (!rule) return { status: 'available', label: '' };
+
+      // Try with shortest duration type to find at least one free gap
+      const [startH, startM] = rule.start_time.split(':').map(Number);
+      const [endH, endM] = rule.end_time.split(':').map(Number);
+      const dayStart = setMinutes(setHours(new Date(date), startH), startM);
+      const dayEnd = setMinutes(setHours(new Date(date), endH), endM);
+      const minDuration = Math.min(...(sessionTypes as any[]).map((t: any) => t.duration_minutes || 30));
+
+      const lunchStart = setMinutes(setHours(new Date(date), 12), 0);
+      const lunchEnd = setMinutes(setHours(new Date(date), 13), 0);
+
+      let hasFreeSlot = false;
+      let cur = dayStart;
+      while (isBefore(cur, dayEnd)) {
+        const slotEnd = addMinutes(cur, minDuration);
+        if (isAfter(slotEnd, dayEnd)) break;
+        const isLunch = isAfter(slotEnd, lunchStart) && isBefore(cur, lunchEnd);
+        if (!isLunch && !isAfter(new Date(), cur)) {
+          const occupied = (allSessions as any[]).some(s => {
+            const sStart = new Date(s.start_time);
+            const sEnd = new Date(s.end_time);
+            return isSameDay(sStart, date) && s.status !== 'canceled' && isBefore(cur, sEnd) && isAfter(slotEnd, sStart);
+          });
+          if (!occupied) { hasFreeSlot = true; break; }
+        }
+        cur = addMinutes(cur, 30);
+      }
+
+      if (!hasFreeSlot) return { status: 'full', label: 'Keine freien Termine' };
+    }
+
+    return { status: 'available', label: '' };
+  };
 
   // Timer for Locking
   useEffect(() => {
@@ -251,19 +322,15 @@ export default function DashboardPage() {
     }
   };
 
-  // Date scroller items (Skip Sat/Sun)
-  const dates = useMemo(() => {
-    let result = [];
-    let d = new Date();
-    while (result.length < 14) {
+  // Calendar days generation (Mo-Fr) for the visible month
+  const calendarDays = useMemo(() => {
+    const start = startOfWeek(startOfMonth(calendarViewMonth), { weekStartsOn: 1 });
+    const end = endOfWeek(endOfMonth(calendarViewMonth), { weekStartsOn: 1 });
+    return eachDayOfInterval({ start, end }).filter(d => {
       const day = d.getDay();
-      if (day !== 0 && day !== 6) {
-        result.push(new Date(d));
-      }
-      d = addDays(d, 1);
-    }
-    return result;
-  }, []);
+      return day !== 0 && day !== 6; // Ignore Saturday and Sunday
+    });
+  }, [calendarViewMonth]);
 
   return (
     <div className="min-h-screen bg-[#faf8f5] font-lato pb-20">
@@ -369,40 +436,179 @@ export default function DashboardPage() {
                              </div>
                           </div>
                           
-                            <div className="flex items-center justify-between px-1 mb-2">
-                               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">
-                                  {format(selectedDate, "MMMM yyyy", { locale: de })}
-                               </p>
+                            {/* Calendar Navigation header */}
+                            <div className="flex items-center justify-between px-1 mb-4">
+                              <button 
+                                onClick={() => setCalendarViewMonth(subMonths(calendarViewMonth, 1))}
+                                className="p-1 px-3 bg-white border border-stone-200 rounded-full hover:bg-stone-50 transition-colors shadow-sm"
+                              >
+                                <ChevronLeft size={16} className="text-stone-600 inline-block" />
+                              </button>
+                              <p className="text-[12px] font-black uppercase tracking-[0.2em] text-stone-700">
+                                {format(calendarViewMonth, "MMMM yyyy", { locale: de })}
+                              </p>
+                              <button 
+                                onClick={() => setCalendarViewMonth(addMonths(calendarViewMonth, 1))}
+                                className="p-1 px-3 bg-white border border-stone-200 rounded-full hover:bg-stone-50 transition-colors shadow-sm"
+                              >
+                                <ChevronRight size={16} className="text-stone-600 inline-block" />
+                              </button>
                             </div>
                             
-                           {/* Date Scroller */}
-                          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide px-1">
-                            {dates.map((date) => (
-                              <button
-                                key={date.toISOString()}
-                                onClick={() => setSelectedDate(startOfDay(date))}
-                                className={cn(
-                                  "flex-shrink-0 w-16 h-20 rounded-2xl flex flex-col items-center justify-center transition-all border",
-                                  isSameDay(selectedDate, date)
-                                    ? "bg-stone-900 border-stone-800 text-white shadow-lg shadow-stone-200"
-                                    : "bg-white border-stone-100 text-stone-600 hover:border-stone-300"
-                                )}
-                              >
-                                <span className="text-[10px] font-black uppercase tracking-tighter mb-1">
-                                  {format(date, "EEE", { locale: de })}
-                                </span>
-                                <span className="text-lg font-montserrat font-black leading-none">
-                                  {format(date, "d")}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
+                           {/* Calendar Grid */}
+                           <div className="bg-white rounded-3xl border border-stone-200 p-4 mb-4 shadow-sm">
+                             {/* Weekday headers */}
+                             <div className="grid grid-cols-5 gap-2 mb-3">
+                               {['Mo', 'Di', 'Mi', 'Do', 'Fr'].map(d => (
+                                 <div key={d} className="text-center text-[9px] font-black tracking-widest text-stone-400">
+                                   {d}
+                                 </div>
+                               ))}
+                             </div>
+                             
+                             {/* Days Grid */}
+                             <div className="grid grid-cols-5 gap-2">
+                               {calendarDays.map((date) => {
+                                 const dateKey = date.toISOString();
+                                 const { status } = getDateStatus(date);
+                                 
+                                 const isPastDay = isBefore(startOfDay(date), startOfDay(new Date()));
+                                 const isDisabled = isPastDay || status === 'blocked' || status === 'full';
+                                 const inMonth = isSameMonth(date, calendarViewMonth);
+
+                                 return (
+                                 <div
+                                   key={dateKey}
+                                   className="relative aspect-[1/1.1]"
+                                   onMouseEnter={() => isDisabled && !isPastDay && setTooltipDate(dateKey)}
+                                   onMouseLeave={() => setTooltipDate(null)}
+                                 >
+                                   <button
+                                     onClick={() => {
+                                       if (isDisabled) {
+                                         if (!isPastDay) setTooltipDate(prev => prev === dateKey ? null : dateKey);
+                                         return;
+                                       }
+                                       setTooltipDate(null);
+                                       setSelectedDate(startOfDay(date));
+                                       if (!inMonth) setCalendarViewMonth(startOfMonth(date));
+                                     }}
+                                     className={cn(
+                                       "w-full h-full rounded-2xl flex flex-col items-center justify-center transition-all border",
+                                       isPastDay
+                                         ? "opacity-30 cursor-not-allowed bg-stone-50 border-transparent text-stone-400"
+                                         : status === 'blocked'
+                                         ? "bg-red-50 border-red-200 text-red-500 cursor-not-allowed shadow-sm"
+                                         : status === 'full'
+                                         ? "bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed"
+                                         : isSameDay(selectedDate, date)
+                                         ? "bg-stone-900 border-stone-800 text-white shadow-lg shadow-stone-200 scale-[1.03] z-10"
+                                         : inMonth
+                                           ? "bg-white border-stone-100 text-stone-700 hover:border-stone-300 hover:shadow-sm"
+                                           : "bg-white border-stone-50 text-stone-300 hover:text-stone-500" // Other month
+                                     )}
+                                   >
+                                     <span className={cn(
+                                       "text-sm font-montserrat font-black leading-none",
+                                       !inMonth && !isSameDay(selectedDate, date) && !isDisabled && "text-stone-400"
+                                     )}>
+                                       {format(date, "d")}
+                                     </span>
+                                     {!isPastDay && status === 'blocked' && (
+                                       <span className="text-[7px] font-black absolute bottom-1.5 text-red-500">✕</span>
+                                     )}
+                                     {!isPastDay && status === 'full' && (
+                                       <span className="text-[5px] font-black uppercase tracking-widest absolute bottom-1.5 text-stone-400">voll</span>
+                                     )}
+                                   </button>
+                                 </div>
+                                 );
+                               })}
+                             </div>
+                           </div>
+
+                           {/* Hover Info Banner — appears below scroller when hovering a disabled date */}
+                           {(() => {
+                             if (!tooltipDate) return null;
+                             const hoveredDate = calendarDays.find(d => d.toISOString() === tooltipDate);
+                             if (!hoveredDate) return null;
+                             const { status, label } = getDateStatus(hoveredDate);
+                             if (status === 'available') return null;
+                             const isHoliday = status === 'blocked';
+                             return (
+                               <div className={cn(
+                                 "flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-medium animate-in fade-in slide-in-from-top-2 duration-200",
+                                 isHoliday
+                                   ? "bg-red-50 border-red-100 text-red-700"
+                                   : "bg-stone-50 border-stone-200 text-stone-700"
+                               )}>
+                                 <span className={cn(
+                                   "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-base",
+                                   isHoliday ? "bg-red-100" : "bg-stone-100"
+                                 )}>
+                                   {isHoliday ? '🏖️' : '📅'}
+                                 </span>
+                                 <div>
+                                   <span className={cn(
+                                     "font-black text-xs uppercase tracking-wide block",
+                                     isHoliday ? "text-red-600" : "text-stone-600"
+                                   )}>
+                                     {label}
+                                   </span>
+                                   <span className={cn(
+                                     "text-[10px] font-medium",
+                                     isHoliday ? "text-red-400" : "text-stone-400"
+                                   )}>
+                                     {isHoliday
+                                       ? `Die Praxis ist am ${format(hoveredDate, "dd. MMMM", { locale: de })} geschlossen.`
+                                       : `Am ${format(hoveredDate, "dd. MMMM", { locale: de })} sind keine Termine mehr frei.`
+                                     }
+                                   </span>
+                                 </div>
+                               </div>
+                             );
+                           })()}
 
                           {/* Time Slots */}
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Verfügbare Slots</h4>
                             </div>
+
+                            {/* Exception / Holiday Banner (for the SELECTED day) */}
+                            {(() => {
+                              const { status, label } = getDateStatus(selectedDate);
+                              if (status === 'available') return null;
+                              const isHoliday = status === 'blocked';
+                              return (
+                                <div className={cn(
+                                  "rounded-2xl p-5 flex items-start gap-4 border",
+                                  isHoliday ? "bg-red-50 border-red-100" : "bg-stone-50 border-stone-200"
+                                )}>
+                                  <div className={cn(
+                                    "w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0",
+                                    isHoliday ? "bg-red-100" : "bg-stone-100"
+                                  )}>
+                                    {isHoliday ? '🏖️' : '📅'}
+                                  </div>
+                                  <div>
+                                    <p className={cn(
+                                      "font-black text-sm uppercase tracking-wide",
+                                      isHoliday ? "text-red-700" : "text-stone-700"
+                                    )}>{label}</p>
+                                    <p className={cn(
+                                      "text-xs mt-1 font-medium",
+                                      isHoliday ? "text-red-500" : "text-stone-500"
+                                    )}>
+                                      {isHoliday
+                                        ? "An diesem Tag ist die Praxis geschlossen. Bitte wählen Sie einen anderen Tag."
+                                        : "Für diesen Tag sind leider keine freien Termine mehr verfügbar."
+                                      }
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                             
                             {filteredSlots.length > 0 ? (
                               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -417,6 +623,7 @@ export default function DashboardPage() {
                                 ))}
                               </div>
                             ) : (
+                              !isDateBlocked(selectedDate).blocked && (
                               <div className="bg-stone-50 rounded-3xl p-12 text-center border-2 border-dashed border-stone-200 flex flex-col items-center gap-4">
                                  <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center text-stone-400">
                                     <X size={24} />
@@ -426,6 +633,7 @@ export default function DashboardPage() {
                                     Nächsten Tag prüfen
                                  </button>
                               </div>
+                              )
                             )}
                           </div>
                         </div>
