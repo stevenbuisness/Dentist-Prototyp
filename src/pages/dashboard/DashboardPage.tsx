@@ -353,8 +353,13 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#faf8f5] font-lato pb-20">
       <header className="border-b border-stone-200 bg-white/80 backdrop-blur-md sticky top-0 z-10">
         <div className="w-full px-6 md:px-10 h-16 flex items-center justify-between">
-          <Link to="/" className="font-montserrat font-bold text-stone-900 hover:opacity-80 transition-opacity">
-            Dr. Schmidt
+          <Link to="/" className="flex items-center gap-2 font-montserrat font-bold text-stone-900 hover:opacity-80 transition-opacity">
+            <img 
+              src="/logo.png" 
+              alt="Dr. Schmidt Logo" 
+              className="w-10 h-10 object-contain mix-blend-multiply"
+            />
+            <span>Dr. Schmidt</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link to="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">

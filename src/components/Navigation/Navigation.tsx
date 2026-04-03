@@ -9,8 +9,13 @@ export const Navigation = (): JSX.Element => {
         <div className="flex items-center gap-12">
           <a
             href="#"
-            className="[font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 [font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
           >
+            <img 
+              src="/logo.png" 
+              alt="Dr. Schmidt Logo" 
+              className="w-10 h-10 object-contain"
+            />
             Zahnarztpraxis Dr. Schmidt
           </a>
 

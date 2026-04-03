@@ -38,9 +38,14 @@ export const PremiumNavigation = (): JSX.Element => {
       >
         <Link
           to="/"
-          className="font-montserrat text-lg font-semibold tracking-tight text-stone-900 hover:text-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
+          className="flex items-center gap-4 font-montserrat text-lg font-semibold tracking-tight text-stone-900 hover:text-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800 transition-all"
         >
-          Dr. Schmidt · Zahnmedizin
+          <img 
+            src="/logo.png" 
+            alt="Dr. Schmidt Logo" 
+            className="w-[4.5rem] h-[4.5rem] object-contain flex-shrink-0 mix-blend-multiply"
+          />
+          <span className="leading-tight">Dr. Schmidt · Zahnmedizin</span>
         </Link>
 
         <ul className="hidden items-center gap-10 md:flex">
@@ -68,13 +73,13 @@ export const PremiumNavigation = (): JSX.Element => {
             <div className="hidden sm:flex items-center gap-3">
               <Link
                 to={profile?.role === "admin" ? "/admin" : "/dashboard"}
-                className="font-lato text-sm font-semibold text-stone-700 hover:text-stone-900 px-3 py-1 border border-stone-300 rounded-md transition-all"
+                className="font-lato text-[11px] font-bold text-stone-700 hover:text-stone-900 px-3 py-1.5 border border-stone-200 rounded-lg transition-all hover:bg-stone-50 whitespace-nowrap"
               >
                 Mein Bereich
               </Link>
               <button
                 onClick={handleLogout}
-                className="font-lato text-sm font-medium text-stone-500 hover:text-destructive px-2 py-1 transition-all"
+                className="font-lato text-[10px] font-medium text-stone-500 hover:text-red-600 px-2 py-1 transition-all whitespace-nowrap"
               >
                 Abmelden
               </button>
@@ -82,13 +87,13 @@ export const PremiumNavigation = (): JSX.Element => {
           )}
           <a
             href="tel:03012345678"
-            className="font-lato hidden text-sm text-stone-700 underline-offset-4 hover:underline lg:inline"
+            className="font-lato hidden text-[11px] font-bold text-stone-400 underline-offset-4 hover:underline lg:inline whitespace-nowrap"
           >
             030 1234 5678
           </a>
           <Link
             to="/dashboard"
-            className="font-montserrat inline-flex items-center rounded-sm border border-stone-800 bg-stone-900 px-3 py-1 text-sm font-semibold tracking-wide text-[#faf8f5] transition-colors hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
+            className="font-montserrat inline-flex items-center rounded-sm bg-stone-900 px-3 py-2 text-[11px] font-black uppercase tracking-widest text-[#faf8f5] transition-all hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800 whitespace-nowrap"
           >
             Termin buchen
           </Link>
