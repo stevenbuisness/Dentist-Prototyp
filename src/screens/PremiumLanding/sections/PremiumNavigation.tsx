@@ -67,7 +67,7 @@ export const PremiumNavigation = (): JSX.Element => {
           ) : (
             <div className="hidden sm:flex items-center gap-3">
               <Link
-                to={profile?.role === "admin" ? "/admin" : "/profile"}
+                to={profile?.role === "admin" ? "/admin" : "/dashboard"}
                 className="font-lato text-sm font-semibold text-stone-700 hover:text-stone-900 px-3 py-1 border border-stone-300 rounded-md transition-all"
               >
                 Mein Bereich

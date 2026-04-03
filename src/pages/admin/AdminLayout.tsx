@@ -94,18 +94,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         .from("bookings")
         .select(`
           id, 
+          created_at,
           booking_time, 
           users (first_name, last_name)
         `)
-        .order("booking_time", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(5);
       
       if (data) {
-        setNotifications((data as unknown as BookingNotificationData[]).map((b) => ({
+        const lastReadStr = localStorage.getItem("adminLastReadNotifications");
+        const lastReadTime = lastReadStr ? new Date(lastReadStr).getTime() : 0;
+
+        setNotifications((data as any[]).map((b) => ({
           id: b.id,
-          message: `Buchung von ${b.users?.first_name || 'Unbekannt'} ${b.users?.last_name || ''}`,
-          time: b.booking_time ? new Date(b.booking_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---',
-          read: true
+          message: `Neue Buchung: ${b.users?.first_name || 'Unbekannt'} ${b.users?.last_name || ''}`,
+          time: b.created_at ? new Date(b.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '---',
+          read: b.created_at ? new Date(b.created_at).getTime() <= lastReadTime : true
         })));
       }
     };
@@ -138,9 +142,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-    if (!showNotifications && unreadCount > 0) {
-      setNotifications(prev => prev.map(n => ({...n, read: true})));
+    const isOpening = !showNotifications;
+    setShowNotifications(isOpening);
+    
+    if (isOpening) {
+      localStorage.setItem("adminLastReadNotifications", new Date().toISOString());
+      if (unreadCount > 0) {
+        setNotifications(prev => prev.map(n => ({...n, read: true})));
+      }
     }
   };
 

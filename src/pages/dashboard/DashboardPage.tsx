@@ -14,7 +14,8 @@ import {
   Timer,
   ChevronLeft,
   AlertCircle,
-  CalendarCheck
+  CalendarCheck,
+  Home
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
@@ -356,6 +357,9 @@ export default function DashboardPage() {
             Dr. Schmidt
           </Link>
           <div className="flex items-center gap-4">
+            <Link to="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
+              <Home size={16} /> Zur Startseite
+            </Link>
             <Link to="/profile" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
               <UserIcon size={16} /> Profil
             </Link>

@@ -36,7 +36,11 @@ export function AdminRoute() {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (!isAdmin) {
     return <Navigate to="/unauthorized" replace />;
   }
 
