@@ -13,7 +13,8 @@ import {
   X,
   Timer,
   ChevronLeft,
-  AlertCircle
+  AlertCircle,
+  CalendarCheck
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
@@ -281,10 +282,9 @@ export default function DashboardPage() {
         description: "Ihr Termin wurde verbindlich gebucht.",
       });
       
-      // Cleanup
-      setBookingStep(1);
-      setSelectedSlot(null);
-      setLockExpiresAt(null);
+      // Move to Success Step instead of jumping back to Step 1
+      setBookingStep(4);
+      setLockExpiresAt(null); // The lock logic is done now that booking is confirmed
     } catch (err: any) {
       toast({
         title: "Fehler",
@@ -647,7 +647,7 @@ export default function DashboardPage() {
                                  {lockExpiresAt && (
                                    <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ring-4 ring-emerald-100/50">
                                      <Timer size={14} className="animate-pulse" />
-                                     Wird gebucht...
+                                     Wird reserviert...
                                    </div>
                                  )}
                               </div>
@@ -678,7 +678,7 @@ export default function DashboardPage() {
                                        <div>
                                           <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-0.5">Zeitpunkt</span>
                                           <span className="font-bold text-stone-900 text-sm">
-                                            {format(new Date(selectedSlot?.start_time), "EEEE, d. MMMM • HH:mm", { locale: de })} Uhr
+                                            {format(new Date(selectedSlot?.start_time || new Date()), "EEEE, d. MMMM • HH:mm", { locale: de })} Uhr
                                           </span>
                                        </div>
                                     </div>
@@ -697,6 +697,52 @@ export default function DashboardPage() {
                                 </button>
                               </div>
                            </div>
+                        </div>
+                      )}
+
+                      {/* Step 4: Success Message */}
+                      {bookingStep === 4 && (
+                        <div className="space-y-6 animate-in zoom-in-95 duration-500 h-full flex flex-col items-center justify-center py-10">
+                          <div className="bg-stone-900 rounded-[3rem] p-12 text-center text-white relative overflow-hidden shadow-2xl max-w-lg w-full mx-auto">
+                            {/* Inner Glow Background */}
+                            <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
+                              <div className="w-64 h-64 bg-emerald-500 rounded-full blur-[100px]" />
+                            </div>
+                            
+                            <div className="relative z-10 flex flex-col items-center">
+                              <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-emerald-900/50 mb-8 border-4 border-emerald-300 pointer-events-none">
+                                <CheckCircle2 size={48} strokeWidth={2.5} className="animate-in fade-in zoom-in duration-500 delay-150" />
+                              </div>
+                              
+                              <h2 className="text-3xl font-montserrat font-black tracking-tight mb-4">
+                                Termin gebucht!
+                              </h2>
+                              
+                              <p className="text-stone-300 font-medium leading-relaxed mb-8">
+                                Vielen Dank! Wir freuen uns auf Sie. Ihr Termin für eine <strong className="text-white">{selectedType?.name}</strong> ist hiermit verbindlich bestätigt.
+                              </p>
+
+                              <div className="bg-white/10 border border-white/10 rounded-3xl p-6 text-left w-full mb-8 backdrop-blur-sm">
+                                <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-1.5 pl-1">Ihr Zeitpunkt</p>
+                                <p className="text-[17px] font-bold font-montserrat flex items-center gap-3">
+                                  <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
+                                    <CalendarCheck size={18} />
+                                  </div>
+                                  {selectedSlot ? format(new Date(selectedSlot.start_time), "EEEE, d. MMMM 'um' HH:mm", { locale: de }) : ""} Uhr
+                                </p>
+                              </div>
+
+                              <Button 
+                                onClick={() => {
+                                  setBookingStep(1);
+                                  setSelectedSlot(null);
+                                }}
+                                className="w-full h-16 bg-white hover:bg-stone-100 text-stone-900 rounded-3xl font-black uppercase tracking-widest text-[11px] transition-all shadow-xl shadow-white/5 active:scale-95"
+                              >
+                                Zurück zur Übersicht
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </>
