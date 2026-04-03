@@ -55,7 +55,7 @@ export default function DashboardPage() {
   const updateBooking = useUpdateBooking();
 
   // Booking State
-  const [bookingStep, setBookingStep] = useState(1); 
+  const [bookingStep, setBookingStep] = useState<number>(1); 
   const [selectedType, setSelectedType] = useState<any>(null);
   const [selectedDate, setSelectedDate] = useState(startOfDay(new Date()));
   const [calendarViewMonth, setCalendarViewMonth] = useState(startOfMonth(new Date()));
@@ -352,7 +352,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#faf8f5] font-lato pb-20">
       <header className="border-b border-stone-200 bg-white/80 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="w-full px-6 md:px-10 h-16 flex items-center justify-between">
           <Link to="/" className="font-montserrat font-bold text-stone-900 hover:opacity-80 transition-opacity">
             Dr. Schmidt
           </Link>
@@ -370,7 +370,7 @@ export default function DashboardPage() {
         </div>
       </header>
       
-      <main className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+      <main className="w-full p-6 md:p-10 space-y-8">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-montserrat font-bold text-stone-900">Guten Tag, {profile?.first_name || "Patient"}!</h1>
@@ -378,8 +378,8 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3 space-y-8">
             {/* BOOKING WIZARD */}
             <div className="bg-white rounded-[2.5rem] border border-stone-100 shadow-xl shadow-stone-200/50 overflow-hidden min-h-[500px] flex flex-col">
                <div className="p-8 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
@@ -420,7 +420,7 @@ export default function DashboardPage() {
                       {bookingStep === 1 && (
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                           <h3 className="font-montserrat font-bold text-stone-900 text-lg mb-4">Was können wir für Sie tun?</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                             {sessionTypes?.map((type) => (
                               <button
                                 key={type.id}
@@ -456,6 +456,8 @@ export default function DashboardPage() {
                              </div>
                           </div>
                           
+                          <div className="flex flex-col xl:flex-row gap-12 items-start">
+                             <div className="w-full xl:w-[400px] shrink-0">
                             {/* Calendar Navigation header */}
                             <div className="flex items-center justify-between px-1 mb-4">
                               <button 
@@ -476,7 +478,7 @@ export default function DashboardPage() {
                             </div>
                             
                            {/* Calendar Grid */}
-                           <div className="bg-white rounded-3xl border border-stone-200 p-4 mb-4 shadow-sm">
+                           <div className="bg-white rounded-3xl border border-stone-200 p-4 shadow-sm">
                              {/* Weekday headers */}
                              <div className="grid grid-cols-5 gap-2 mb-3">
                                {['Mo', 'Di', 'Mi', 'Do', 'Fr'].map(d => (
@@ -544,10 +546,11 @@ export default function DashboardPage() {
                                  </div>
                                  );
                                })}
+                               </div>
                              </div>
-                           </div>
+                             </div>
 
-                           {/* Hover Info Banner — appears below scroller when hovering a disabled date */}
+                             <div className="flex-1 w-full space-y-6">
                            {(() => {
                              if (!tooltipDate) return null;
                              const hoveredDate = calendarDays.find(d => d.toISOString() === tooltipDate);
@@ -657,10 +660,12 @@ export default function DashboardPage() {
                             )}
                           </div>
                         </div>
-                      )}
+                      </div>
+                    </div>
+                  )}
 
-                      {/* Step 3: Confirmation */}
-                      {bookingStep === 3 && (
+                  {/* Step 3: Confirmation */}
+                  {bookingStep === 3 && (
                         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500 h-full flex flex-col justify-center">
                            <div className="bg-stone-50 border border-stone-100 rounded-[2.5rem] p-10 space-y-8 relative overflow-hidden max-w-lg mx-auto w-full">
                               <div className="absolute top-0 right-0 p-8">

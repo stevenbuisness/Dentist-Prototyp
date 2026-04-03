@@ -79,7 +79,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#faf8f5] font-lato pb-12">
       {/* Navigation Header */}
       <header className="border-b border-stone-200 bg-white/80 backdrop-blur-md sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="w-full px-6 md:px-10 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate(-1)} 
@@ -99,7 +99,7 @@ export default function ProfilePage() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 pt-8">
+      <main className="w-full px-6 md:px-10 pt-8">
         <div className="mb-8">
           <Link 
             to="/dashboard" 
