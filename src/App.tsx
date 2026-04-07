@@ -12,11 +12,9 @@ import BookingsPage from "./pages/admin/BookingsPage";
 import ClientsPage from "./pages/admin/ClientsPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import CalendarPage from "./pages/admin/CalendarPage";
+import AuditLogsPage from "./pages/admin/AuditLogsPage";
 import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 import { useAuthContext } from "./contexts/AuthContext";
-import { supabase } from "./lib/supabase";
-
-
 
 function AdminDashboardRedirect() {
   const { profile, loading } = useAuthContext();
@@ -51,6 +49,7 @@ export default function App() {
         <Route path="/admin/clients" element={<ClientsPage />} />
         <Route path="/admin/calendar" element={<CalendarPage />} />
         <Route path="/admin/settings" element={<SettingsPage />} />
+        <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
       </Route>
 
       {/* Fallback */}

@@ -31,15 +31,6 @@ interface Notification {
   read: boolean;
 }
 
-interface BookingNotificationData {
-  id: string;
-  booking_time: string;
-  users: {
-    first_name: string | null;
-    last_name: string | null;
-  } | null;
-}
-
 const navItems = [
   { label: "Übersicht", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Sitzungen", href: "/admin/sessions", icon: Calendar },

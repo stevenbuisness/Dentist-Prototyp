@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
-import { Settings, Moon, Sun } from "lucide-react";
+import { Settings, Moon, Sun, History as HistoryIcon, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
 
 export default function SettingsPage() {
@@ -54,6 +56,32 @@ export default function SettingsPage() {
                   {adminDarkMode ? <Moon size={12} className="text-stone-800" /> : <Sun size={12} className="text-stone-400" />}
                 </div>
               </button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-stone-200 shadow-sm bg-white overflow-hidden">
+          <CardHeader className="bg-stone-50/50 border-b border-stone-100">
+            <CardTitle className="text-lg font-montserrat font-bold text-stone-900 flex items-center gap-2">
+              <HistoryIcon size={18} className="text-stone-400" />
+              Sicherheit & Protokollierung
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-stone-900 text-sm">System-Audit-Logs</h3>
+                <p className="text-stone-500 text-xs mt-1">
+                  Revisionssichere Einsicht in alle Datenbankänderungen, Buchungsverläufe und Benutzeraktionen.
+                </p>
+              </div>
+              
+              <Link to="/admin/audit-logs">
+                <Button variant="outline" className="gap-2 border-stone-200 text-stone-600 hover:bg-stone-50">
+                  Logs einsehen
+                  <ChevronRight size={14} />
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
