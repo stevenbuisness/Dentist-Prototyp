@@ -14,7 +14,8 @@ import {
   X,
   Stethoscope,
   ChevronRight,
-  Bell
+  Bell,
+  Clock
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
@@ -37,7 +38,6 @@ const navItems = [
   { label: "Behandlungsarten", href: "/admin/session-types", icon: Stethoscope },
   { label: "Buchungen", href: "/admin/bookings", icon: ClipboardList },
   { label: "Patienten", href: "/admin/clients", icon: Users },
-  { label: "Verfügbarkeit", href: "/admin/calendar", icon: Settings },
   { label: "Einstellungen", href: "/admin/settings", icon: Settings },
 ];
 

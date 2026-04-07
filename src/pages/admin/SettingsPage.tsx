@@ -1,7 +1,7 @@
 import { useState } from "react";
 import AdminLayout from "./AdminLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card";
-import { Settings, Moon, Sun, History as HistoryIcon, ChevronRight } from "lucide-react";
+import { Settings, Moon, Sun, History as HistoryIcon, ChevronRight, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
@@ -26,6 +26,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-6">
+        {/* Erscheinungsbild */}
         <Card className="border-stone-200 shadow-sm bg-white overflow-hidden">
           <CardHeader className="bg-stone-50/50 border-b border-stone-100">
             <CardTitle className="text-lg font-montserrat font-bold text-stone-900 flex items-center gap-2">
@@ -60,6 +61,40 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Praxis-Konfiguration */}
+        <Card className="border-stone-200 shadow-sm bg-white overflow-hidden">
+          <CardHeader className="bg-stone-50/50 border-b border-stone-100">
+            <CardTitle className="text-lg font-montserrat font-bold text-stone-900 flex items-center gap-2">
+              <Clock size={18} className="text-stone-400" />
+              Praxis-Konfiguration
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-stone-900 text-sm">Öffnungszeiten & Verfügbarkeit</h3>
+                <p className="text-stone-500 text-xs mt-1">
+                  Verwalten Sie die Kern-Öffnungszeiten der Praxis und definieren Sie globale Verfügbarkeitsregeln.
+                </p>
+              </div>
+              
+              <Link to="/admin/calendar">
+                <Button 
+                  className={cn(
+                    "gap-2 transition-all h-10 px-4 rounded-xl font-bold flex items-center shadow-sm",
+                    "bg-stone-900 text-white hover:bg-stone-800",
+                    "dark-admin-btn" // Special class for our hackless dark mode
+                  )}
+                >
+                  <span className="text-[10px] font-black uppercase tracking-widest leading-none">Zeiten verwalten</span>
+                  <ChevronRight size={14} />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Sicherheit & Protokollierung */}
         <Card className="border-stone-200 shadow-sm bg-white overflow-hidden">
           <CardHeader className="bg-stone-50/50 border-b border-stone-100">
             <CardTitle className="text-lg font-montserrat font-bold text-stone-900 flex items-center gap-2">
@@ -77,8 +112,14 @@ export default function SettingsPage() {
               </div>
               
               <Link to="/admin/audit-logs">
-                <Button variant="outline" className="gap-2 border-stone-200 text-stone-600 hover:bg-stone-50">
-                  Logs einsehen
+                <Button 
+                  className={cn(
+                    "gap-2 transition-all h-10 px-4 rounded-xl font-bold flex items-center shadow-sm",
+                    "bg-stone-900 text-white hover:bg-stone-800",
+                    "dark-admin-btn" // Special class for our hackless dark mode
+                  )}
+                >
+                  <span className="text-[10px] font-black uppercase tracking-widest leading-none">Logs einsehen</span>
                   <ChevronRight size={14} />
                 </Button>
               </Link>
