@@ -63,10 +63,12 @@ export default function DashboardPage() {
   const [lockExpiresAt, setLockExpiresAt] = useState<Date | null>(null);
   const [tooltipDate, setTooltipDate] = useState<string | null>(null); // for date button tooltip
   
-  // Auto-scroll to top when advancing steps
+  const wizardRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to wizard when advancing steps
   useEffect(() => {
-    if (bookingStep > 1) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    if (bookingStep > 1 && wizardRef.current) {
+      wizardRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [bookingStep]);
 
@@ -395,7 +397,10 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3 space-y-8">
             {/* BOOKING WIZARD */}
-            <div className="bg-white rounded-[2.5rem] border border-stone-100 shadow-xl shadow-stone-200/50 overflow-hidden min-h-[500px] flex flex-col">
+            <div 
+              ref={wizardRef}
+              className="bg-white rounded-[2.5rem] border border-stone-100 shadow-xl shadow-stone-200/50 overflow-hidden min-h-[500px] flex flex-col scroll-mt-24 sm:scroll-mt-28"
+            >
                <div className="p-8 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-montserrat font-black text-stone-900 uppercase tracking-tight">Terminbuchung</h2>
