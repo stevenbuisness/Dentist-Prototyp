@@ -252,9 +252,34 @@ export default function BookingsPage() {
             </thead>
             <tbody className="text-sm">
               {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-20 text-center text-stone-400 animate-pulse">Lade Buchungsdaten...</td>
-                </tr>
+                [...Array(6)].map((_, i) => (
+                  <tr key={i} className="animate-pulse border-b border-stone-50">
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-stone-100" />
+                        <div className="space-y-2">
+                          <div className="h-4 bg-stone-100 rounded w-32" />
+                          <div className="h-3 bg-stone-100 rounded w-24" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="space-y-2">
+                        <div className="h-4 bg-stone-100 rounded w-28" />
+                        <div className="h-3 bg-stone-100 rounded w-20" />
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="h-6 bg-stone-100 rounded-full w-20" />
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="h-4 bg-stone-100 rounded w-24" />
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="h-8 w-8 bg-stone-100 rounded-lg ml-auto" />
+                    </td>
+                  </tr>
+                ))
               ) : filteredBookings.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-20 text-center text-stone-400 font-montserrat">

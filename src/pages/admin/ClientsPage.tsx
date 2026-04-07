@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import AdminLayout from "./AdminLayout";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../../hooks/use-toast";
@@ -194,6 +195,7 @@ function PatientTimeline({ patientId }: { patientId: string }) {
 
 export default function ClientsPage() {
   const { toast } = useToast();
+  const { user: adminUser } = useAuthContext();
   const [showTrash, setShowTrash] = useState(false);
   const { data: patients = [], isLoading } = usePatients(showTrash);
   const { data: todayAppsCount = 0 } = useTodayAppointments();
@@ -237,8 +239,15 @@ export default function ClientsPage() {
     updatePatient.mutate(
       { id: selectedPatient.id, ...editForm },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast({ title: "Gespeichert", description: "Patientendaten wurden aktualisiert." });
+          
+          await supabase.from("activities").insert({
+            action: "patient_updated",
+            details: { patient_id: selectedPatient.id, first_name: editForm.first_name, last_name: editForm.last_name },
+            actor_id: adminUser?.id
+          });
+
           setIsEditing(false);
           setSelectedPatient(prev => prev ? { ...prev, ...editForm } : null);
         },
@@ -254,8 +263,15 @@ export default function ClientsPage() {
     deletePatient.mutate(
       { id: p.id },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast({ title: isPermanent ? "Gelöscht" : "Archiviert", variant: isPermanent ? "destructive" : "default" });
+          
+          await supabase.from("activities").insert({
+            action: isPermanent ? "patient_deleted" : "patient_archived",
+            details: { patient_id: p.id, first_name: p.first_name, last_name: p.last_name },
+            actor_id: adminUser?.id
+          });
+
           setSelectedPatient(null);
         },
       }
@@ -266,8 +282,14 @@ export default function ClientsPage() {
     deletePatient.mutate(
       { id: p.id, restore: true },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast({ title: "Wiederhergestellt", description: "Patient ist wieder aktiv." });
+          await supabase.from("activities").insert({
+            action: "patient_restored",
+            details: { patient_id: p.id, first_name: p.first_name, last_name: p.last_name },
+            actor_id: adminUser?.id
+          });
+
           setSelectedPatient(null);
         },
       }
@@ -284,45 +306,63 @@ export default function ClientsPage() {
 
         {/* 1. Metrics Grid (Reduced to 3 columns - Trash card removed) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="border-stone-200 shadow-sm transition-all hover:shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-stone-900 flex items-center justify-center text-white shadow-lg">
-                  <Users size={24} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Patienten</p>
-                  <p className="text-2xl font-bold text-stone-900">{stats.total}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-stone-200 shadow-sm transition-all hover:shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/10">
-                  <Clock size={24} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Termine Heute</p>
-                  <p className="text-2xl font-bold text-stone-900">{todayAppsCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-stone-200 shadow-sm transition-all hover:shadow-md">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-stone-500">
-                  <UserPlus size={24} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Neu (7T)</p>
-                  <p className="text-2xl font-bold text-stone-900">{stats.newThisWeek}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {isLoading ? (
+            [...Array(3)].map((_, i) => (
+              <Card key={i} className="border-stone-200 shadow-sm animate-pulse">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-stone-100" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-2 bg-stone-100 rounded w-1/2" />
+                      <div className="h-5 bg-stone-100 rounded w-1/3" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <>
+              <Card className="border-stone-200 shadow-sm transition-all hover:shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-stone-900 flex items-center justify-center text-white shadow-lg">
+                      <Users size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Patienten</p>
+                      <p className="text-2xl font-bold text-stone-900">{stats.total}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-stone-200 shadow-sm transition-all hover:shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/10">
+                      <Clock size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Termine Heute</p>
+                      <p className="text-2xl font-bold text-stone-900">{todayAppsCount}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-stone-200 shadow-sm transition-all hover:shadow-md">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center text-stone-500">
+                      <UserPlus size={24} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Neu (7T)</p>
+                      <p className="text-2xl font-bold text-stone-900">{stats.newThisWeek}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* 2. Cohesive Filter Bar (Trash text replaced with Papierkorb only) */}
@@ -364,7 +404,31 @@ export default function ClientsPage() {
               </thead>
               <tbody className="divide-y divide-stone-50 text-sm">
                 {isLoading ? (
-                   Array(3).fill(0).map((_, i) => <tr key={i}><td colSpan={4} className="h-20 animate-pulse bg-stone-50/20"></td></tr>)
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-stone-100" />
+                          <div className="space-y-2">
+                            <div className="h-4 bg-stone-100 rounded w-32" />
+                            <div className="h-3 bg-stone-100 rounded w-20" />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="space-y-2">
+                          <div className="h-4 bg-stone-100 rounded w-40" />
+                          <div className="h-3 bg-stone-100 rounded w-28" />
+                        </div>
+                      </td>
+                      <td className="px-8 py-5">
+                        <div className="h-4 bg-stone-100 rounded w-24" />
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <div className="w-10 h-10 bg-stone-100 rounded-xl ml-auto" />
+                      </td>
+                    </tr>
+                  ))
                 ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-8 py-32 text-center">
@@ -535,21 +599,21 @@ export default function ClientsPage() {
                     </section>
 
                     {/* Action Bar with "Löschen" button restricted to this info view only */}
-                    <div className="bg-stone-900 rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden">
-                        <div className="text-white text-center sm:text-left">
+                    <div className="bg-stone-900 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+                        <div className="text-white text-center md:text-left">
                            <p className="text-xs font-bold uppercase tracking-widest opacity-40">Verwaltung</p>
                            <p className="text-base font-bold mt-1">Status für diesen Patienten</p>
                         </div>
-                        <div className="flex gap-3 w-full sm:w-auto">
-                           <Button variant="outline" onClick={() => handleEdit(selectedPatient)} className="flex-1 sm:flex-none h-14 px-8 rounded-2xl bg-white border-0 text-stone-900 font-bold hover:bg-stone-50 gap-2">
+                        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                           <Button variant="outline" onClick={() => handleEdit(selectedPatient)} className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-2xl bg-white border-0 text-stone-900 font-bold hover:bg-stone-50 gap-2">
                               <Edit2 size={16} /> Bearbeiten
                            </Button>
                            {selectedPatient.deleted_at ? (
-                              <Button onClick={() => handleRestore(selectedPatient)} className="flex-1 sm:flex-none h-14 px-8 rounded-2xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 gap-2">
-                                 <RotateCcw size={16} /> Wiederherstellen
+                              <Button onClick={() => handleRestore(selectedPatient)} className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-2xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 gap-2">
+                                 <RotateCcw size={16} /> Reaktivieren
                               </Button>
                            ) : (
-                              <Button onClick={() => handleDelete(selectedPatient)} className="flex-1 sm:flex-none h-14 px-8 rounded-2xl bg-red-400/10 text-red-400 border border-red-400/20 font-bold hover:bg-red-400 hover:text-white gap-2 transition-all">
+                              <Button onClick={() => handleDelete(selectedPatient)} className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-2xl bg-red-400/10 text-red-400 border border-red-400/20 font-bold hover:bg-red-400 hover:text-white gap-2 transition-all">
                                  <Trash2 size={16} /> Löschen
                               </Button>
                            )}

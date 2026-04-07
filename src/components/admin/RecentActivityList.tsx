@@ -26,6 +26,11 @@ interface Activity {
     last_name: string | null;
     role: string;
   } | null;
+  details?: {
+    first_name?: string;
+    last_name?: string;
+    patient_id?: string;
+  } | null;
   booking: {
     id: string;
     user: {
@@ -60,6 +65,22 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
 
   const getActionConfig = (action: string) => {
     switch (action) {
+      case "patient_created":
+        return {
+          label: "Neu aufgenommen",
+          icon: UserCheck,
+          color: "text-purple-600",
+          bg: "bg-purple-50",
+          border: "border-purple-100"
+        };
+      case "patient_updated":
+        return {
+          label: "Akte aktualisiert",
+          icon: ClipboardList,
+          color: "text-purple-600",
+          bg: "bg-purple-50",
+          border: "border-purple-100"
+        };
       case "created":
         return {
           label: "Neu gebucht",
@@ -109,9 +130,33 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
           bg: "bg-blue-50",
           border: "border-blue-100"
         };
+      case "patient_archived":
+        return {
+          label: "In Papierkorb",
+          icon: AlertCircle,
+          color: "text-amber-600",
+          bg: "bg-amber-50",
+          border: "border-amber-100"
+        };
+      case "patient_restored":
+        return {
+          label: "Profil reaktiviert",
+          icon: UserCheck,
+          color: "text-emerald-600",
+          bg: "bg-emerald-50",
+          border: "border-emerald-100"
+        };
+      case "patient_deleted":
+        return {
+          label: "Endgültig gelöscht",
+          icon: XCircle,
+          color: "text-red-600",
+          bg: "bg-red-50",
+          border: "border-red-100"
+        };
       default:
         return {
-          label: action,
+          label: action.replace(/_/g, " "),
           icon: Clock,
           color: "text-stone-600",
           bg: "bg-stone-50",
@@ -164,11 +209,15 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
       </CardHeader>
       <CardContent className="p-0 overflow-y-auto max-h-[850px] scrollbar-thin scrollbar-thumb-stone-100">
         {isLoading ? (
-          <div className="p-6 space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex gap-3 animate-pulse">
-                <div className="w-8 h-8 rounded-full bg-stone-100 shrink-0" />
-                <div className="flex-1 space-y-2">
+          <div className="p-6 space-y-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex gap-4 animate-pulse">
+                <div className="w-9 h-9 rounded-full bg-stone-100 shrink-0 border-2 border-stone-50" />
+                <div className="flex-1 space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <div className="h-2 bg-stone-100 rounded w-1/3" />
+                    <div className="h-2 bg-stone-100 rounded w-16" />
+                  </div>
                   <div className="h-4 bg-stone-100 rounded w-3/4" />
                   <div className="h-3 bg-stone-100 rounded w-1/2" />
                 </div>
@@ -176,9 +225,11 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
             ))}
           </div>
         ) : activities.length === 0 ? (
-          <div className="text-center py-10 opacity-40">
-            <Calendar size={40} className="mx-auto mb-3 text-stone-300" />
-            <p className="text-sm italic">Bisher keine Aktivitäten</p>
+          <div className="text-center py-20 opacity-40 flex flex-col items-center justify-center">
+            <div className="w-16 h-16 bg-stone-50 rounded-2xl flex items-center justify-center mb-4">
+              <Calendar size={32} className="text-stone-200" />
+            </div>
+            <p className="text-sm font-medium text-stone-500 italic">Noch keine Aktivitäten protokolliert</p>
           </div>
         ) : (
           <div className="relative">
@@ -188,11 +239,15 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
             <div className="space-y-0">
               {filteredActivities.map((activity) => {
                 const config = getActionConfig(activity.action);
-                const roleLabel = activity.actor?.role === 'admin' ? 'Admin' : 'Patient';
                 
-                const patientName = activity.booking?.user 
-                  ? `${activity.booking.user.first_name || ''} ${activity.booking.user.last_name || ''}`.trim()
-                  : "Unbekannt";
+                // Alle direkten Patientenaktionen (erstellen, bearbeiten, archivieren, löschen, wiederherstellen) fangen mit "patient_" an
+                const isPatientAction = activity.action.startsWith("patient_");
+                
+                const patientName = isPatientAction && activity.details 
+                  ? `${activity.details.first_name || ''} ${activity.details.last_name || ''}`.trim()
+                  : activity.booking?.user 
+                    ? `${activity.booking.user.first_name || ''} ${activity.booking.user.last_name || ''}`.trim()
+                    : "Unbekannt";
 
                 return (
                   <div key={activity.id} className="p-4 hover:bg-stone-50/10 transition-colors group relative">
@@ -204,7 +259,7 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
                         <config.icon size={16} />
                       </div>
                       <div className="flex-1 min-w-0 pt-0.5">
-                        <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center justify-between mb-2">
                           <span className={cn(
                             "text-[10px] font-black uppercase tracking-[0.1em] flex items-center gap-2",
                             activity.actor?.role === 'admin' ? "text-amber-500" : "text-emerald-500"
@@ -213,25 +268,31 @@ export function RecentActivityList({ activities, isLoading }: RecentActivityList
                               "w-1.5 h-1.5 rounded-full shrink-0",
                               activity.actor?.role === 'admin' ? "bg-amber-500" : "bg-emerald-500"
                             )} />
-                            {roleLabel}
+                            {activity.actor?.role === 'admin' ? 'Administrator' : 'Patient'}
                           </span>
                           <span className="text-[9px] text-stone-400 font-bold bg-stone-100/80 px-2 py-0.5 rounded-full border border-stone-100">
                             {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true, locale: de })}
                           </span>
                         </div>
                         
-                        <div className="text-sm font-bold text-stone-900 group-hover:text-stone-950 transition-colors truncate">
-                          <span className="text-stone-400 font-medium">{config.label === "Neu gebucht" ? "Buchung" : config.label}:</span> {patientName}
+                        <div className="text-sm font-bold text-stone-900 group-hover:text-stone-950 transition-colors flex items-center gap-2 flex-wrap mt-1">
+                          <span className="text-stone-500 font-medium">
+                            {config.label}
+                          </span>
+                          <Badge variant="secondary" className="bg-white border border-stone-200 text-stone-800 px-2.5 py-0.5 rounded-md text-xs font-bold shadow-sm pointer-events-none">
+                            <span className="opacity-40 mr-1.5 text-[10px]">👤</span>
+                            {patientName}
+                          </Badge>
                         </div>
                         
                         {activity.booking?.session && (
-                          <div className="mt-2 flex items-center gap-3">
-                            <Badge variant="outline" className="text-[9px] py-0 px-2 h-4 bg-white border-stone-200 text-stone-500 font-bold uppercase tracking-tighter">
-                              {activity.booking.session.session_type?.name}
-                            </Badge>
+                          <div className="mt-2.5 flex items-center gap-3">
+                            <span className="text-[10px] font-bold text-stone-500 uppercase tracking-widest bg-stone-50 border border-stone-100 px-2 py-1 rounded-md">
+                              {activity.booking.session.session_type?.name || "Termin"}
+                            </span>
                             <span className="text-[10px] text-stone-400 font-medium flex items-center gap-1.5">
-                              <Calendar size={10} className="text-stone-300" />
-                              {new Date(activity.booking.session.start_time).toLocaleDateString("de-DE", { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                              <Calendar size={12} className="text-stone-300" />
+                              {new Date(activity.booking.session.start_time).toLocaleDateString("de-DE", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
                             </span>
                           </div>
                         )}

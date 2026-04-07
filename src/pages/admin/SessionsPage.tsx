@@ -3,6 +3,7 @@ import AdminLayout from "./AdminLayout";
 import { useToast } from "../../hooks/use-toast";
 import { supabase } from "../../lib/supabase";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { useAvailabilityExceptions } from "../../hooks/useAvailability";
 import {
   useSessionTypes,
@@ -52,6 +53,7 @@ type TabType = "todo" | "today" | "upcoming" | "history";
 export default function SessionsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user: adminUser } = useAuthContext();
   const { data: types = [] } = useSessionTypes();
   const { data: sessions = [], isLoading } = useSessions({ ascending: true });
   const createSession = useCreateSession();
@@ -116,6 +118,14 @@ export default function SessionsPage() {
         city: payload.city || null
       }).select().single();
       if (error) throw error;
+      
+      // Log activity for patient creation
+      await supabase.from("activities").insert({
+        action: "patient_created",
+        details: { patient_id: data.id, first_name: data.first_name, last_name: data.last_name },
+        actor_id: adminUser?.id
+      });
+
       return data;
     },
     onSuccess: (data) => {
@@ -222,7 +232,7 @@ export default function SessionsPage() {
     
     const startHour = 8;
     const endHour = 18;
-    const durationMin = selectedType ? selectedType.duration : 30;
+    const durationMin = selectedType ? selectedType.default_duration_minutes : 30;
     const slots = [];
     
     for (let h = startHour; h < endHour; h++) {
@@ -287,7 +297,7 @@ export default function SessionsPage() {
     const selectedType = (types as any[]).find(t => t.id === typeId);
     if (!selectedType) return;
     
-    const endObj = new Date(startObj.getTime() + selectedType.duration * 60000);
+    const endObj = new Date(startObj.getTime() + selectedType.default_duration_minutes * 60000);
 
     const payload = {
       session_type_id: typeId,
@@ -312,8 +322,18 @@ export default function SessionsPage() {
                user_id: selectedPatientId,
                notes: ""
             }, {
-               onSuccess: () => { toast({ title: "Termin erfolgreich angelegt!" }); resetForm(); },
-               onError: (err: any) => toast({ title: "Termin erstellt, aber Patientenzuweisung fehlgeschlagen", description: err.message, variant: "destructive" })
+                onSuccess: (newBooking: any) => { 
+                   // Log activity for admin manual booking
+                   supabase.from("activities").insert({
+                      action: "created",
+                      entity_id: newBooking.id,
+                      actor_id: adminUser?.id
+                   }).then(() => {
+                      toast({ title: "Termin erfolgreich angelegt!" }); 
+                      resetForm();
+                   });
+                },
+                onError: (err: any) => toast({ title: "Termin erstellt, aber Patientenzuweisung fehlgeschlagen", description: err.message, variant: "destructive" })
             });
           } else {
              toast({ title: "Gast-Termin erstellt" }); 
@@ -345,12 +365,19 @@ export default function SessionsPage() {
       status: "attended"
     }, {
       onSuccess: () => {
-        if (selectedSessionToComplete) {
-            updateSession.mutate({ id: selectedSessionToComplete, status: 'completed' });
-        }
-        toast({ title: "Dokumentation gespeichert", description: "Der Termin wurde als erledigt markiert." });
-        setSelectedBooking(null);
-        setSelectedSessionToComplete(null);
+        // Log activity for treatment recorded
+        supabase.from("activities").insert({
+          action: "treatment_recorded",
+          entity_id: selectedBooking.id,
+          actor_id: adminUser?.id
+        }).then(() => {
+          if (selectedSessionToComplete) {
+              updateSession.mutate({ id: selectedSessionToComplete, status: 'completed' });
+          }
+          toast({ title: "Dokumentation gespeichert", description: "Der Termin wurde als erledigt markiert." });
+          setSelectedBooking(null);
+          setSelectedSessionToComplete(null);
+        });
       },
       onError: (err: any) => toast({ title: "Fehler", description: err.message, variant: "destructive" })
     });
@@ -498,7 +525,7 @@ export default function SessionsPage() {
                 
                 {typeId && selectedDate ? (
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Freie Terminslots ({((types as any[]).find(t => t.id === typeId)?.duration || 30)} Min. Raster)</label>
+                    <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest pl-1">Freie Terminslots ({((types as any[]).find(t => t.id === typeId)?.default_duration_minutes || 30)} Min. Raster)</label>
 
                     {/* Exception Day Banner */}
                     {isDateBlocked(selectedDate).blocked ? (
@@ -559,9 +586,26 @@ export default function SessionsPage() {
 
       <div className="space-y-6">
         {isLoading ? (
-            <div className="space-y-4">
-                {[1,2,3].map(i => <div key={i} className="h-32 bg-stone-100 rounded-3xl animate-pulse" />)}
-            </div>
+          <div className="space-y-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-[32px] p-8 border border-stone-100 flex flex-col lg:flex-row lg:items-center justify-between gap-6 animate-pulse">
+                <div className="flex items-center gap-8 flex-1">
+                  <div className="min-w-[90px] pr-8 border-r border-stone-100 space-y-2">
+                    <div className="h-3 bg-stone-100 rounded w-16" />
+                    <div className="h-6 bg-stone-100 rounded w-12" />
+                  </div>
+                  <div className="flex-1 space-y-3">
+                    <div className="h-4 bg-stone-100 rounded w-24" />
+                    <div className="h-6 bg-stone-100 rounded w-48" />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-12 h-12 bg-stone-100 rounded-2xl" />
+                  <div className="w-12 h-12 bg-stone-100 rounded-2xl" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : filteredData.length === 0 ? (
             <div className="bg-stone-50 border border-dashed border-stone-200 rounded-[40px] p-24 text-center">
                 <div className="w-20 h-20 bg-stone-100 rounded-3xl flex items-center justify-center mx-auto mb-6 text-stone-300">

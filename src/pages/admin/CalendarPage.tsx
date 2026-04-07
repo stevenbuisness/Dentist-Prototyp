@@ -104,48 +104,54 @@ export default function CalendarPage() {
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-4">
-              {DAYS.map((day) => {
-                const rule = rules.find((r) => r.day_of_week === day.id);
-                const startTime = rule?.start_time?.slice(0, 5) || "08:00";
-                const endTime = rule?.end_time?.slice(0, 5) || "17:00";
-                
-                return (
-                  <div key={day.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-stone-100 rounded-2xl hover:bg-stone-50/80 transition-all bg-white shadow-sm group">
-                    <div className="flex items-center gap-4">
-                      {/* Day Avatar/Icon */}
-                      <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
-                        {day.name.substring(0, 2)}
-                      </div>
-                      
-                      {/* Day Details */}
-                      <div className="flex flex-col">
-                        <span className="font-montserrat font-bold text-base text-stone-900">{day.name}</span>
-                        <div className="flex items-center gap-1.5 mt-0.5 text-stone-400 text-[10px] uppercase font-bold tracking-wider">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 
-                          inkl. Pause 12—13 Uhr
+              {rules.length === 0 ? (
+                [...Array(5)].map((_, i) => (
+                  <div key={i} className="h-20 animate-pulse bg-stone-50 rounded-2xl border border-stone-100" />
+                ))
+              ) : (
+                DAYS.map((day) => {
+                  const rule = rules.find((r) => r.day_of_week === day.id);
+                  const startTime = rule?.start_time?.slice(0, 5) || "08:00";
+                  const endTime = rule?.end_time?.slice(0, 5) || "17:00";
+                  
+                  return (
+                    <div key={day.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-stone-100 rounded-2xl hover:bg-stone-50/80 transition-all bg-white shadow-sm group">
+                      <div className="flex items-center gap-4">
+                        {/* Day Avatar/Icon */}
+                        <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
+                          {day.name.substring(0, 2)}
+                        </div>
+                        
+                        {/* Day Details */}
+                        <div className="flex flex-col">
+                          <span className="font-montserrat font-bold text-base text-stone-900">{day.name}</span>
+                          <div className="flex items-center gap-1.5 mt-0.5 text-stone-400 text-[10px] uppercase font-bold tracking-wider">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 
+                            inkl. Pause 12—13 Uhr
+                          </div>
                         </div>
                       </div>
+                      
+                      {/* Time Inputs */}
+                      <div className="flex items-center gap-2 bg-stone-50/50 p-1.5 rounded-xl border border-stone-100 group-hover:border-stone-200 transition-colors">
+                        <Input 
+                          type="time" 
+                          value={startTime} 
+                          onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: e.target.value, end_time: endTime })}
+                          className="h-9 w-24 text-sm font-bold bg-white border-stone-200 text-stone-800 focus-visible:ring-1 focus-visible:ring-emerald-500 text-center shadow-sm" 
+                        />
+                        <span className="text-stone-300 font-bold px-1">–</span>
+                        <Input 
+                          type="time" 
+                          value={endTime} 
+                          onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: startTime, end_time: e.target.value })}
+                          className="h-9 w-24 text-sm font-bold bg-white border-stone-200 text-stone-800 focus-visible:ring-1 focus-visible:ring-emerald-500 text-center shadow-sm" 
+                        />
+                      </div>
                     </div>
-                    
-                    {/* Time Inputs */}
-                    <div className="flex items-center gap-2 bg-stone-50/50 p-1.5 rounded-xl border border-stone-100 group-hover:border-stone-200 transition-colors">
-                      <Input 
-                        type="time" 
-                        value={startTime} 
-                        onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: e.target.value, end_time: endTime })}
-                        className="h-9 w-24 text-sm font-bold bg-white border-stone-200 text-stone-800 focus-visible:ring-1 focus-visible:ring-emerald-500 text-center shadow-sm" 
-                      />
-                      <span className="text-stone-300 font-bold px-1">–</span>
-                      <Input 
-                        type="time" 
-                        value={endTime} 
-                        onChange={(e) => updateRule.mutate({ day_of_week: day.id, start_time: startTime, end_time: e.target.value })}
-                        className="h-9 w-24 text-sm font-bold bg-white border-stone-200 text-stone-800 focus-visible:ring-1 focus-visible:ring-emerald-500 text-center shadow-sm" 
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
             <div className="mt-8 p-5 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 leading-relaxed flex gap-4">
               <ShieldAlert size={24} className="shrink-0 text-blue-500" />
@@ -194,9 +200,13 @@ export default function CalendarPage() {
 
               <div className="space-y-3">
                 {exceptions.length === 0 ? (
-                  <div className="text-center py-10 text-stone-400 text-sm italic">
-                    Keine Ausnahmen eingetragen.
-                  </div>
+                  addException.isPending ? (
+                    <div className="h-16 animate-pulse bg-stone-50 rounded-xl border border-stone-100" />
+                  ) : (
+                    <div className="text-center py-10 text-stone-400 text-sm italic">
+                      Keine Ausnahmen eingetragen.
+                    </div>
+                  )
                 ) : (
                   exceptions.map((ex) => (
                     <div key={ex.id} className="flex items-center justify-between p-4 border border-stone-100 rounded-xl hover:shadow-sm transition-all group">

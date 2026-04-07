@@ -130,6 +130,7 @@ export const useAdminStats = (selectedDate: Date = new Date()) => {
           id,
           action,
           entity_id,
+          details,
           created_at,
           actor:users(first_name, last_name, role),
           booking:bookings(

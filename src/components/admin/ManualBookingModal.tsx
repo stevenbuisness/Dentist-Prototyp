@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, Calendar, Clock, User, ClipboardList, Search, Check, UserPlus, AlertCircle } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { supabase } from "../../lib/supabase";
@@ -34,7 +35,7 @@ interface ManualBookingModalProps {
 
 export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTimeStr, onSuccess }: ManualBookingModalProps) {
   const { toast } = useToast();
-
+  const { user: adminUser } = useAuthContext();
   const { data: sessionTypes } = useSessionTypes();
   const createSession = useCreateSession();
   const createBooking = useCreateBooking();
@@ -83,6 +84,14 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
         city: payload.city || null
       }).select().single();
       if (error) throw error;
+      
+      // Log activity for patient creation
+      await supabase.from("activities").insert({
+        action: "patient_created",
+        entity_id: data.id,
+        actor_id: adminUser?.id
+      });
+
       return data;
     },
     onSuccess: (data) => {
@@ -174,10 +183,17 @@ export function ManualBookingModal({ isOpen, onClose, defaultDateStr, defaultTim
       });
 
       // 2. Create Booking
-      await createBooking.mutateAsync({
+      const booking = await createBooking.mutateAsync({
         session_id: session.id,
         user_id: selectedPatient.id,
         notes: "Manuelle Einplanung (Admin)",
+      });
+
+      // 3. Log Activity for Admin creation
+      await supabase.from("activities").insert({
+        action: "created",
+        entity_id: booking.id,
+        actor_id: adminUser?.id
       });
 
       toast({ title: "Gebucht", description: "Der Termin wurde erfolgreich eingetragen." });

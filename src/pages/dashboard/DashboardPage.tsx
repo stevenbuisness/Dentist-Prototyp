@@ -32,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
-import { format, addDays, isSameDay, startOfDay, isAfter, subHours, differenceInMinutes, setHours, setMinutes, isBefore, addMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths } from "date-fns";
+import { format, addDays, isSameDay, startOfDay, isAfter, differenceInMinutes, setHours, setMinutes, isBefore, addMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths } from "date-fns";
 import { de } from "date-fns/locale";
 
 export default function DashboardPage() {
@@ -317,13 +317,15 @@ export default function DashboardPage() {
   const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
 
   const handleCancelExisting = async (bookingId: string, startTime: string) => {
-    const startsAt = new Date(startTime);
-    const limit = subHours(startsAt, 24);
+    // Current time and start time in milliseconds for precise comparison
+    const now = Date.now();
+    const startsAt = new Date(startTime).getTime();
+    const twentyFourHoursInMs = 24 * 60 * 60 * 1000;
     
-    if (isAfter(new Date(), limit)) {
+    if (startsAt - now < twentyFourHoursInMs) {
       toast({
         title: "Stornierung nicht möglich",
-        description: "Termine müssen mindestens 24h vorher abgesagt werden.",
+        description: "Termine müssen mindestens 24h vorher abgesagt werden. Bitte kontaktieren Sie uns telefonisch.",
         variant: "destructive"
       });
       return;

@@ -12,10 +12,16 @@ import {
   Eye,
   ChevronUp,
   Terminal,
-  ChevronDown
+  ChevronDown,
+  Undo2,
+  AlertTriangle,
+  ShieldAlert,
+  CheckCircle2,
+  X
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
+
 
 interface AuditLog {
   id: string;
@@ -28,6 +34,7 @@ interface AuditLog {
   created_at: string;
   user_email?: string;
   user_name?: string;
+  target_patient_name?: string;
 }
 
 // Helper functions
@@ -60,10 +67,10 @@ function translateValue(value: any) {
     'no_show': "Nicht erschienen",
     'canceled_by_admin': "Abgesagt (Admin)",
     'canceled_by_user': "Abgesagt (User)",
-    'open': "Offen",
-    'fully_booked': "Ausgebucht",
+    'open': "Verfügbar",
+    'fully_booked': "Reserviert / Gebucht",
     'canceled': "Abgesagt",
-    'completed': "Abgeschlossen",
+    'completed': "Abgeschlossen / Dokumentiert",
     'active': "Aktiv",
     'blocked': "Gesperrt",
     'rejected': "Abgelehnt",
@@ -102,6 +109,9 @@ export default function AuditLogsPage() {
   const [filterAction, setFilterAction] = useState<string>("all");
   const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
   const [debugLogs, setDebugLogs] = useState<Record<string, boolean>>({});
+  const [undoTarget, setUndoTarget] = useState<AuditLog | null>(null);
+  const [undoLoading, setUndoLoading] = useState(false);
+  const [undoSuccess, setUndoSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLogs();
@@ -109,7 +119,16 @@ export default function AuditLogsPage() {
 
   const fetchLogs = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    // Wir holen uns alle User (Patienten), um aus nackten IDs echte Namen auflösen zu können
+    const { data: usersData } = await supabase.from('users').select('id, first_name, last_name, role');
+    const userMap = new Map((usersData || []).map(u => [u.id, `${u.first_name || ''} ${u.last_name || ''}`.trim()]));
+
+    // Alle SessionTypes für die lesbare Anzeige der Behandlungsart anstelle kryptischer IDs
+    const { data: sessionTypesData } = await supabase.from('session_types').select('id, name');
+    const sessionTypeMap = new Map((sessionTypesData || []).map(t => [t.id, t.name]));
+
+    const { data: logsData, error } = await supabase
       .from('audit_logs')
       .select(`
         *,
@@ -125,11 +144,68 @@ export default function AuditLogsPage() {
     if (error) {
       console.error("Fehler beim Laden der Audit-Logs:", error);
     } else {
-      setLogs((data as any[]).map(log => ({
-        ...log,
-        user_name: log.changer ? `${log.changer.first_name} ${log.changer.last_name}` : "System / Automatisch",
-        user_email: log.changer?.email
-      })));
+      // Vorab-Suche nach Bookings für Sessions, um die Verbindung Termin -> Patient wiederherzustellen
+      const sessionIds = new Set<string>();
+      (logsData as any[]).forEach(log => {
+        if (log.table_name === 'sessions') {
+          sessionIds.add(log.record_id);
+        }
+      });
+      
+      const sessionToUserMap = new Map<string, string>();
+      if (sessionIds.size > 0) {
+        const { data: bookingsData } = await supabase
+          .from('bookings')
+          .select('session_id, user_id')
+          .in('session_id', Array.from(sessionIds));
+        
+        bookingsData?.forEach(b => {
+          sessionToUserMap.set(b.session_id, b.user_id);
+        });
+      }
+
+      setLogs((logsData as any[]).map(log => {
+        let patientName = "";
+        let sessionTypeName = "";
+        
+        const logData = log.new_data || log.old_data;
+        
+        // Direkte Zuweisung des Patienten per ID
+        let targetId = "";
+        if (log.table_name === 'bookings') {
+          targetId = logData?.user_id;
+        } else if (log.table_name === 'sessions') {
+          targetId = sessionToUserMap.get(log.record_id) || "";
+          
+          if (logData?.session_type_id && sessionTypeMap.has(logData.session_type_id)) {
+            sessionTypeName = sessionTypeMap.get(logData.session_type_id) || "";
+          }
+        } else if (log.table_name === 'users' && logData?.role === 'patient') {
+          targetId = logData?.id;
+        } else if (log.table_name === 'activities' && logData?.details?.patient_id) {
+          targetId = logData.details.patient_id;
+        }
+
+        if (targetId && userMap.has(targetId)) {
+          patientName = userMap.get(targetId) || "";
+        } else if (log.table_name === 'bookings' && logData?.user?.first_name) {
+          patientName = `${logData.user.first_name} ${logData.user.last_name || ''}`.trim();
+        } else if (log.table_name === 'users' && logData?.role === 'patient') {
+          patientName = `${logData.first_name || ''} ${logData.last_name || ''}`.trim();
+        }
+
+        const changerName = log.changer 
+          ? `${log.changer.first_name || ''} ${log.changer.last_name || ''}`.trim() 
+          : "System / Automatisch";
+
+        return {
+          ...log,
+          user_name: changerName,
+          user_email: log.changer?.email,
+          target_patient_name: patientName || "",
+          session_type_name: sessionTypeName || ""
+        };
+      }));
     }
     setLoading(false);
   };
@@ -142,12 +218,122 @@ export default function AuditLogsPage() {
     setDebugLogs(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // ──────────────────────────────────
+  // UNDO-Logik: Schritt rückgängig machen
+  // ──────────────────────────────────
+  const canUndo = (log: AuditLog) => {
+    if (log.action === 'UPDATE' && log.old_data) return true;
+    if (log.action === 'DELETE' && log.old_data) return true;
+    if (log.action === 'INSERT' && log.new_data) return true;
+    return false;
+  };
+
+  const getUndoDescription = (log: AuditLog) => {
+    const tableName = formatTableName(log.table_name);
+    switch (log.action) {
+      case 'UPDATE':
+        return `Die Änderungen an „${tableName}" werden auf den vorherigen Zustand zurückgesetzt.`;
+      case 'DELETE':
+        return `Der gelöschte Datensatz „${tableName}" wird wiederhergestellt.`;
+      case 'INSERT':
+        return `Der neu erstellte Datensatz „${tableName}" wird wieder entfernt.`;
+      default:
+        return "Diese Aktion wird rückgängig gemacht.";
+    }
+  };
+
+  const handleUndo = async (log: AuditLog) => {
+    setUndoLoading(true);
+    try {
+      let error: any = null;
+
+      if (log.action === 'UPDATE' && log.old_data) {
+        
+        if (log.table_name === 'sessions') {
+          // ─── INTELLIGENTER SESSION-UNDO ───
+          // Nur Status und Dokumentationsfelder zurücksetzen,
+          // aber den Titel (Patientenname) und Zeitfenster NICHT überschreiben!
+          const safeRestoreFields: Record<string, any> = {};
+          
+          // Nur diese Felder dürfen zurückgesetzt werden:
+          const allowedFields = ['status', 'notes'];
+          for (const field of allowedFields) {
+            if (log.old_data[field] !== undefined) {
+              safeRestoreFields[field] = log.old_data[field];
+            }
+          }
+          
+          if (Object.keys(safeRestoreFields).length > 0) {
+            const result = await supabase
+              .from('sessions')
+              .update(safeRestoreFields)
+              .eq('id', log.record_id);
+            error = result.error;
+          }
+          
+          // Wenn der Status von completed zurück auf fully_booked geht,
+          // müssen auch die zugehörigen Buchungen zurück auf "confirmed" gesetzt werden.
+          // So erscheint der Termin wieder unter "Ausstehend" in der Sitzungszentrale.
+          if (!error && log.old_data.status === 'fully_booked' && log.new_data?.status === 'completed') {
+            const { error: bookingError } = await supabase
+              .from('bookings')
+              .update({ status: 'confirmed' })
+              .eq('session_id', log.record_id);
+            
+            if (bookingError) {
+              console.warn("Buchungs-Kaskade fehlgeschlagen:", bookingError);
+            }
+          }
+          
+        } else {
+          // ─── STANDARD-UNDO für alle anderen Tabellen ───
+          const restoreData = { ...log.old_data };
+          delete restoreData.id;
+          const result = await supabase
+            .from(log.table_name)
+            .update(restoreData)
+            .eq('id', log.record_id);
+          error = result.error;
+        }
+        
+      } else if (log.action === 'DELETE' && log.old_data) {
+        const result = await supabase
+          .from(log.table_name)
+          .insert(log.old_data);
+        error = result.error;
+      } else if (log.action === 'INSERT' && log.new_data) {
+        const result = await supabase
+          .from(log.table_name)
+          .delete()
+          .eq('id', log.record_id);
+        error = result.error;
+      }
+
+      if (error) {
+        console.error("Undo fehlgeschlagen:", error);
+        alert(`Fehler beim Rückgängig-Machen: ${error.message}`);
+      } else {
+        setUndoSuccess(log.id);
+        setTimeout(() => {
+          setUndoTarget(null);
+          setUndoSuccess(null);
+          fetchLogs();
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("Undo Fehler:", err);
+      alert("Ein unerwarteter Fehler ist aufgetreten.");
+    }
+    setUndoLoading(false);
+  };
+
   const filteredLogs = logs.filter(log => {
     const actionText = translateAction(log.action).toLowerCase();
     const tableText = formatTableName(log.table_name).toLowerCase();
     const matchesSearch = 
       tableText.includes(searchTerm.toLowerCase()) ||
       (log.user_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (log.target_patient_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
       actionText.includes(searchTerm.toLowerCase());
     
     const matchesAction = filterAction === "all" || log.action === filterAction;
@@ -314,6 +500,24 @@ export default function AuditLogsPage() {
                               hour: '2-digit', minute: '2-digit'
                             })} Uhr</span>
                           </div>
+                          
+                          {log.target_patient_name ? (
+                            <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200 shadow-sm transition-all">
+                              <span className="text-[10px] font-black uppercase tracking-tight opacity-50">👤 Bezug:</span>
+                              <span className="font-bold">{log.target_patient_name}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2 text-stone-500 bg-stone-100 px-2.5 py-0.5 rounded-md border border-stone-200 shadow-sm transition-all">
+                              <span className="text-[10px] font-black uppercase tracking-tight opacity-70">⚙️ System-Einstellung</span>
+                            </div>
+                          )}
+                          
+                          {(log as any).session_type_name && (
+                            <div className="flex items-center gap-2 text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-md border border-stone-200 shadow-sm transition-all">
+                              <span className="text-[10px] font-black uppercase tracking-tight opacity-50">Art:</span>
+                              <span className="font-bold">{(log as any).session_type_name}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -348,15 +552,29 @@ export default function AuditLogsPage() {
                     <div className="mt-6 animate-in slide-in-from-top-2 duration-300 space-y-4">
                       {renderDiff(log)}
                       
-                      {/* Neuer Button für Entwickler-Ansicht */}
-                      <button 
-                        onClick={() => toggleDebug(log.id)}
-                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors py-2"
-                      >
-                        <Terminal size={12} />
-                        Entwickler Ansicht
-                        {debugLogs[log.id] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                      </button>
+                      {/* Aktions-Leiste: Undo + Entwickler */}
+                      <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-dashed border-stone-200">
+                        {canUndo(log) && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setUndoTarget(log)}
+                            className="h-9 px-4 rounded-xl font-bold flex items-center gap-2 text-amber-700 border-amber-200 bg-amber-50 hover:bg-amber-100 hover:border-amber-300 transition-all shadow-sm"
+                          >
+                            <Undo2 size={14} />
+                            Rückgängig machen
+                          </Button>
+                        )}
+
+                        <button 
+                          onClick={() => toggleDebug(log.id)}
+                          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-stone-900 transition-colors py-2"
+                        >
+                          <Terminal size={12} />
+                          Entwickler Ansicht
+                          {debugLogs[log.id] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        </button>
+                      </div>
 
                       {debugLogs[log.id] && (
                         <div className="p-4 bg-stone-900 flex flex-col gap-3 rounded-xl border border-stone-800 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
@@ -377,6 +595,114 @@ export default function AuditLogsPage() {
           </div>
         )}
       </div>
+
+      {/* ═══════════════════════════════════════════════ */}
+      {/* BESTÄTIGUNGS-MODAL für Rückgängig-Machen       */}
+      {/* ═══════════════════════════════════════════════ */}
+      {undoTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            onClick={() => !undoLoading && setUndoTarget(null)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 overflow-hidden">
+            {/* Header mit Warnsignal */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-b border-amber-100 p-8 text-center relative">
+              <button
+                onClick={() => !undoLoading && setUndoTarget(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center text-stone-400 hover:text-stone-900 transition-all shadow-sm border border-stone-200"
+              >
+                <X size={16} />
+              </button>
+              
+              {undoSuccess ? (
+                <>
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-100 border-2 border-emerald-200 flex items-center justify-center shadow-sm">
+                    <CheckCircle2 size={32} className="text-emerald-600" />
+                  </div>
+                  <h3 className="text-xl font-black text-emerald-900 font-montserrat">Erfolgreich rückgängig gemacht</h3>
+                  <p className="text-emerald-600 text-sm mt-1">Die Daten wurden wiederhergestellt.</p>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-100 border-2 border-amber-200 flex items-center justify-center shadow-sm">
+                    <ShieldAlert size={32} className="text-amber-600" />
+                  </div>
+                  <h3 className="text-xl font-black text-stone-900 font-montserrat">Aktion rückgängig machen?</h3>
+                  <p className="text-stone-500 text-sm mt-1">Diese Änderung erfordert eine bewusste Bestätigung.</p>
+                </>
+              )}
+            </div>
+            
+            {/* Inhalt */}
+            {!undoSuccess && (
+              <div className="p-8 space-y-5">
+                {/* Was genau wird rückgängig gemacht */}
+                <div className="bg-stone-50 rounded-2xl p-5 border border-stone-100 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className={cn(
+                      "px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border shadow-sm",
+                      getActionColor(undoTarget.action)
+                    )}>
+                      {translateAction(undoTarget.action)}
+                    </span>
+                    <span className="text-base font-black text-stone-900">
+                      {formatTableName(undoTarget.table_name)}
+                    </span>
+                  </div>
+                  
+                  <p className="text-sm text-stone-600 leading-relaxed">
+                    {getUndoDescription(undoTarget)}
+                  </p>
+                  
+                  {undoTarget.target_patient_name && (
+                    <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200 w-fit">
+                      <span className="text-[10px] font-black uppercase opacity-50">👤 Bezug:</span>
+                      <span className="font-bold text-sm">{undoTarget.target_patient_name}</span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Warnung */}
+                <div className="flex items-start gap-3 bg-red-50 rounded-xl p-4 border border-red-100">
+                  <AlertTriangle size={18} className="text-red-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-red-700 leading-relaxed">
+                    <strong>Achtung:</strong> Die Wiederherstellung überschreibt den aktuellen Zustand des Datensatzes. 
+                    Diese Aktion wird ebenfalls im Protokoll revisionssicher gespeichert.
+                  </p>
+                </div>
+
+                {/* Aktions-Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setUndoTarget(null)}
+                    disabled={undoLoading}
+                    className="flex-1 h-12 rounded-xl font-bold border-stone-200 text-stone-600 hover:bg-stone-50"
+                  >
+                    Abbrechen
+                  </Button>
+                  <Button
+                    onClick={() => handleUndo(undoTarget)}
+                    disabled={undoLoading}
+                    className="flex-1 h-12 rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-white border-0 shadow-md shadow-amber-200 transition-all"
+                  >
+                    {undoLoading ? (
+                      <RefreshCw size={16} className="animate-spin mr-2" />
+                    ) : (
+                      <Undo2 size={16} className="mr-2" />
+                    )}
+                    {undoLoading ? "Wird wiederhergestellt…" : "Ja, rückgängig machen"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
