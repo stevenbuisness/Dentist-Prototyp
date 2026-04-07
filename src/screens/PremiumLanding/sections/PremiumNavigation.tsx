@@ -33,19 +33,21 @@ export const PremiumNavigation = (): JSX.Element => {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-stone-200/80 bg-[#faf8f5]/95 backdrop-blur-md">
       <nav
-        className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-4"
+        className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-6 py-3 sm:py-4"
         aria-label="Hauptnavigation"
       >
         <Link
           to="/"
-          className="flex items-center gap-4 font-montserrat text-lg font-semibold tracking-tight text-stone-900 hover:text-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800 transition-all"
+          className="flex items-center gap-2 font-montserrat text-base sm:text-lg font-bold tracking-tight text-stone-900 group"
         >
           <img 
             src="/logo.png" 
             alt="Dr. Schmidt Logo" 
-            className="w-[4.5rem] h-[4.5rem] object-contain flex-shrink-0 mix-blend-multiply"
+            className="w-12 h-12 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 mix-blend-multiply transition-transform group-hover:scale-105"
           />
-          <span className="leading-tight">Dr. Schmidt · Zahnmedizin</span>
+          <span className="leading-tight">
+            Dr. Schmidt<span className="hidden sm:inline"> · Zahnmedizin</span>
+          </span>
         </Link>
 
         <ul className="hidden items-center gap-10 md:flex">
@@ -93,7 +95,7 @@ export const PremiumNavigation = (): JSX.Element => {
           </a>
           <Link
             to="/dashboard"
-            className="font-montserrat inline-flex items-center rounded-sm bg-stone-900 px-3 py-2 text-[11px] font-black uppercase tracking-widest text-[#faf8f5] transition-all hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800 whitespace-nowrap"
+            className="font-montserrat inline-flex items-center rounded-sm bg-stone-900 px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[#faf8f5] transition-all hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800 whitespace-nowrap"
           >
             Termin buchen
           </Link>
