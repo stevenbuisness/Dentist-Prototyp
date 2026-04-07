@@ -68,7 +68,7 @@ export default function AdminDashboard() {
       description: "Gesamtzahl für heute"
     },
     {
-      label: "Offene Termine Heute",
+      label: "Offene Termine heute",
       value: stats?.openCountToday ?? 0,
       icon: CalendarCheck,
       color: "text-amber-600",
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       description: "Letzte 7 Tage"
     },
     {
-      label: "Offene Dokus",
+      label: "Offene Dokumentationen",
       value: stats?.missingDocsCount ?? 0,
       icon: (stats?.missingDocsCount ?? 0) > 0 ? AlertCircle : CheckCircle2,
       color: (stats?.missingDocsCount ?? 0) > 0 ? "text-red-600" : "text-emerald-600",

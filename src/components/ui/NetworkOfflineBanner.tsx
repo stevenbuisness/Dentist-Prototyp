@@ -24,7 +24,7 @@ export function NetworkOfflineBanner() {
       <div className="max-w-7xl mx-auto px-4 h-10 flex items-center justify-center gap-2 text-white text-sm">
         <WifiOff size={16} />
         <p className="font-medium">
-          <span className="hidden sm:inline">Keine Internetverbindung. Die Applikation befindet sich im Offline-Modus.</span>
+          <span className="hidden sm:inline">Keine Internetverbindung. Die Anwendung befindet sich im Offline-Modus.</span>
           <span className="sm:hidden">Offline-Modus aktiv</span>
         </p>
       </div>

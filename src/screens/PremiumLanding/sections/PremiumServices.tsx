@@ -15,7 +15,7 @@ const items = [
   },
   {
     title: "Zahnerhalt",
-    text: "Karies- und Endodontietherapie mit mikroskopischer Präzision wo indiziert.",
+    text: "Karies- und Endodontietherapie mit mikroskopischer Präzision, wo indiziert.",
     Icon: Microscope,
   },
   {

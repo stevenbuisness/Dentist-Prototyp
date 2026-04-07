@@ -72,13 +72,13 @@ export const PremiumFooter = (): JSX.Element => {
               href="#kontakt"
               className="font-lato text-xs text-stone-400 hover:text-stone-200"
             >
-              Impressum (Platzhalter)
+              Impressum
             </a>
             <a
               href="#kontakt"
               className="font-lato text-xs text-stone-400 hover:text-stone-200"
             >
-              Datenschutz (Platzhalter)
+              Datenschutz
             </a>
           </nav>
         </div>

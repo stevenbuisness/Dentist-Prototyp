@@ -34,6 +34,7 @@ import {
 } from "../../components/ui/alert-dialog";
 import { format, addDays, isSameDay, startOfDay, isAfter, differenceInMinutes, setHours, setMinutes, isBefore, addMinutes, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths } from "date-fns";
 import { de } from "date-fns/locale";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const { user, profile } = useAuthContext();
@@ -404,10 +405,10 @@ export default function DashboardPage() {
                <div className="p-8 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-montserrat font-black text-stone-900 uppercase tracking-tight">Terminbuchung</h2>
-                    <p className="text-stone-400 text-[10px] font-black uppercase tracking-widest mt-1">Schritt {bookingStep} von 3</p>
+                    <p className="text-stone-400 text-[10px] font-black uppercase tracking-widest mt-1">Schritt {bookingStep} von 4</p>
                   </div>
                   <div className="flex gap-1.5">
-                    {[1, 2, 3].map(step => (
+                    {[1, 2, 3, 4].map(step => (
                       <div key={step} className={cn("w-2 h-2 rounded-full transition-all duration-300", bookingStep >= step ? "bg-stone-900 w-6" : "bg-stone-200")} />
                     ))}
                   </div>
@@ -420,7 +421,7 @@ export default function DashboardPage() {
                          <CheckCircle2 size={40} />
                       </div>
                       <div className="max-w-md">
-                        <h3 className="text-2xl font-montserrat font-black text-stone-900 uppercase tracking-tight leading-none mb-4">Ein Termin ist bereits reserviert</h3>
+                        <h3 className="text-2xl font-montserrat font-black text-stone-900 uppercase tracking-tight leading-none mb-4">Sie haben bereits einen Termin reserviert</h3>
                         <p className="text-stone-500 text-sm leading-relaxed font-medium">
                           Um die Qualität unserer Planung zu sichern, kann pro Patient aktuell nur ein anstehender Termin gebucht werden. 
                           Sie können Ihren bestehenden Termin in der Sidebar rechts verwalten oder stornieren, um einen neuen zu wählen.
@@ -471,7 +472,7 @@ export default function DashboardPage() {
                              </button>
                              <div>
                                <h3 className="font-bold text-stone-900">{selectedType?.name}</h3>
-                               <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest leading-none mt-1">Geben Sie Ihre gewünschte Zeit an</p>
+                               <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest leading-none mt-1">Wählen Sie Ihren Wunschtermin</p>
                              </div>
                           </div>
                           
@@ -697,8 +698,8 @@ export default function DashboardPage() {
                               </div>
 
                               <div>
-                                 <h3 className="font-montserrat font-black text-stone-900 uppercase tracking-tight text-2xl leading-none">Termin Bestätigen</h3>
-                                 <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-2 px-1 border-l-2 border-stone-300">Fast am Ziel</p>
+                                 <h3 className="font-montserrat font-black text-stone-900 uppercase tracking-tight text-2xl leading-none">Termin bestätigen</h3>
+                                 <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-2 px-1 border-l-2 border-stone-300">Nur noch ein Schritt</p>
                               </div>
 
                               <div className="space-y-4">
@@ -746,27 +747,56 @@ export default function DashboardPage() {
 
                       {/* Step 4: Success Message */}
                       {bookingStep === 4 && (
-                        <div className="space-y-6 animate-in zoom-in-95 duration-500 h-full flex flex-col items-center justify-center py-10">
+                        <motion.div 
+                          className="h-full flex flex-col items-center justify-center py-10"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                        >
                           <div className="bg-stone-900 rounded-[3rem] p-12 text-center text-white relative overflow-hidden shadow-2xl max-w-lg w-full mx-auto">
                             {/* Inner Glow Background */}
-                            <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
+                            <motion.div 
+                              className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none"
+                              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            >
                               <div className="w-64 h-64 bg-emerald-500 rounded-full blur-[100px]" />
-                            </div>
+                            </motion.div>
                             
                             <div className="relative z-10 flex flex-col items-center">
-                              <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-emerald-900/50 mb-8 border-4 border-emerald-300 pointer-events-none">
-                                <CheckCircle2 size={48} strokeWidth={2.5} className="animate-in fade-in zoom-in duration-500 delay-150" />
-                              </div>
+                              <motion.div 
+                                className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-emerald-900/50 mb-8 border-4 border-emerald-300 pointer-events-none"
+                                initial={{ y: 20, rotate: -15, scale: 0.5 }}
+                                animate={{ y: 0, rotate: 0, scale: 1 }}
+                                transition={{ type: "spring", bounce: 0.6, delay: 0.2 }}
+                              >
+                                <CheckCircle2 size={48} strokeWidth={2.5} />
+                              </motion.div>
                               
-                              <h2 className="text-3xl font-montserrat font-black tracking-tight mb-4">
-                                Termin gebucht!
-                              </h2>
+                              <motion.h2 
+                                className="text-3xl font-montserrat font-black tracking-tight mb-4"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 }}
+                              >
+                                Termin erfolgreich gebucht
+                              </motion.h2>
                               
-                              <p className="text-stone-300 font-medium leading-relaxed mb-8">
+                              <motion.p 
+                                className="text-stone-300 font-medium leading-relaxed mb-8"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                              >
                                 Vielen Dank! Wir freuen uns auf Sie. Ihr Termin für eine <strong className="text-white">{selectedType?.name}</strong> ist hiermit verbindlich bestätigt.
-                              </p>
+                              </motion.p>
 
-                              <div className="bg-white/10 border border-white/10 rounded-3xl p-6 text-left w-full mb-8 backdrop-blur-sm">
+                              <motion.div 
+                                className="bg-white/10 border border-white/10 rounded-3xl p-6 text-left w-full mb-8 backdrop-blur-sm"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6 }}
+                              >
                                 <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-1.5 pl-1">Ihr Zeitpunkt</p>
                                 <div className="text-[17px] font-bold font-montserrat flex items-center gap-3">
                                   <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
@@ -774,20 +804,27 @@ export default function DashboardPage() {
                                   </div>
                                   {selectedSlot ? format(new Date(selectedSlot.start_time), "EEEE, d. MMMM 'um' HH:mm", { locale: de }) : ""} Uhr
                                 </div>
-                              </div>
+                              </motion.div>
 
-                              <Button 
-                                onClick={() => {
-                                  setBookingStep(1);
-                                  setSelectedSlot(null);
-                                }}
-                                className="w-full h-16 bg-white hover:bg-stone-100 text-stone-900 rounded-3xl font-black uppercase tracking-widest text-[11px] transition-all shadow-xl shadow-white/5 active:scale-95"
+                              <motion.div
+                                className="w-full"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.8 }}
                               >
-                                Zurück zur Übersicht
-                              </Button>
+                                <Button 
+                                  onClick={() => {
+                                    setBookingStep(1);
+                                    setSelectedSlot(null);
+                                  }}
+                                  className="w-full h-16 bg-white hover:bg-stone-100 text-stone-900 rounded-3xl font-black uppercase tracking-widest text-[11px] transition-all shadow-xl shadow-white/5 active:scale-95"
+                                >
+                                  Zurück zur Übersicht
+                                </Button>
+                              </motion.div>
                             </div>
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                     </>
                   )}
@@ -827,7 +864,7 @@ export default function DashboardPage() {
                    onClick={() => handleCancelExisting(upcomingBooking.id, upcomingBooking.session.start_time)}
                    className="w-full bg-white/5 border-white/10 text-white/60 hover:bg-red-500 hover:text-white hover:border-red-500 rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 transition-all"
                  >
-                    Termin Absagen
+                    Termin absagen
                  </Button>
               </div>
             ) : (

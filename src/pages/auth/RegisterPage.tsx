@@ -51,7 +51,7 @@ export default function RegisterPage() {
             Konto erstellen
           </h2>
           <p className="mt-2 text-sm text-muted-foreground font-lato">
-            Werden Sie Teil unserer Patienten-Gemeinschaft
+            Werden Sie Teil unserer Patientengemeinschaft
           </p>
         </div>
 

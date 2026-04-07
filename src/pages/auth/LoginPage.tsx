@@ -21,7 +21,7 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setLoginError("Anmelde Daten sind falsch");
+      setLoginError("Anmeldedaten sind nicht korrekt");
       setLoading(false);
       return;
     }
@@ -61,7 +61,7 @@ export default function LoginPage() {
             Anmelden
           </h2>
           <p className="mt-2 text-sm text-muted-foreground font-lato">
-            Willkommen zurück in Ihrer Zahnarzt-Praxis
+            Willkommen zurück in Ihrer Zahnarztpraxis
           </p>
         </div>
 

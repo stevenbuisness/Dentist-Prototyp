@@ -14,8 +14,8 @@ export const PremiumTeam = (): JSX.Element => {
           />
         </div>
         <div className="max-w-xl pt-2">
-          <h2 className="font-montserrat text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
-            Führungszahnarzt mit nachweislicher Weiterbildung
+            <h2 className="font-montserrat text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
+            Leitender Zahnarzt mit nachweislicher Weiterbildung
           </h2>
           <p className="mt-6 font-lato text-lg leading-relaxed text-stone-700">
             Dr. Schmidt leitet die Praxis mit über 15 Jahren klinischer
@@ -28,7 +28,7 @@ export const PremiumTeam = (): JSX.Element => {
               <dt className="text-xs font-semibold uppercase tracking-wide text-stone-500">
                 Qualifikation
               </dt>
-              <dd>Staatsexamen; Fachzahnarztweiterbildung (analog gültiger Regelung)</dd>
+              <dd>Staatsexamen; Fachzahnärztliche Weiterbildung</dd>
             </div>
             <div className="flex flex-col gap-1 border-l-2 border-stone-300 pl-4">
               <dt className="text-xs font-semibold uppercase tracking-wide text-stone-500">

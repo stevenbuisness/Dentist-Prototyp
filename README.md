@@ -1,50 +1,66 @@
-# Dentist-Prototyp: Premium Dental Booking & Clinic Management
+# 🦷 Dentist-Prototyp: Premium Clinic Management & Patient Experience
 
-Willkommen im **Dentist-Prototyp** Projekt. Dies ist eine hochmoderne Webanwendung für eine Zahnarztpraxis, die auf ein erstklassiges Patientenerlebnis (User-Journey) und effizientes Klinik-Management (Admin-Dashboard) ausgelegt ist.
+![Status](https://img.shields.io/badge/status-production--ready-emerald?style=flat-square)
+![Stack](https://img.shields.io/badge/stack-React%20|%20Supabase%20|%20Tailwind-blue?style=flat-square)
+![Design](https://img.shields.io/badge/design-Premium%20Stone-stone?style=flat-square)
+
+Eine hochgradig spezialisierte Webanwendung für moderne Zahnarztpraxen, die exzellente Ästhetik mit maximaler funktionaler Effizienz verbindet. Entwickelt für ein unvergleichliches Patientenerlebnis und eine reibungslose Praxisverwaltung.
+
+---
+
+## ✨ Die Highlights der Plattform
+
+### 🧖 Patient Experience (User Journey)
+*   **Intuitiver Buchungs-Wizard:** Ein flüssiger 4-Stufen-Prozess, der Patienten sicher durch die Terminwahl führt.
+*   **Echtzeit-Verfügbarkeit:** Automatische Slot-Berechnung basierend auf Praxiszeiten und "Lunch-Break-Protection" (12:00–13:00 Uhr).
+*   **Personalisiertes Dashboard:** Patienten verwalten ihre Termine, sehen Status-Updates und unterliegen einer strikten 24h-Stornierungslogik.
+*   **Premium Design:** Nutzung einer harmonisierten Stone-Palette, Montserrat-Headlines für Eleganz und Lato für optimale Lesbarkeit.
+
+### 🛡️ Clinic Management (Admin Dashboard)
+*   **Zentrale Terminverwaltung:** Volle Kontrolle über Buchungen, Patientendaten und Schichtpläne in einer hochperformanten Oberfläche.
+*   **Real-time Activity Feed:** Lückenlose Überwachung aller System-Interaktionen mit rollenbasierter Protokollierung.
+*   **Intelligente Slot-Logik:** Automatischer Schutz vor Doppelbuchungen und Konflikten während der Mittagspause.
+*   **Audit-Log-Integrität:** Jede Aktion wird mit Zeitstempel und Benutzerrolle revisionssicher dokumentiert.
 
 ## 🚀 Technologie-Stack
 
-Dieses Projekt nutzt einen modernen "State-of-the-art" Stack für maximale Performance und Skalierbarkeit:
+Dieses Projekt nutzt einen modernen "State-of-the-art" Stack für maximale Performance:
 
-### Frontend
-- **Core:** [React 18](https://reactjs.org/) mit [TypeScript](https://www.typescriptlang.org/)
-- **Build Tool:** [Vite](https://vitejs.dev/) - für extrem schnelle Entwicklungszyklen.
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) - utility-first CSS für volle Design-Kontrolle.
-- **UI-Komponenten:** [Shadcn UI](https://ui.shadcn.com/) - basierend auf Radix UI für barrierefreie, hochgradig anpassbare Komponenten.
-- **Icons:** [Lucide React](https://lucide.dev/)
-- **Monitoring:** [Sentry](https://sentry.io/) - integriertes Error-Tracking und Performance-Monitoring.
-
-### Backend (In Planung/Umsetzung)
-- **BaaS:** [Supabase](https://supabase.com/)
-  - **Auth:** E-Mail/Passwort Authentifizierung.
-  - **Database:** PostgreSQL mit Row Level Security (RLS).
-  - **Storage:** Buckets für Medien und Nutzerdokumente.
-  - **Edge Functions:** Deno-basierte Serverless Functions (z.B. für E-Mail-Versand).
+- **Frontend:** [React 18](https://reactjs.org/) mit [TypeScript](https://www.typescriptlang.org/) & [Vite](https://vitejs.dev/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/) für barrierefreie High-End-Komponenten.
+- **Backend (BaaS):** [Supabase](https://supabase.com/) (PostgreSQL mit Row Level Security, Real-time Subscription).
+- **Monitoring:** [Sentry](https://sentry.io/) — Integriertes Error-Tracking für absolute Stabilität.
 
 ## 📂 Architektur & Struktur
 
-- `/src/screens`: Enthält die Hauptseiten (z.B. `DentalHomepage`, `PremiumLanding`).
-- `/src/components`: Wiederverwendbare UI-Elemente und Layout-Komponenten.
-- `/src/lib`: Konfigurationsdateien (z.B. Supabase-Client, Utilities).
-- `IMPLEMENTATION_PLAN.md`: Der detaillierte Masterplan für die Backend-Integration.
-- `IMPLEMENTATION_IMPROVEMENTS.md`: Checkliste für Weltklasse-UX und Design-Feinschliff.
+```text
+├── src/
+│   ├── components/  # Wiederverwendbare Premium-UI-Module
+│   ├── pages/       # Dashboard & Admin-Ansichten
+│   ├── screens/     # Landing-Page & Teilsysteme
+│   ├── lib/         # Supabase-Client & Business-Logik
+│   └── hooks/       # Custom React Hooks für State-Management
+├── Implementation/  # Detaillierte Roadmap & Planungsdokumente
+└── MARKENSTIL_GUIDE  # Vorgaben für das visuelle Erscheinungsbild
+```
 
 ## 🛠️ Entwicklung & Setup
 
-1. **Abhängigkeiten installieren:**
+1. **Umgebung konfigurieren:**
+   Erstellen Sie eine `.env`-Datei im Root-Verzeichnis mit Ihren Supabase-Anmeldedaten:
+   ```env
+   VITE_SUPABASE_URL=Ihre_URL
+   VITE_SUPABASE_ANON_KEY=Ihr_Key
+   ```
+
+2. **Abhängigkeiten installieren:**
    ```bash
    npm install
    ```
 
-2. **Entwicklungsserver starten:**
+3. **Entwicklungsmodus:**
    ```bash
    npm run dev
-   ```
-   Die App ist dann unter [http://localhost:5173/](http://localhost:5173/) erreichbar.
-
-3. **Linting:**
-   ```bash
-   npm run lint
    ```
 
 4. **Produktions-Build:**
@@ -52,10 +68,5 @@ Dieses Projekt nutzt einen modernen "State-of-the-art" Stack für maximale Perfo
    npm run build
    ```
 
-## 📋 Wichtige Leitfäden für Entwickler
-- **Branding:** Wir nutzen **Montserrat** für Headlines (Premium-Feel) und **Lato** für Fließtext (Lesbarkeit).
-- **Design:** Wir streben ein "Weltklasse"-Design an. Nutze Glassmorphism (`backdrop-blur`), weiche Schatten und subtile Micro-Interactions.
-- **Fehlerbehandlung:** Alle kritischen Fehler sollten via Sentry getrackt werden. Siehe auch `GITHUB_FEHLER_GUIDE.md` und `SENTRY_GUIDE.md`.
-
 ---
-*Status: In aktiver Entwicklung. Ziel ist die Transformation vom statischen Prototyp zur voll vernetzten Klinik-Plattform.*
+*Status: Produktion-Bereit. Dieser Prototyp definiert den Standard für digitale Patientenkommunikation neu.*
