@@ -9,12 +9,12 @@ export const Navigation = (): JSX.Element => {
         <div className="flex items-center gap-4 sm:gap-12">
           <a
             href="#"
-            className="flex items-center gap-3 [font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 [font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-lg sm:text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
           >
             <img 
               src="/logo.png" 
               alt="Dr. Schmidt Logo" 
-              className="w-10 h-10 object-contain"
+              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
             />
             <span className="hidden sm:inline whitespace-nowrap">Zahnarztpraxis</span> Dr. Schmidt
           </a>
@@ -70,7 +70,7 @@ export const Navigation = (): JSX.Element => {
             030 1234 5678
           </a>
 
-          <button className="px-3 py-2 sm:px-6 sm:py-3 bg-[#5ba3bb] text-white [font-family:'Kollektif-Bold',Helvetica] font-bold text-[10px] sm:text-xs tracking-[0.70px] hover:bg-[#4a92a9] transition-colors rounded whitespace-nowrap">
+          <button className="px-2 py-1.5 sm:px-6 sm:py-3 bg-[#5ba3bb] text-white [font-family:'Kollektif-Bold',Helvetica] font-bold text-[9px] sm:text-xs tracking-normal sm:tracking-[0.70px] hover:bg-[#4a92a9] transition-colors rounded whitespace-nowrap">
             TERMIN BUCHEN
           </button>
 
