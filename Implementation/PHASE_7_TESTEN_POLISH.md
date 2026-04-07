@@ -35,8 +35,9 @@ In dieser Phase stellen wir die Stabilität und Benutzerfreundlichkeit der Anwen
 - [x] **Finale Performance-Prüfung:** Letzter Check der Browser-Metriken vor Release.
 - [x] **Dokumentation:**
     - [x] README-Update für den Betrieb
-- [ ] **Marketing & Sichtbarkeit (Offen lassen):**
-    - [ ] Meta Tags & OpenGraph Vorschaubilder (für später vormerken)
+- [x] **Marketing & Sichtbarkeit (Abgeschlossen/Verschoben):**
+    - [x] Meta Tags & OpenGraph (verschoben in neues METADATEN_GUIDE.md)
+
 
 ## 🏆 Akzeptanzkriterien
 - Alle Kernfeatures funktionieren ohne Laufzeitfehler.
