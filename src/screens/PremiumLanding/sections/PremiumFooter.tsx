@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Instagram, Linkedin, MapPin, Phone, Mail, Award, Landmark, FileCheck } from "lucide-react";
 
 export const PremiumFooter = (): JSX.Element => {
   return (
@@ -15,6 +16,26 @@ export const PremiumFooter = (): JSX.Element => {
             <p className="mt-3 font-lato text-sm leading-relaxed text-stone-300">
               Zahnarztpraxis · evidenzbasierte Diagnostik und Therapieplanung.
             </p>
+            <div className="mt-8 flex items-center gap-4">
+              <a 
+                href="#" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all duration-300 group"
+                aria-label="Instagram"
+              >
+                <Instagram size={20} className="transition-transform group-hover:scale-110" />
+              </a>
+              <a 
+                href="#" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-emerald-500 hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all duration-300 group"
+                aria-label="LinkedIn"
+              >
+                <Linkedin size={20} className="transition-transform group-hover:scale-110" />
+              </a>
+            </div>
           </div>
           <address className="not-italic">
             <p className="font-montserrat text-sm font-semibold uppercase tracking-wide text-stone-400">
@@ -91,25 +112,35 @@ export const PremiumFooter = (): JSX.Element => {
             </div>
           </div>
         </div>
-        <div className="mt-16 flex flex-col gap-4 border-t border-stone-700 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-lato text-xs text-stone-500">
-            © {new Date().getFullYear()} Zahnarztpraxis Dr. Maria Schmidt
-          </p>
-          <nav aria-label="Rechtliches" className="flex flex-wrap gap-6">
-            <Link
-              to="/impressum"
-              className="font-lato text-xs text-stone-400 hover:text-stone-200 transition-colors"
-            >
-              Impressum
-            </Link>
-            <Link
-              to="/datenschutz"
-              className="font-lato text-xs text-stone-400 hover:text-stone-200 transition-colors"
-            >
-              Datenschutz
-            </Link>
-          </nav>
-
+        <div className="mt-16 border-t border-stone-800/80 pt-8">
+          <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-4">
+              <p className="font-lato text-sm italic text-stone-400 tracking-wide leading-relaxed max-w-xs">
+                „Zahnmedizin auf höchstem Niveau für ein <span className="text-emerald-500/80 font-bold not-italic">strahlendes Lächeln</span>.“
+              </p>
+              <div className="flex items-center gap-4">
+                <p className="font-lato text-[10px] uppercase tracking-[0.2em] text-stone-600">
+                  © {new Date().getFullYear()} Zahnarztpraxis Dr. Maria Schmidt
+                </p>
+              </div>
+            </div>
+            <nav aria-label="Rechtliches" className="flex flex-wrap gap-x-8 gap-y-4">
+              <Link
+                to="/impressum"
+                className="font-lato text-[10px] font-black uppercase tracking-[0.2em] text-stone-500 hover:text-emerald-400 transition-all duration-300 flex items-center gap-2 group"
+              >
+                <div className="w-1 h-1 rounded-full bg-stone-700 group-hover:bg-emerald-500 transition-colors" />
+                Impressum
+              </Link>
+              <Link
+                to="/datenschutz"
+                className="font-lato text-[10px] font-black uppercase tracking-[0.2em] text-stone-500 hover:text-emerald-400 transition-all duration-300 flex items-center gap-2 group"
+              >
+                <div className="w-1 h-1 rounded-full bg-stone-700 group-hover:bg-emerald-500 transition-colors" />
+                Datenschutz
+              </Link>
+            </nav>
+          </div>
         </div>
       </div>
     </footer>
