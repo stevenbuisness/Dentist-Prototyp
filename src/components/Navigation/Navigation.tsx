@@ -5,8 +5,8 @@ export const Navigation = (): JSX.Element => {
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm shadow-sm">
-      <div className="max-w-[1840px] mx-auto px-8 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-12">
+      <div className="max-w-[1840px] mx-auto px-4 sm:px-8 py-4 sm:py-6 flex items-center justify-between">
+        <div className="flex items-center gap-4 sm:gap-12">
           <a
             href="#"
             className="flex items-center gap-3 [font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
@@ -47,7 +47,7 @@ export const Navigation = (): JSX.Element => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <a
             href="tel:03012345678"
             className="hidden md:flex items-center gap-2 [font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors"
@@ -70,7 +70,7 @@ export const Navigation = (): JSX.Element => {
             030 1234 5678
           </a>
 
-          <button className="px-6 py-3 bg-[#5ba3bb] text-white [font-family:'Kollektif-Bold',Helvetica] font-bold text-xs tracking-[0.70px] hover:bg-[#4a92a9] transition-colors rounded">
+          <button className="px-3 py-2 sm:px-6 sm:py-3 bg-[#5ba3bb] text-white [font-family:'Kollektif-Bold',Helvetica] font-bold text-[10px] sm:text-xs tracking-[0.70px] hover:bg-[#4a92a9] transition-colors rounded whitespace-nowrap">
             TERMIN BUCHEN
           </button>
 

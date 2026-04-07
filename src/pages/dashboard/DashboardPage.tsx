@@ -363,14 +363,14 @@ export default function DashboardPage() {
             />
             <span>Dr. Schmidt</span>
           </Link>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link to="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
-              <Home size={16} /> <span className="hidden sm:inline">Zur Startseite</span>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link to="/" className="text-stone-600 hover:text-stone-900 transition-colors flex items-center justify-center group p-1">
+              <Home size={22} /> <span className="hidden sm:inline ml-1.5 text-sm font-medium">Zur Startseite</span>
             </Link>
-            <Link to="/profile" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
-              <UserIcon size={16} /> <span className="hidden sm:inline">Profil</span>
+            <Link to="/profile" className="text-stone-600 hover:text-stone-900 transition-colors flex items-center justify-center group p-1">
+              <UserIcon size={22} /> <span className="hidden sm:inline ml-1.5 text-sm font-medium">Profil</span>
             </Link>
-            <button onClick={handleLogout} className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-stone-900 text-[#faf8f5] text-xs sm:text-sm font-semibold hover:bg-stone-800 transition-colors shadow-sm">
+            <button onClick={handleLogout} className="px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-stone-900 text-[#faf8f5] text-xs sm:text-sm font-bold hover:bg-stone-800 transition-all shadow-sm active:scale-95">
               Abmelden
             </button>
           </div>
