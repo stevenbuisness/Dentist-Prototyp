@@ -5,18 +5,18 @@ In dieser Phase stellen wir die Stabilität und Benutzerfreundlichkeit der Anwen
 ## 📋 Aufgabenliste
 
 ### 7.1 Testing & Validierung (Schritt 1: Der "Hard-Test")
-- [ ] **End-to-End Test (E2E) Flow:**
-    - [ ] Patient "Frank Meier" registrieren/einloggen
-    - [ ] Termin buchen (Patienten-Wizard)
-    - [ ] Admin sieht Buchung in Dashboard & Sitzungszentrale
-    - [ ] Admin bestätigt/bearbeitet Termin
-    - [ ] Patient sieht Status-Update
+- [x] **End-to-End Test (E2E) Flow:**
+    - [x] Patient "Frank Meier" registrieren/einloggen
+    - [x] Termin buchen (Patienten-Wizard)
+    - [x] Admin sieht Buchung in Dashboard & Sitzungszentrale
+    - [x] Admin bestätigt/bearbeitet Termin
+    - [x] Patient sieht Status-Update
 - [x] **Regel-Validierung:**
     - [x] Validierung der Audit-Logs & Rollen-Anzeige (Name & Rolle korrekt protokolliert)
     - [x] Prüfung der Stornierungs-Logik (24h Regel)
-- [ ] **Sicherheits-Check:**
+- [x] **Sicherheits-Check:**
     - [x] Überprüfung der Zugangsberechtigungen (Rollen-Check: Kann Patient Admin-Seiten aufrufen?)
-    - [ ] Edge-Case: Offline-State / Verbindungsabbruch-Handling prüfen
+    - [x] Edge-Case: Offline-State / Verbindungsabbruch-Handling prüfen
 
 ### 7.2 UX, Performance & Premium-Finish (Schritt 2)
 - [x] **Visual Polishing:**
@@ -24,7 +24,7 @@ In dieser Phase stellen wir die Stabilität und Benutzerfreundlichkeit der Anwen
     - [x] Elegante Transitions & Animationen (Verfeinerte Timeline-Animationen, Hover-States an Karten)
     - [x] Konsistente Fehler- & Toast-Meldungen (Rollenbasierte Toasts für Admin & Patienten)
 - [ ] **Performance:**
-    - [ ] Sentry-Error Tracking validieren (Fehlerfrei im Browser-Log?)
+    - [x] Sentry-Error Tracking validieren (Fehlerfrei im Browser-Log?)
     - [ ] Responsive Audit (Bedienbarkeit auf Tablets/Smartphones finalisieren)
 
 ### 7.3 Finaler Content & Release (Schritt 3)

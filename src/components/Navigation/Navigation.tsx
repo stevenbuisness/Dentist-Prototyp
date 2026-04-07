@@ -16,7 +16,7 @@ export const Navigation = (): JSX.Element => {
               alt="Dr. Schmidt Logo" 
               className="w-10 h-10 object-contain"
             />
-            Zahnarztpraxis Dr. Schmidt
+            <span className="hidden sm:inline whitespace-nowrap">Zahnarztpraxis</span> Dr. Schmidt
           </a>
 
           <div className="hidden lg:flex items-center gap-8">

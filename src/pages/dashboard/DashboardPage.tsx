@@ -363,14 +363,14 @@ export default function DashboardPage() {
             />
             <span>Dr. Schmidt</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link to="/" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
-              <Home size={16} /> Zur Startseite
+              <Home size={16} /> <span className="hidden sm:inline">Zur Startseite</span>
             </Link>
             <Link to="/profile" className="text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors flex items-center gap-1.5 group">
-              <UserIcon size={16} /> Profil
+              <UserIcon size={16} /> <span className="hidden sm:inline">Profil</span>
             </Link>
-            <button onClick={handleLogout} className="px-4 py-2 rounded-md bg-stone-900 text-[#faf8f5] text-sm font-semibold hover:bg-stone-800 transition-colors shadow-sm">
+            <button onClick={handleLogout} className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-stone-900 text-[#faf8f5] text-xs sm:text-sm font-semibold hover:bg-stone-800 transition-colors shadow-sm">
               Abmelden
             </button>
           </div>
@@ -756,12 +756,12 @@ export default function DashboardPage() {
 
                               <div className="bg-white/10 border border-white/10 rounded-3xl p-6 text-left w-full mb-8 backdrop-blur-sm">
                                 <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-1.5 pl-1">Ihr Zeitpunkt</p>
-                                <p className="text-[17px] font-bold font-montserrat flex items-center gap-3">
+                                <div className="text-[17px] font-bold font-montserrat flex items-center gap-3">
                                   <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
                                     <CalendarCheck size={18} />
                                   </div>
                                   {selectedSlot ? format(new Date(selectedSlot.start_time), "EEEE, d. MMMM 'um' HH:mm", { locale: de }) : ""} Uhr
-                                </p>
+                                </div>
                               </div>
 
                               <Button 

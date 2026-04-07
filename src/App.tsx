@@ -25,9 +25,13 @@ function AdminDashboardRedirect() {
   return <DashboardPage />;
 }
 
+import { NetworkOfflineBanner } from "./components/ui/NetworkOfflineBanner";
+
 export default function App() {
   return (
-    <Routes>
+    <>
+      <NetworkOfflineBanner />
+      <Routes>
       <Route path="/" element={<PremiumLanding />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
@@ -55,5 +59,6 @@ export default function App() {
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
