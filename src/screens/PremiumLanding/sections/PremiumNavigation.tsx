@@ -89,10 +89,10 @@ export const PremiumNavigation = (): JSX.Element => {
             </div>
           )}
           <a
-            href="tel:03012345678"
+            href="tel:02111593482"
             className="font-lato hidden text-[11px] font-bold text-stone-400 underline-offset-4 hover:underline lg:inline whitespace-nowrap"
           >
-            030 1234 5678
+            0211 1593 482
           </a>
           <Link
             to="/dashboard"
@@ -172,11 +172,11 @@ export const PremiumNavigation = (): JSX.Element => {
             )}
             <li>
               <a
-                href="tel:03012345678"
+                href="tel:02111593482"
                 className="font-lato block py-1 text-stone-700"
                 onClick={() => setOpen(false)}
               >
-                030 1234 5678
+                0211 1593 482
               </a>
             </li>
           </ul>

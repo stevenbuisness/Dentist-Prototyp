@@ -14,6 +14,7 @@ import SettingsPage from "./pages/admin/SettingsPage";
 import CalendarPage from "./pages/admin/CalendarPage";
 import AuditLogsPage from "./pages/admin/AuditLogsPage";
 import PrivacyPage from "./pages/PrivacyPage";
+import ImpressumPage from "./pages/ImpressumPage";
 import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 import { useAuthContext } from "./contexts/AuthContext";
 
@@ -40,6 +41,7 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/datenschutz" element={<PrivacyPage />} />
+      <Route path="/impressum" element={<ImpressumPage />} />
       
       {/* Patient Protected Routes */}
       <Route element={<ProtectedRoute />}>
