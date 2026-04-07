@@ -45,9 +45,9 @@ export const PremiumNavigation = (): JSX.Element => {
             alt="Dr. Schmidt Logo" 
             className="w-10 h-10 sm:w-[5rem] sm:h-[5rem] object-contain flex-shrink-0 mix-blend-multiply transition-transform group-hover:scale-105"
           />
-          <div className="flex flex-col justify-center">
-            <span className="text-base sm:text-xl font-bold leading-tight tracking-tight text-stone-900">Dr. Schmidt</span>
-            <span className="text-[11px] sm:text-sm font-medium text-stone-600 leading-tight mt-0.5">Zahnmedizin</span>
+          <div className="flex flex-col items-start justify-center">
+            <span className="text-base sm:text-xl font-bold leading-none tracking-tight text-stone-900">Dr. Schmidt</span>
+            <span className="text-[11px] sm:text-sm font-medium text-stone-600 leading-none mt-1 ml-[1.5px]">Zahnmedizin</span>
           </div>
         </Link>
 
