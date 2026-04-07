@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
@@ -62,6 +62,13 @@ export default function DashboardPage() {
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [lockExpiresAt, setLockExpiresAt] = useState<Date | null>(null);
   const [tooltipDate, setTooltipDate] = useState<string | null>(null); // for date button tooltip
+  
+  // Auto-scroll to top when advancing steps
+  useEffect(() => {
+    if (bookingStep > 1) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [bookingStep]);
 
   // Derived Data
   const upcomingBooking = useMemo(() => {
