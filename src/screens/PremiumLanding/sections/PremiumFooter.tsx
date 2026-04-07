@@ -68,19 +68,20 @@ export const PremiumFooter = (): JSX.Element => {
             © {new Date().getFullYear()} Zahnarztpraxis Dr. Schmidt
           </p>
           <nav aria-label="Rechtliches" className="flex flex-wrap gap-6">
-            <a
-              href="#kontakt"
-              className="font-lato text-xs text-stone-400 hover:text-stone-200"
+            <Link
+              to="/impressum"
+              className="font-lato text-xs text-stone-400 hover:text-stone-200 transition-colors"
             >
               Impressum
-            </a>
-            <a
-              href="#kontakt"
-              className="font-lato text-xs text-stone-400 hover:text-stone-200"
+            </Link>
+            <Link
+              to="/datenschutz"
+              className="font-lato text-xs text-stone-400 hover:text-stone-200 transition-colors"
             >
               Datenschutz
-            </a>
+            </Link>
           </nav>
+
         </div>
       </div>
     </footer>

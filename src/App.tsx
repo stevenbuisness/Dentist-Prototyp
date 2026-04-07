@@ -13,6 +13,7 @@ import ClientsPage from "./pages/admin/ClientsPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import CalendarPage from "./pages/admin/CalendarPage";
 import AuditLogsPage from "./pages/admin/AuditLogsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 import { useAuthContext } from "./contexts/AuthContext";
 
@@ -26,16 +27,19 @@ function AdminDashboardRedirect() {
 }
 
 import { NetworkOfflineBanner } from "./components/ui/NetworkOfflineBanner";
+import { CookieBanner } from "./components/ui/CookieBanner";
 
 export default function App() {
   return (
     <>
       <NetworkOfflineBanner />
+      <CookieBanner />
       <Routes>
       <Route path="/" element={<PremiumLanding />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/datenschutz" element={<PrivacyPage />} />
       
       {/* Patient Protected Routes */}
       <Route element={<ProtectedRoute />}>
