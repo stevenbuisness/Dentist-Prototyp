@@ -33,21 +33,22 @@ export const PremiumNavigation = (): JSX.Element => {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-stone-200/80 bg-[#faf8f5]/95 backdrop-blur-md">
       <nav
-        className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-6 py-3 sm:py-4"
+        className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-10 py-5"
         aria-label="Hauptnavigation"
       >
         <Link
           to="/"
-          className="flex items-center gap-2 font-montserrat text-base sm:text-lg font-bold tracking-tight text-stone-900 group"
+          className="flex items-center gap-3 font-montserrat text-stone-900 group"
         >
           <img 
             src="/logo.png" 
             alt="Dr. Schmidt Logo" 
-            className="w-12 h-12 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 mix-blend-multiply transition-transform group-hover:scale-105"
+            className="w-10 h-10 sm:w-[5rem] sm:h-[5rem] object-contain flex-shrink-0 mix-blend-multiply transition-transform group-hover:scale-105"
           />
-          <span className="leading-tight">
-            Dr. Schmidt<span className="hidden sm:inline"> · Zahnmedizin</span>
-          </span>
+          <div className="flex flex-col justify-center">
+            <span className="text-base sm:text-xl font-bold leading-tight tracking-tight text-stone-900">Dr. Schmidt</span>
+            <span className="text-[11px] sm:text-sm font-medium text-stone-600 leading-tight mt-0.5">Zahnmedizin</span>
+          </div>
         </Link>
 
         <ul className="hidden items-center gap-10 md:flex">
