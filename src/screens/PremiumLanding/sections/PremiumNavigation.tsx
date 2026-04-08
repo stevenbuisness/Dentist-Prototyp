@@ -4,6 +4,7 @@ import { useAuthContext } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabase";
 import { useToast } from "../../../hooks/use-toast";
 import { motion } from "framer-motion";
+import { Phone, LogOut } from "lucide-react";
 
 const navItems = [
   { href: "#leistungen", label: "Leistungen" },
@@ -57,7 +58,7 @@ export const PremiumNavigation = (): JSX.Element => {
               window.history.replaceState({}, "", "/");
             }
           }}
-          className="flex items-center gap-3 font-montserrat text-stone-900 group"
+          className="flex items-center gap-3 font-montserrat text-stone-900 group min-w-max"
         >
           <img 
             src="/logo.png" 
@@ -65,12 +66,12 @@ export const PremiumNavigation = (): JSX.Element => {
             className="w-10 h-10 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 transition-transform group-hover:scale-105"
           />
           <div className="flex flex-col items-start justify-center">
-            <span className="text-base sm:text-xl font-bold leading-none tracking-tight text-blue-950">Dr. Schmidt</span>
-            <span className="text-[10px] sm:text-xs font-semibold italic text-blue-600/80 leading-none mt-1 ml-[1.5px]">Ihr Lächeln in besten Händen</span>
+            <span className="text-base sm:text-xl font-bold leading-none tracking-tight text-blue-950 whitespace-nowrap">Dr. Schmidt</span>
+            <span className="text-[10px] sm:text-xs font-semibold italic text-blue-600/80 leading-none mt-1 ml-[1.5px] whitespace-nowrap">Ihr Lächeln in besten Händen</span>
           </div>
         </Link>
 
-        <ul className="hidden items-center gap-10 md:flex">
+        <ul className="hidden items-center gap-10 xl:flex flex-1 justify-center">
           {navItems.map((item) => (
             <li key={item.href} className="group relative">
               <a
@@ -86,22 +87,32 @@ export const PremiumNavigation = (): JSX.Element => {
           ))}
         </ul>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 ml-auto min-w-max">
+          <a
+            href="tel:02111593482"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-all hover:bg-blue-600 hover:text-white"
+            title="0211 1593 482"
+          >
+            <Phone size={16} strokeWidth={2.5} />
+          </a>
+
+          <div className="hidden sm:block h-6 w-[1px] bg-blue-100/60" />
+
           {!user ? (
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 to="/login"
-                className="font-lato hidden text-sm font-semibold text-stone-600 sm:inline-flex items-center rounded-full border border-blue-100 bg-white/50 px-5 py-2 transition-all hover:bg-blue-50/50 backdrop-blur-sm"
+                className="font-lato hidden text-sm font-semibold text-stone-600 sm:inline-flex items-center rounded-full border border-blue-100 bg-white/50 px-4 py-1.5 transition-all hover:bg-blue-50/50 backdrop-blur-sm whitespace-nowrap"
               >
                 Anmelden
               </Link>
             </motion.div>
           ) : (
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-4">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   to={profile?.role === "admin" ? "/admin" : "/dashboard"}
-                  className="font-lato inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/50 px-4 py-2 text-xs font-bold text-stone-700 transition-all hover:bg-white hover:shadow-sm"
+                  className="font-lato inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/50 px-4 py-1.5 text-sm font-semibold text-stone-700 transition-all hover:bg-white hover:shadow-sm backdrop-blur-sm whitespace-nowrap"
                 >
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   Mein Bereich
@@ -109,21 +120,13 @@ export const PremiumNavigation = (): JSX.Element => {
               </motion.div>
               <button
                 onClick={handleLogout}
-                className="font-lato text-[10px] font-medium text-stone-400 hover:text-red-600 px-2 py-1 transition-all"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-stone-400 hover:bg-red-50 hover:text-red-600 transition-all"
+                title="Logout"
               >
-                Abmelden
+                <LogOut size={16} strokeWidth={2.5} />
               </button>
             </div>
           )}
-
-          <div className="hidden lg:block h-6 w-[1px] bg-blue-100/60" />
-
-          <a
-            href="tel:02111593482"
-            className="font-lato hidden text-[11px] font-bold text-blue-950/60 hover:text-blue-600 transition-colors lg:inline"
-          >
-            0211 1593 482
-          </a>
 
           <motion.div 
             whileHover={{ scale: 1.03, y: -1 }} 
@@ -132,7 +135,7 @@ export const PremiumNavigation = (): JSX.Element => {
           >
             <Link
               to="/dashboard"
-              className="group relative flex items-center gap-2 bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-blue-700"
+              className="group relative flex items-center gap-2 bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-blue-700 whitespace-nowrap"
             >
               <span className="relative z-10">Termin buchen</span>
               
