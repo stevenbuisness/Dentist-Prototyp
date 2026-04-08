@@ -43,7 +43,7 @@ export const PremiumNavigation = (): JSX.Element => {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-blue-100/50 bg-white/95 backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_0_0_rgba(219,234,254,0.5)] transform-gpu">
       <nav
         className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-10 py-4 sm:py-5"
         aria-label="Hauptnavigation"
