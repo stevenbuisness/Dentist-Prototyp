@@ -43,7 +43,7 @@ export const PremiumNavigation = (): JSX.Element => {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-blue-100/50 bg-white/80 backdrop-blur-xl">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-blue-100/50 bg-white/95 backdrop-blur-md">
       <nav
         className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-10 py-4 sm:py-5"
         aria-label="Hauptnavigation"
@@ -55,7 +55,7 @@ export const PremiumNavigation = (): JSX.Element => {
           <img 
             src="/logo.png" 
             alt="Dr. Schmidt Logo" 
-            className="w-10 h-10 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 mix-blend-multiply transition-transform group-hover:scale-105"
+            className="w-10 h-10 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 transition-transform group-hover:scale-105"
           />
           <div className="flex flex-col items-start justify-center">
             <span className="text-base sm:text-xl font-bold leading-none tracking-tight text-blue-950">Dr. Schmidt</span>
