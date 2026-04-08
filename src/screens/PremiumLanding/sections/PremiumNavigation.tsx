@@ -46,7 +46,7 @@ export const PremiumNavigation = (): JSX.Element => {
   return (
     <header className="fixed inset-x-0 top-0 z-50 bg-white/95 backdrop-blur-md shadow-[0_1px_0_0_rgba(219,234,254,0.5)] transform-gpu">
       <nav
-        className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-10 py-4 sm:py-5"
+        className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-3 sm:px-10 py-3 sm:py-5"
         aria-label="Hauptnavigation"
       >
         <Link
@@ -63,11 +63,11 @@ export const PremiumNavigation = (): JSX.Element => {
           <img 
             src="/logo.png" 
             alt="Dr. Schmidt Logo" 
-            className="w-10 h-10 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 transition-transform group-hover:scale-105"
+            className="w-8 h-8 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 transition-transform group-hover:scale-105"
           />
           <div className="flex flex-col items-start justify-center">
-            <span className="text-base sm:text-xl font-bold leading-none tracking-tight text-blue-950 whitespace-nowrap">Dr. Schmidt</span>
-            <span className="text-[10px] sm:text-xs font-semibold italic text-blue-600/80 leading-none mt-1 ml-[1.5px] whitespace-nowrap">Ihr Lächeln in besten Händen</span>
+            <span className="text-sm sm:text-xl font-bold leading-none tracking-tight text-blue-950 whitespace-nowrap">Dr. Schmidt</span>
+            <span className="hidden xs:inline text-[9px] sm:text-xs font-semibold italic text-blue-600/80 leading-none mt-1 ml-0.5 whitespace-nowrap">Ihr Lächeln in besten Händen</span>
           </div>
         </Link>
 
@@ -87,22 +87,22 @@ export const PremiumNavigation = (): JSX.Element => {
           ))}
         </ul>
 
-        <div className="flex items-center gap-3 sm:gap-4 ml-auto min-w-max">
+        <div className="flex items-center gap-2 sm:gap-4 ml-auto min-w-max">
           <a
             href="tel:02111593482"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-all hover:bg-blue-600 hover:text-white"
+            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-blue-50 text-blue-600 transition-all hover:bg-blue-600 hover:text-white"
             title="0211 1593 482"
           >
-            <Phone size={16} strokeWidth={2.5} />
+            <Phone size={14} className="sm:w-[16px]" strokeWidth={2.5} />
           </a>
 
-          <div className="hidden sm:block h-6 w-[1px] bg-blue-100/60" />
+          <div className="hidden md:block h-6 w-[1px] bg-blue-100/60" />
 
           {!user ? (
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 to="/login"
-                className="font-lato hidden text-sm font-semibold text-stone-600 sm:inline-flex items-center rounded-full border border-blue-100 bg-white/50 px-4 py-1.5 transition-all hover:bg-blue-50/50 backdrop-blur-sm whitespace-nowrap"
+                className="font-lato hidden sm:inline-flex text-sm font-semibold text-stone-600 items-center rounded-full border border-blue-100 bg-white/50 px-4 py-1.5 transition-all hover:bg-blue-50/50 backdrop-blur-sm whitespace-nowrap"
               >
                 Anmelden
               </Link>
@@ -115,7 +115,7 @@ export const PremiumNavigation = (): JSX.Element => {
                   className="font-lato inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/50 px-4 py-1.5 text-sm font-semibold text-stone-700 transition-all hover:bg-white hover:shadow-sm backdrop-blur-sm whitespace-nowrap"
                 >
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Mein Bereich
+                  Bereich
                 </Link>
               </motion.div>
               <button
@@ -135,9 +135,10 @@ export const PremiumNavigation = (): JSX.Element => {
           >
             <Link
               to="/dashboard"
-              className="group relative flex items-center gap-2 bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-blue-700 whitespace-nowrap"
+              className="group relative flex items-center gap-2 bg-blue-600 px-3 py-2 sm:px-6 sm:py-3 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider sm:tracking-[0.15em] text-white transition-all hover:bg-blue-700 whitespace-nowrap"
             >
-              <span className="relative z-10">Termin buchen</span>
+              <span className="relative z-10">Termin</span>
+              <span className="hidden xs:inline relative z-10">buchen</span>
               
               {/* Shine Effect */}
               <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] skew-x-[-30deg] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out" />
