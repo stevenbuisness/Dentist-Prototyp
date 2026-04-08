@@ -37,7 +37,6 @@ export default function AdminDashboard() {
     );
     
     if (needsFix) {
-      console.log("Fixing session type duration:", needsFix.name);
       upsertType.mutate({
         ...needsFix,
         default_duration_minutes: 30
@@ -63,32 +62,32 @@ export default function AdminDashboard() {
       label: "Heutige Termine",
       value: stats?.todayCount ?? 0,
       icon: Calendar,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
+      color: "text-primary",
+      bg: "bg-primary/10",
       description: "Gesamtzahl für heute"
     },
     {
       label: "Offene Termine heute",
       value: stats?.openCountToday ?? 0,
       icon: CalendarCheck,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      color: "text-stone-600",
+      bg: "bg-stone-100",
       description: "Noch nicht abgeschlossen"
     },
     {
       label: "Neue Buchungen",
       value: stats?.newSevenDays ?? 0,
       icon: ClipboardList,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      color: "text-primary",
+      bg: "bg-primary/10",
       description: "Letzte 7 Tage"
     },
     {
       label: "Offene Dokumentationen",
       value: stats?.missingDocsCount ?? 0,
       icon: (stats?.missingDocsCount ?? 0) > 0 ? AlertCircle : CheckCircle2,
-      color: (stats?.missingDocsCount ?? 0) > 0 ? "text-red-600" : "text-emerald-600",
-      bg: (stats?.missingDocsCount ?? 0) > 0 ? "bg-red-50" : "bg-emerald-50",
+      color: (stats?.missingDocsCount ?? 0) > 0 ? "text-red-600" : "text-primary",
+      bg: (stats?.missingDocsCount ?? 0) > 0 ? "bg-red-50" : "bg-primary/10",
       description: (stats?.missingDocsCount ?? 0) > 0 ? "Behandlungen dokumentieren" : "Alles dokumentiert"
     },
   ];
@@ -175,7 +174,7 @@ export default function AdminDashboard() {
                       <div className="space-y-6">
                         <div className="animate-in fade-in duration-500">
                           <div className="flex items-center gap-3 mb-4">
-                            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg border border-emerald-100 shadow-sm">
+                            <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg border border-primary/20 shadow-sm">
                               {(nextBooking.user?.first_name?.[0] || "?").toUpperCase()}
                             </div>
                             <div>
@@ -209,7 +208,7 @@ export default function AdminDashboard() {
                             {others.map((appt: any) => (
                               <div key={appt.id} className="flex items-center justify-between group">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center font-bold text-xs group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
+                                  <div className="w-8 h-8 rounded-full bg-stone-100 text-stone-500 flex items-center justify-center font-bold text-xs group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                     {appt.user?.first_name?.[0]}
                                   </div>
                                   <div>
@@ -252,12 +251,12 @@ export default function AdminDashboard() {
                     <div className="relative pt-1">
                       <div className="flex mb-2 items-center justify-between">
                         <div>
-                          <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-emerald-600 bg-emerald-100">
+                          <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary bg-primary/10">
                             Kapazität heute
                           </span>
                         </div>
                         <div className="text-right">
-                          <span className="text-xs font-semibold inline-block text-emerald-600">
+                          <span className="text-xs font-semibold inline-block text-primary">
                             {stats?.occupancyToday ?? 0}%
                           </span>
                         </div>
@@ -265,7 +264,7 @@ export default function AdminDashboard() {
                       <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-stone-100">
                         <div
                           style={{ width: `${stats?.occupancyToday ?? 0}%` }}
-                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500 transition-all duration-1000 ease-out"
+                          className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary transition-all duration-1000 ease-out"
                         ></div>
                       </div>
                     </div>
@@ -299,7 +298,7 @@ export default function AdminDashboard() {
                             const isSelected = day.date === selectedDay;
 
                             const colorClasses: Record<string, string> = {
-                              emerald: isToday ? "bg-emerald-500" : "bg-emerald-400/80 group-hover:bg-emerald-500",
+                              emerald: isToday ? "bg-primary" : "bg-primary/60 group-hover:bg-primary",
                               orange: isToday ? "bg-orange-500" : "bg-orange-400/80 group-hover:bg-orange-500",
                               red: isToday ? "bg-red-500" : "bg-red-400/80 group-hover:bg-red-500"
                             };
@@ -329,11 +328,11 @@ export default function AdminDashboard() {
                                 <div className="relative flex flex-col items-center mt-2 w-full">
                                   <span className={cn(
                                     "text-[11px] font-black uppercase tracking-widest transition-colors",
-                                    isToday ? "text-emerald-500" : "text-stone-400 group-hover:text-stone-600"
+                                    isToday ? "text-primary" : "text-stone-400 group-hover:text-stone-600"
                                   )}>
                                     {day.dayName}
                                   </span>
-                                  {isToday && <div className="absolute top-full mt-1 w-1 h-1 bg-emerald-500 rounded-full" />}
+                                  {isToday && <div className="absolute top-full mt-1 w-1 h-1 bg-primary rounded-full" />}
                                 </div>
                               </div>
                             );

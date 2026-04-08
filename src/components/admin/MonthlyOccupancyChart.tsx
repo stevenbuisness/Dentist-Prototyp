@@ -60,14 +60,12 @@ export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({
       </div>
 
       {/* Grid Days */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-1.5 px-1 py-1">
          {/* Since it's a fixed Mo-Fr grid, we might have empty cells at the start if month doesn't start on Mon */}
-         {/* But to keep it simple and clean, let's just show all available workdays in order as small cards */}
          {Array.from({ length: 31 }).map((_, i) => {
            const dayNum = i + 1;
            const date = new Date(year, month, dayNum);
            
-           // Skip if not in month or weekend
            if (date.getMonth() !== month) return null;
            const dow = date.getDay();
            if (dow === 0 || dow === 6) return null;
@@ -76,8 +74,6 @@ export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({
            const dayStats = data[dateStr];
            const isToday = dateStr === todayStr;
 
-           // Padding for first week? (Optional, let's see if 5 column layout works without alignment)
-           // Better alignment: compute day index within Mon-Fri (1-5)
            const column = dow; // Mon=1, ..., Fri=5
            
            return (
@@ -86,13 +82,13 @@ export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({
                onClick={() => onDayClick(dateStr)}
                style={{ gridColumnStart: column }}
                className={cn(
-                 "relative aspect-square flex flex-col items-center justify-center rounded-lg border transition-all group cursor-pointer",
-                 isToday ? "border-stone-900 bg-stone-50" : "border-stone-100 hover:border-stone-300 bg-white"
+                 "relative h-12 flex flex-col items-center justify-center rounded-lg border transition-all group cursor-pointer",
+                 isToday ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-stone-100 hover:border-stone-300 bg-white"
                )}
              >
                <span className={cn(
                  "text-[9px] font-bold mb-1",
-                 isToday ? "text-stone-900" : "text-stone-400"
+                 isToday ? "text-primary" : "text-stone-400"
                )}>
                  {dayNum}
                </span>
@@ -100,10 +96,10 @@ export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({
                {dayStats ? (
                 <>
                   <div className={cn(
-                    "w-2 h-2 rounded-full",
-                    dayStats.statusColor === "emerald" ? "bg-emerald-500" :
-                    dayStats.statusColor === "orange" ? "bg-orange-500" :
-                    "bg-red-500"
+                    "w-1.5 h-1.5 rounded-full",
+                    dayStats.statusColor === "emerald" ? "bg-primary" :
+                    dayStats.statusColor === "orange" ? "bg-orange-400" :
+                    "bg-red-400"
                   )} />
                   {/* Tooltip */}
                   <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-2.5 py-1 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-30 scale-75 group-hover:scale-100 border border-white/5 backdrop-blur-md">

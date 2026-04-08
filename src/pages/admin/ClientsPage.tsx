@@ -136,7 +136,7 @@ function PatientTimeline({ patientId }: { patientId: string }) {
           <div key={booking.id} className="relative pl-12 group">
             <div className={cn(
               "absolute left-0 top-1.5 w-9 h-9 rounded-xl flex items-center justify-center border-4 border-[#faf8f5] z-10 transition-all shadow-sm",
-              booking.notes ? "bg-emerald-500 text-white" : "bg-stone-200 text-stone-500"
+              booking.notes ? "bg-primary text-white" : "bg-stone-200 text-stone-500"
             )}>
               <CalendarIcon size={14} />
             </div>
@@ -162,7 +162,7 @@ function PatientTimeline({ patientId }: { patientId: string }) {
                   <div className="flex items-center gap-4 flex-shrink-0">
                      <div className={cn(
                        "px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider hidden sm:block",
-                       booking.status === "attended" ? "bg-emerald-50 text-emerald-600" : "bg-stone-50 text-stone-400"
+                       booking.status === "attended" ? "bg-primary/10 text-primary" : "bg-stone-50 text-stone-400"
                      )}>
                        {booking.status === "attended" ? "Erschienen" : "Geplant"}
                      </div>
@@ -338,7 +338,7 @@ export default function ClientsPage() {
               <Card className="border-stone-200 shadow-sm transition-all hover:shadow-md">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/10">
+                    <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/10">
                       <Clock size={24} />
                     </div>
                     <div>
@@ -450,7 +450,7 @@ export default function ClientsPage() {
                           </div>
                           <div>
                             <div className="font-bold text-stone-900">{p.first_name} {p.last_name}</div>
-                            <div className="text-[10px] text-stone-400 font-mono tracking-tighter">#{p.id.slice(0, 13)}</div>
+                            <div className="text-[10px] text-stone-300 font-mono tracking-tight opacity-0 group-hover:opacity-100 transition-opacity">ID: {p.id.slice(0, 8)}...</div>
                           </div>
                         </div>
                       </td>
@@ -512,6 +512,7 @@ export default function ClientsPage() {
                    <div>
                       <h3 className="text-2xl font-montserrat font-bold text-stone-900">{selectedPatient.first_name} {selectedPatient.last_name}</h3>
                       <p className="text-xs text-stone-400 font-medium">Registriert am {new Date(selectedPatient.created_at).toLocaleDateString("de-DE")}</p>
+                      <p className="text-[9px] text-stone-300 font-mono mt-1 uppercase tracking-widest opacity-60">ID: {selectedPatient.id}</p>
                    </div>
                 </div>
 
@@ -593,7 +594,7 @@ export default function ClientsPage() {
                     <section className="space-y-6">
                        <div className="flex items-center justify-between border-b border-stone-200 pb-2">
                           <h4 className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.2em]">Behandlungshistorie (Karteikarte)</h4>
-                          <span className="text-[10px] text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full font-bold">Live</span>
+                          <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold">Live</span>
                        </div>
                        <PatientTimeline patientId={selectedPatient.id} />
                     </section>
@@ -609,7 +610,7 @@ export default function ClientsPage() {
                               <Edit2 size={16} /> Bearbeiten
                            </Button>
                            {selectedPatient.deleted_at ? (
-                              <Button onClick={() => handleRestore(selectedPatient)} className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-2xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 gap-2">
+                              <Button onClick={() => handleRestore(selectedPatient)} className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 gap-2">
                                  <RotateCcw size={16} /> Reaktivieren
                               </Button>
                            ) : (

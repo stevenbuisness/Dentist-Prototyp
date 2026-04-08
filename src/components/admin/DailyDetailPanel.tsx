@@ -171,7 +171,7 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
                 <ChevronRight size={20} />
               </button>
             </div>
-            <p className="text-[13px] text-emerald-500 font-bold mt-2 uppercase tracking-widest pl-1">
+            <p className="text-[13px] text-primary font-bold mt-2 uppercase tracking-widest pl-1">
               {dateStr ? new Date(dateStr).toLocaleDateString("de-DE", { weekday: 'long', day: 'numeric', month: 'long' }) : ""}
             </p>
           </div>
@@ -233,14 +233,14 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
             {/* Ghost Slot Hover Indicator - only on non-blocked days */}
             {hoverTime && !isDayBlocked && (
               <div 
-                className="absolute left-[72px] right-0 bg-emerald-500/10 border-2 border-emerald-500/20 rounded-2xl border-dashed pointer-events-none flex items-center justify-center animate-in fade-in duration-200"
+                className="absolute left-[72px] right-0 bg-primary/10 border-2 border-primary/20 rounded-2xl border-dashed pointer-events-none flex items-center justify-center animate-in fade-in duration-200"
                 style={{ 
                   top: `${hoverTop}%`, 
                   height: `${(30 / TOTAL_MINUTES) * 100}%`,
                   zIndex: 5
                 }}
               >
-                <div className="flex items-center gap-1.5 text-emerald-600/60 font-black text-[10px] uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 text-primary/60 font-black text-[10px] uppercase tracking-wider">
                   <Plus size={12} /> {hoverTime} Uhr buchen
                 </div>
               </div>
@@ -294,8 +294,8 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
                     }}
                     className={cn(
                       "absolute rounded-xl p-2 px-3 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer border-2",
-                      booking.status === "confirmed" ? "bg-emerald-50/95 border-emerald-100 hover:bg-emerald-100/50" : 
-                      booking.status === "attended" ? "bg-blue-50/95 border-blue-100 hover:bg-blue-100/50" :
+                      booking.status === "confirmed" ? "bg-primary/5 border-primary/20 hover:bg-primary/10" : 
+                      booking.status === "attended" ? "bg-stone-50 border-stone-100 hover:bg-stone-100/50" :
                       booking.status === "no_show" ? "bg-amber-50/95 border-amber-100 hover:bg-amber-100/50" :
                       "bg-stone-50/95 border-stone-100 hover:bg-stone-100/50"
                     )}
@@ -314,18 +314,18 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
                         </span>
                         {!isShort ? (
                           <div className="flex flex-col mt-0.5">
-                            <span className="text-[9px] text-emerald-600 font-black uppercase tracking-widest leading-tight block truncate">
+                            <span className="text-[9px] text-primary font-black uppercase tracking-widest leading-tight block truncate">
                               {booking.session.session_type?.name}
                             </span>
                           </div>
                         ) : (
-                          <span className="text-[9px] text-emerald-600 font-black uppercase tracking-widest leading-none truncate bg-white/50 px-1.5 py-0.5 rounded-md border border-white flex-1 min-w-0 text-right">
+                          <span className="text-[9px] text-primary font-black uppercase tracking-widest leading-none truncate bg-white/50 px-1.5 py-0.5 rounded-md border border-white flex-1 min-w-0 text-right">
                             {booking.session.session_type?.name}
                           </span>
                         )}
                       </div>
                       <div className="flex flex-col items-end shrink-0 justify-center">
-                        <div className="text-[10px] text-emerald-700 font-bold bg-white/80 px-2 py-0.5 rounded-lg border border-emerald-100/50 shadow-sm tabular-nums whitespace-nowrap">
+                        <div className="text-[10px] text-primary font-bold bg-white/80 px-2 py-0.5 rounded-lg border border-primary/10 shadow-sm tabular-nums whitespace-nowrap">
                           {new Date(booking.session.start_time).toLocaleTimeString("de-DE", { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
@@ -350,7 +350,7 @@ export const DailyDetailPanel: React.FC<DailyDetailPanelProps> = ({
           <div className="p-8 pb-10 bg-stone-50 border-t border-stone-100 shrink-0">
             <div className="flex items-center gap-5">
               <div className="w-14 h-14 rounded-[22px] bg-white border-2 border-stone-100 flex items-center justify-center shadow-sm">
-                <AlertCircle size={28} className="text-emerald-500" />
+                <AlertCircle size={28} className="text-primary" />
               </div>
               <div>
                 <div className="text-lg font-black text-stone-900">{filteredBookings.length} Geplante Termine</div>

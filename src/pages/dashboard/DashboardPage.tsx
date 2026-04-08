@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
+import { Skeleton } from "../../components/ui/skeleton";
 import { useSessionTypes, useSessions, useLockSession, useUnlockSession, useAvailabilityRules, useCreateOnDemandSession } from "../../hooks/useSessions";
 import { useAvailabilityExceptions } from "../../hooks/useAvailability";
 import { useMyBookings, useCreateBooking, useUpdateBooking } from "../../hooks/useBookings";
@@ -42,8 +43,8 @@ export default function DashboardPage() {
   const { toast } = useToast();
   
   // Data Fetching
-  const { data: sessionTypes } = useSessionTypes();
-  const { data: myBookings } = useMyBookings(user?.id);
+  const { data: sessionTypes, isLoading: isLoadingTypes } = useSessionTypes();
+  const { data: myBookings, isLoading: isLoadingBookings } = useMyBookings(user?.id);
   const { data: allSessions } = useSessions(); // Fetch all sessions to see occupied times
   const { data: availabilityRules } = useAvailabilityRules();
   const { data: availabilityExceptions = [] } = useAvailabilityExceptions();
@@ -390,7 +391,9 @@ export default function DashboardPage() {
       <main className="w-full p-6 md:p-10 space-y-8">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-montserrat font-bold text-stone-900">Guten Tag, {profile?.first_name || "Patient"}!</h1>
+            <h1 className="text-3xl font-montserrat font-bold text-stone-900">
+              Guten Tag, {profile?.first_name || (isLoadingBookings ? <Skeleton className="h-8 w-32 inline-block align-middle" /> : "Patient")}!
+            </h1>
             <p className="text-stone-500 mt-1">Verwalten Sie Ihre Gesundheit und buchen Sie neue Termine.</p>
           </div>
         </section>
@@ -441,24 +444,40 @@ export default function DashboardPage() {
                         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                           <h3 className="font-montserrat font-bold text-stone-900 text-lg mb-4">Was können wir für Sie tun?</h3>
                           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                            {sessionTypes?.map((type) => (
-                              <button
-                                key={type.id}
-                                onClick={() => { setSelectedType(type); setBookingStep(2); }}
-                                className="group p-6 rounded-3xl border border-stone-100 bg-stone-50/50 hover:bg-white hover:border-emerald-500 hover:ring-4 hover:ring-emerald-500/10 transition-all text-left"
-                              >
-                                <div className="flex justify-between items-start mb-4">
-                                  <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                    <ClipboardList size={20} />
+                            {isLoadingTypes ? (
+                              [...Array(4)].map((_, i) => (
+                                <div key={i} className="p-6 rounded-3xl border border-stone-100 bg-white space-y-4">
+                                  <div className="flex justify-between items-start">
+                                    <Skeleton className="w-12 h-12 rounded-2xl" />
+                                    <Skeleton className="w-16 h-6 rounded-full" />
                                   </div>
-                                  <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest bg-white px-2 py-1 rounded-full border border-stone-100">
-                                    {type.duration_minutes || type.default_duration_minutes} Min
-                                  </span>
+                                  <Skeleton className="h-4 w-3/4" />
+                                  <div className="space-y-2">
+                                    <Skeleton className="h-3 w-full" />
+                                    <Skeleton className="h-3 w-5/6" />
+                                  </div>
                                 </div>
-                                <h3 className="font-montserrat font-bold text-stone-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight text-xs">{type.name}</h3>
-                                <p className="text-stone-500 mt-2 line-clamp-2 leading-relaxed text-[11px] font-medium">{type.description || "Professionelle Behandlung durch unser Team."}</p>
-                              </button>
-                            ))}
+                              ))
+                            ) : (
+                              sessionTypes?.map((type) => (
+                                <button
+                                  key={type.id}
+                                  onClick={() => { setSelectedType(type); setBookingStep(2); }}
+                                  className="group p-6 rounded-3xl border border-stone-100 bg-stone-50/50 hover:bg-white hover:border-primary hover:ring-4 hover:ring-primary/10 transition-all text-left"
+                                >
+                                  <div className="flex justify-between items-start mb-4">
+                                    <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
+                                      <ClipboardList size={20} />
+                                    </div>
+                                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest bg-white px-2 py-1 rounded-full border border-stone-100">
+                                      {type.duration_minutes || type.default_duration_minutes} Min
+                                    </span>
+                                  </div>
+                                  <h3 className="font-montserrat font-bold text-stone-900 group-hover:text-primary transition-colors uppercase tracking-tight text-xs">{type.name}</h3>
+                                  <p className="text-stone-500 mt-2 line-clamp-2 leading-relaxed text-[11px] font-medium">{type.description || "Professionelle Behandlung durch unser Team."}</p>
+                                </button>
+                              ))
+                            )}
                           </div>
                         </div>
                       )}
@@ -760,17 +779,17 @@ export default function DashboardPage() {
                               animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
                               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                             >
-                              <div className="w-64 h-64 bg-emerald-500 rounded-full blur-[100px]" />
+                              <div className="w-64 h-64 bg-primary rounded-full blur-[100px]" />
                             </motion.div>
                             
                             <div className="relative z-10 flex flex-col items-center">
                               <motion.div 
-                                className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-emerald-900/50 mb-8 border-4 border-emerald-300 pointer-events-none"
+                                className="w-24 h-24 bg-gradient-to-br from-primary via-primary/80 to-primary/40 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-primary/20 mb-8 border-4 border-primary/30 pointer-events-none"
                                 initial={{ y: 20, rotate: -15, scale: 0.5 }}
                                 animate={{ y: 0, rotate: 0, scale: 1 }}
                                 transition={{ type: "spring", bounce: 0.6, delay: 0.2 }}
                               >
-                                <CheckCircle2 size={48} strokeWidth={2.5} />
+                                <CheckCircle2 size={48} strokeWidth={2.5} className="text-stone-900" />
                               </motion.div>
                               
                               <motion.h2 
@@ -779,7 +798,7 @@ export default function DashboardPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
                               >
-                                Termin erfolgreich gebucht
+                                Termin bestätigt
                               </motion.h2>
                               
                               <motion.p 
@@ -788,7 +807,7 @@ export default function DashboardPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.5 }}
                               >
-                                Vielen Dank! Wir freuen uns auf Sie. Ihr Termin für eine <strong className="text-white">{selectedType?.name}</strong> ist hiermit verbindlich bestätigt.
+                                Vielen Dank{profile?.first_name ? `, ${profile.first_name}` : ""}! Wir freuen uns auf Sie. Ihr Termin für eine <strong className="text-white">{selectedType?.name}</strong> ist hiermit verbindlich gebucht.
                               </motion.p>
 
                               <motion.div 
@@ -797,12 +816,12 @@ export default function DashboardPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.6 }}
                               >
-                                <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest mb-1.5 pl-1">Ihr Zeitpunkt</p>
+                                <p className="text-[10px] text-primary font-black uppercase tracking-widest mb-1.5 pl-1">Bestätigter Termin</p>
                                 <div className="text-[17px] font-bold font-montserrat flex items-center gap-3">
-                                  <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-emerald-400 shrink-0">
+                                  <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center text-primary shrink-0">
                                     <CalendarCheck size={18} />
                                   </div>
-                                  {selectedSlot ? format(new Date(selectedSlot.start_time), "EEEE, d. MMMM 'um' HH:mm", { locale: de }) : ""} Uhr
+                                  <span className="capitalize">{selectedSlot ? format(new Date(selectedSlot.start_time), "EEEE, d. MMMM 'um' HH:mm", { locale: de }) : ""} Uhr</span>
                                 </div>
                               </motion.div>
 
@@ -817,9 +836,9 @@ export default function DashboardPage() {
                                     setBookingStep(1);
                                     setSelectedSlot(null);
                                   }}
-                                  className="w-full h-16 bg-white hover:bg-stone-100 text-stone-900 rounded-3xl font-black uppercase tracking-widest text-[11px] transition-all shadow-xl shadow-white/5 active:scale-95"
+                                  className="w-full h-16 bg-white hover:bg-stone-100 text-stone-900 rounded-3xl font-black uppercase tracking-widest text-[11px] transition-all shadow-xl shadow-white/5 active:scale-95 border-none"
                                 >
-                                  Zurück zur Übersicht
+                                  Verstanden
                                 </Button>
                               </motion.div>
                             </div>
@@ -835,14 +854,26 @@ export default function DashboardPage() {
           {/* SIDEBAR */}
           <div className="space-y-8">
             {/* NEXT APPOINTMENT */}
-            {upcomingBooking ? (
+            {isLoadingBookings ? (
+              <div className="bg-white rounded-[2.5rem] p-8 border border-stone-100 space-y-6">
+                 <Skeleton className="h-3 w-24 mb-6" />
+                 <div className="flex items-center gap-4">
+                    <Skeleton className="w-14 h-14 rounded-2xl" />
+                    <div className="space-y-2">
+                       <Skeleton className="h-5 w-32" />
+                       <Skeleton className="h-3 w-16" />
+                    </div>
+                 </div>
+                 <Skeleton className="h-12 w-full rounded-2xl" />
+              </div>
+            ) : upcomingBooking ? (
               <div className="bg-stone-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-colors" />
                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Nächster Termin</h3>
                  
                  <div className="flex items-center gap-4 mb-8">
                     <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                      <CalendarIcon size={24} className="text-white" />
+                       <CalendarIcon size={24} className="text-white" />
                     </div>
                     <div>
                       <div className="text-lg font-montserrat font-bold">
@@ -883,29 +914,43 @@ export default function DashboardPage() {
                  <History size={14} /> Behandlungs-Historie
                </h3>
                <div className="space-y-6">
-                  {myBookings?.slice(0, 5).map((booking) => (
-                    <div key={booking.id} className="flex items-center justify-between group">
-                       <div className="flex items-center gap-3">
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center transition-colors font-bold text-xs",
-                            booking.status === 'confirmed' ? "bg-emerald-50 text-emerald-500" : "bg-stone-50 text-stone-400"
-                          )}>
-                             <CheckCircle2 size={16} />
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm text-stone-900 leading-tight truncate max-w-[120px]">
-                              {booking.session.session_type?.name}
-                            </p>
-                            <p className="text-[10px] text-stone-400 font-bold uppercase tracking-tighter">
-                              {format(new Date(booking.session.start_time), "d. MMM yyyy")} • {booking.status === 'canceled_by_user' ? 'Storniert' : 'Bestätigt'}
-                            </p>
-                          </div>
+                 {isLoadingBookings ? (
+                   [...Array(3)].map((_, i) => (
+                     <div key={i} className="flex items-center gap-3">
+                       <Skeleton className="w-10 h-10 rounded-xl" />
+                       <div className="space-y-2 flex-1">
+                         <Skeleton className="h-4 w-3/4" />
+                         <Skeleton className="h-3 w-1/2" />
                        </div>
-                       <ChevronRight size={14} className="text-stone-300 opacity-0 group-hover:opacity-100 transition-all" />
-                    </div>
-                  ))}
+                     </div>
+                   ))
+                 ) : (
+                   <>
+                      {myBookings?.slice(0, 5).map((booking) => (
+                        <div key={booking.id} className="flex items-center justify-between group">
+                           <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center transition-colors font-bold text-xs",
+                                booking.status === 'confirmed' ? "bg-primary/10 text-primary" : "bg-stone-50 text-stone-400"
+                              )}>
+                                 <CheckCircle2 size={16} />
+                              </div>
+                              <div>
+                                <p className="font-bold text-sm text-stone-900 leading-tight truncate max-w-[120px]">
+                                  {booking.session.session_type?.name}
+                                </p>
+                                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-tighter">
+                                  {format(new Date(booking.session.start_time), "d. MMM yyyy")} • {booking.status === 'canceled_by_user' ? 'Storniert' : 'Bestätigt'}
+                                </p>
+                              </div>
+                           </div>
+                           <ChevronRight size={14} className="text-stone-300 opacity-0 group-hover:opacity-100 transition-all" />
+                        </div>
+                      ))}
+                      {!myBookings?.length && <p className="text-stone-400 text-[11px] italic">Noch keine Behandlungen.</p>}
+                   </>
+                 )}
                </div>
-               {!myBookings?.length && <p className="text-stone-400 text-[11px] italic">Noch keine Behandlungen.</p>}
             </div>
           </div>
         </div>

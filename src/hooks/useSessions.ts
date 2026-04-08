@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
+import { translateError } from "../lib/utils";
 
 // ── SESSION TYPES ──────────────────────────────────────────────────────────────
 
@@ -32,7 +33,7 @@ export const useUpsertSessionType = () => {
         .upsert(payload)
         .select()
         .single();
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessionTypes"] }),
@@ -44,7 +45,7 @@ export const useDeleteSessionType = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("session_types").delete().eq("id", id);
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessionTypes"] }),
   });
@@ -97,7 +98,7 @@ export const useCreateSession = () => {
           session_type:session_types(*)
         `)
         .single();
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
@@ -114,7 +115,7 @@ export const useUpdateSession = () => {
         .eq("id", id)
         .select()
         .single();
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
       return data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
@@ -126,7 +127,7 @@ export const useDeleteSession = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("sessions").delete().eq("id", id);
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
   });
@@ -141,7 +142,7 @@ export const useLockSession = () => {
         p_session_id: sessionId,
         p_user_id: userId,
       });
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
       return data as boolean;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
@@ -156,7 +157,7 @@ export const useUnlockSession = () => {
         p_session_id: sessionId,
         p_user_id: userId,
       });
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sessions"] }),
   });
@@ -184,7 +185,7 @@ export const useCreateOnDemandSession = () => {
         p_start_time: startTime,
         p_end_time: endTime,
       });
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
       
       // Fetch the full session object back to be consistent with the rest of the app
       const { data: session, error: fetchError } = await supabase
@@ -192,7 +193,7 @@ export const useCreateOnDemandSession = () => {
         .select("*, session_type:session_types(*)")
         .eq("id", sessionId)
         .single();
-      if (fetchError) throw fetchError;
+      if (fetchError) throw new Error(translateError(fetchError));
       
       return session;
     },

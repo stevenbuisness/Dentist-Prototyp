@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { translateError } from "../lib/utils";
 
 export type BookingStatus =
   | "confirmed"
@@ -65,11 +66,7 @@ export const useCreateBooking = () => {
         .single();
 
       if (error) {
-        // Surface the DB trigger's human-readable message
-        const msg = error.message.includes("SLOT_FULL")
-          ? "Dieser Termin ist bereits ausgebucht."
-          : error.message;
-        throw new Error(msg);
+        throw new Error(translateError(error));
       }
       return data;
     },
@@ -101,7 +98,7 @@ export const useUpdateBooking = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
       return data;
     },
     onSuccess: () => {
@@ -148,7 +145,7 @@ export const useUpdateBookingStatus = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) throw new Error(translateError(error));
       return data;
     },
 
