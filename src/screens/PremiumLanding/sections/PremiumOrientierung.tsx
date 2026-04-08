@@ -2,14 +2,14 @@ export const PremiumOrientierung = (): JSX.Element => {
   return (
     <section
       id="orientierung"
-      className="border-b border-stone-200/60 bg-white/60"
+      className="border-b border-stone-200/60 bg-white"
     >
       <div className="mx-auto grid max-w-6xl gap-14 px-6 py-24 lg:grid-cols-2 lg:items-center">
         <div className="order-2 lg:order-1">
           <img
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80"
-            alt=""
-            className="w-full rounded-sm object-cover shadow-lg ring-1 ring-stone-900/10"
+            alt="Praxis Interieur"
+            className="w-full rounded-2xl object-cover shadow-[0_40px_80px_-15px_rgba(0,0,0,0.1)] transition-transform hover:scale-[1.01]"
           />
         </div>
         <div className="order-1 max-w-xl lg:order-2">

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabase";
 import { useToast } from "../../../hooks/use-toast";
+import { motion } from "framer-motion";
 
 const navItems = [
   { href: "#leistungen", label: "Leistungen" },
@@ -31,9 +32,9 @@ export const PremiumNavigation = (): JSX.Element => {
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-stone-200/80 bg-[#faf8f5]/95 backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-blue-100/50 bg-white/80 backdrop-blur-xl">
       <nav
-        className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-10 py-5"
+        className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-6 px-4 sm:px-10 py-4 sm:py-5"
         aria-label="Hauptnavigation"
       >
         <Link
@@ -43,66 +44,87 @@ export const PremiumNavigation = (): JSX.Element => {
           <img 
             src="/logo.png" 
             alt="Dr. Schmidt Logo" 
-            className="w-10 h-10 sm:w-[5rem] sm:h-[5rem] object-contain flex-shrink-0 mix-blend-multiply transition-transform group-hover:scale-105"
+            className="w-10 h-10 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 mix-blend-multiply transition-transform group-hover:scale-105"
           />
           <div className="flex flex-col items-start justify-center">
-            <span className="text-base sm:text-xl font-bold leading-none tracking-tight text-stone-900">Dr. Schmidt</span>
-            <span className="text-[11px] sm:text-sm font-medium text-stone-600 leading-none mt-1 ml-[1.5px]">Zahnmedizin</span>
+            <span className="text-base sm:text-xl font-bold leading-none tracking-tight text-blue-950">Dr. Schmidt</span>
+            <span className="text-[10px] sm:text-xs font-semibold italic text-blue-600/80 leading-none mt-1 ml-[1.5px]">Ihr Lächeln in besten Händen</span>
           </div>
         </Link>
 
         <ul className="hidden items-center gap-10 md:flex">
           {navItems.map((item) => (
-            <li key={item.href}>
+            <li key={item.href} className="group relative">
               <a
                 href={item.href}
-                className="font-lato text-sm text-stone-700 transition-colors hover:text-stone-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
+                className="font-lato text-sm font-semibold tracking-wide text-stone-600 transition-colors hover:text-blue-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 {item.label}
               </a>
+              {/* Underline Bloom */}
+              <span className="absolute -bottom-1 left-0 h-[1.5px] w-0 bg-blue-500 transition-all duration-300 group-hover:w-full" />
             </li>
           ))}
         </ul>
 
         <div className="flex items-center gap-4">
           {!user ? (
-            <Link
-              to="/login"
-              className="font-lato hidden text-sm font-semibold text-stone-700 hover:text-stone-900 sm:inline px-3 py-1 border border-stone-300 rounded-md transition-all"
-            >
-              Anmelden
-            </Link>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                to="/login"
+                className="font-lato hidden text-sm font-semibold text-stone-600 sm:inline-flex items-center rounded-full border border-blue-100 bg-white/50 px-5 py-2 transition-all hover:bg-blue-50/50 backdrop-blur-sm"
+              >
+                Anmelden
+              </Link>
+            </motion.div>
           ) : (
             <div className="hidden sm:flex items-center gap-3">
-              <Link
-                to={profile?.role === "admin" ? "/admin" : "/dashboard"}
-                className="font-lato text-[11px] font-bold text-stone-700 hover:text-stone-900 px-3 py-1.5 border border-stone-200 rounded-lg transition-all hover:bg-stone-50 whitespace-nowrap"
-              >
-                Mein Bereich
-              </Link>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Link
+                  to={profile?.role === "admin" ? "/admin" : "/dashboard"}
+                  className="font-lato inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/50 px-4 py-2 text-xs font-bold text-stone-700 transition-all hover:bg-white hover:shadow-sm"
+                >
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Mein Bereich
+                </Link>
+              </motion.div>
               <button
                 onClick={handleLogout}
-                className="font-lato text-[10px] font-medium text-stone-500 hover:text-red-600 px-2 py-1 transition-all whitespace-nowrap"
+                className="font-lato text-[10px] font-medium text-stone-400 hover:text-red-600 px-2 py-1 transition-all"
               >
                 Abmelden
               </button>
             </div>
           )}
+
+          <div className="hidden lg:block h-6 w-[1px] bg-blue-100/60" />
+
           <a
             href="tel:02111593482"
-            className="font-lato hidden text-[11px] font-bold text-stone-400 underline-offset-4 hover:underline lg:inline whitespace-nowrap"
+            className="font-lato hidden text-[11px] font-bold text-blue-950/60 hover:text-blue-600 transition-colors lg:inline"
           >
             0211 1593 482
           </a>
-          <Link
-            to="/dashboard"
-            className="font-montserrat inline-flex items-center rounded-sm bg-stone-900 px-2 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] font-black uppercase tracking-widest text-[#faf8f5] transition-all hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800 whitespace-nowrap"
+
+          <motion.div 
+            whileHover={{ scale: 1.03, y: -1 }} 
+            whileTap={{ scale: 0.97 }}
+            className="relative overflow-hidden rounded-full shadow-lg shadow-blue-200/50"
           >
-            Termin buchen
-          </Link>
+            <Link
+              to="/dashboard"
+              className="group relative flex items-center gap-2 bg-blue-600 px-4 py-2.5 sm:px-6 sm:py-3 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.15em] text-white transition-all hover:bg-blue-700"
+            >
+              <span className="relative z-10">Termin buchen</span>
+              
+              {/* Shine Effect */}
+              <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] skew-x-[-30deg] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out" />
+            </Link>
+          </motion.div>
+
           <button
             type="button"
-            className="inline-flex p-2 md:hidden"
+            className="inline-flex p-2 md:hidden text-stone-600"
             aria-expanded={open}
             aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
@@ -114,6 +136,7 @@ export const PremiumNavigation = (): JSX.Element => {
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </button>
@@ -123,7 +146,7 @@ export const PremiumNavigation = (): JSX.Element => {
       {open ? (
         <div
           id="mobile-menu"
-          className="border-t border-stone-200/80 bg-[#faf8f5] px-6 py-4 md:hidden"
+          className="border-t border-blue-100 bg-white/95 backdrop-blur-md px-6 py-4 md:hidden"
         >
           <ul className="flex flex-col gap-3">
             {navItems.map((item) => (

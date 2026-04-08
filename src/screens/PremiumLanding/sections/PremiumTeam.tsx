@@ -1,16 +1,12 @@
 export const PremiumTeam = (): JSX.Element => {
   return (
-    <section id="team" className="border-b border-stone-200/60 bg-white/70">
+    <section id="team" className="scroll-mt-28 border-b border-stone-200/60 bg-[#f8fbfe]">
       <div className="mx-auto grid max-w-6xl gap-16 px-6 py-24 lg:grid-cols-2 lg:items-start">
         <div className="relative mx-auto w-full max-w-md lg:mx-0">
-          <div
-            className="absolute -right-3 -top-3 h-full w-full rounded-sm border border-stone-300/80"
-            aria-hidden
-          />
           <img
             src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=900&q=80"
-            alt=""
-            className="relative z-10 w-full rounded-sm object-cover shadow-xl ring-1 ring-stone-900/10"
+            alt="Dr. Maria Schmidt"
+            className="relative z-10 w-full rounded-[2.5rem] object-cover shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] transition-transform hover:scale-[1.02]"
           />
         </div>
         <div className="max-w-xl pt-2">

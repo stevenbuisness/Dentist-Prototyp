@@ -42,7 +42,7 @@ const items = [
 
 export const PremiumServices = (): JSX.Element => {
   return (
-    <section id="leistungen" className="border-b border-stone-200/60 bg-[#f3f0eb]">
+    <section id="leistungen" className="scroll-mt-28 border-b border-stone-200/60 bg-[#f4f7fb]">
       <div className="mx-auto max-w-6xl px-6 py-24">
         <div className="max-w-2xl">
           <p className="font-montserrat text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">
@@ -61,7 +61,7 @@ export const PremiumServices = (): JSX.Element => {
           {items.map(({ title, text, Icon }) => (
             <article
               key={title}
-              className="flex flex-col rounded-sm border border-stone-200/80 bg-[#faf8f5] p-8 shadow-sm"
+              className="flex flex-col rounded-sm border border-stone-200/80 bg-white p-8 shadow-sm"
             >
               <Icon
                 className="h-8 w-8 text-stone-700"
