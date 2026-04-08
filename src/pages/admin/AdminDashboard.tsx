@@ -292,7 +292,7 @@ export default function AdminDashboard() {
                           data={stats?.monthlyOccupancy || {}}
                         />
                       ) : (
-                        <div className="flex items-end justify-between h-32 gap-2 px-2">
+                        <div className="flex items-end justify-between h-52 gap-2 px-2">
                           {stats?.weeklyOccupancy?.map((day: any) => {
                             const isToday = day.date === new Date().toLocaleDateString("en-CA");
                             const isSelected = day.date === selectedDay;
@@ -310,7 +310,7 @@ export default function AdminDashboard() {
                                 className="flex-1 flex flex-col items-center gap-3 group cursor-pointer"
                               >
                                 <div className={cn(
-                                  "relative w-full flex flex-col justify-end h-24 p-0.5 rounded-lg transition-all",
+                                  "relative w-full flex flex-col justify-end h-40 p-0.5 rounded-lg transition-all",
                                   isSelected && "ring-1 ring-stone-900 ring-offset-2 scale-105"
                                 )}>
                                   <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-3 py-1.5 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-30 scale-90 group-hover:scale-100 border border-white/10">

@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import { PremiumNavigation } from "../screens/PremiumLanding/sections/PremiumNavigation";
 import { PremiumFooter } from "../screens/PremiumLanding/sections/PremiumFooter";
 import { Info, MapPin, Phone, Mail, Award, Landmark, FileCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ImpressumPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-900 antialiased">
       <PremiumNavigation />
@@ -148,7 +151,7 @@ export default function ImpressumPage() {
           {/* Back Button */}
           <div className="mt-16 text-center">
              <button 
-                onClick={() => window.history.back()}
+                onClick={() => navigate("/")}
                 className="inline-flex items-center gap-2 text-stone-400 hover:text-stone-900 font-black uppercase tracking-[0.2em] text-[10px] bg-white px-8 py-4 rounded-full border border-stone-100 transition-all shadow-sm hover:shadow-md active:scale-95"
              >
                 ← Zurück zur Startseite

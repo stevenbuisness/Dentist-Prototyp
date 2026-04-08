@@ -76,10 +76,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] font-lato pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-[#faf9f7] via-[#faf9f7] to-[#f4f7fb] relative overflow-hidden font-lato pb-12">
+      {/* Decorative background elements */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-100/30 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-[-5%] left-[-5%] w-[30%] h-[30%] bg-stone-200/20 rounded-full blur-[100px] pointer-events-none" />
+      
       {/* Navigation Header */}
-      <header className="border-b border-stone-200 bg-white/80 backdrop-blur-md sticky top-0 z-10">
-        <div className="w-full px-6 md:px-10 h-16 flex items-center justify-between">
+      <header className="relative border-b border-stone-200/60 bg-white/70 backdrop-blur-md sticky top-0 z-10 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate(-1)} 
@@ -88,126 +92,130 @@ export default function ProfilePage() {
             >
               <ArrowLeft size={20} />
             </button>
-            <h1 className="font-montserrat font-bold text-stone-900">Mein Profil</h1>
+            <h1 className="font-montserrat font-black text-blue-950 tracking-tight uppercase text-lg">Mein Profil</h1>
           </div>
           <Link 
             to="/" 
-            className="px-4 py-2 bg-white border border-stone-200 text-stone-900 rounded-md text-sm font-semibold hover:bg-stone-50 transition-colors shadow-sm"
+            className="px-4 py-2 bg-white border border-stone-200 text-blue-950 rounded-full text-sm font-bold hover:bg-stone-50 transition-all shadow-sm hover:shadow-md"
           >
             Zur Startseite
           </Link>
         </div>
       </header>
 
-      <main className="w-full px-6 md:px-10 pt-8">
+      <main className="relative max-w-7xl mx-auto px-6 md:px-10 pt-8 z-20">
         <div className="mb-8">
           <Link 
             to="/dashboard" 
-            className="text-xs font-semibold uppercase tracking-wider text-stone-500 hover:text-stone-900 transition-colors flex items-center gap-1 mb-2"
+            className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 mb-3"
           >
-            <ArrowLeft size={12} /> Dashboard
+            <ArrowLeft size={12} className="mb-0.5" /> Zurück zum Dashboard
           </Link>
-          <h2 className="text-3xl font-montserrat font-bold text-stone-900">Persönliche Daten</h2>
-          <p className="text-stone-500 mt-1">Verwalten Sie Ihre Informationen für eine reibungslose Terminplanung.</p>
+          <h2 className="text-4xl font-montserrat font-black text-blue-950 tracking-tighter mb-2">
+            Persönliche Daten
+          </h2>
+          <p className="text-stone-500 font-medium max-w-2xl">
+            Verwalten Sie Ihre Informationen für eine reibungslose Terminplanung und individuelle Betreuung.
+          </p>
         </div>
 
-        <Card className="border-stone-200 shadow-sm overflow-hidden bg-white">
-          <CardHeader className="bg-stone-50/50 border-b border-stone-100">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-stone-900 rounded-full flex items-center justify-center text-[#faf8f5]">
-                <UserIcon size={24} />
+        <Card className="border-stone-200/60 shadow-xl shadow-stone-200/40 overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl">
+          <CardHeader className="bg-gradient-to-r from-blue-50/50 to-transparent border-b border-stone-100/60 p-8">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-blue-950 rounded-2xl flex items-center justify-center text-[#faf8f5] shadow-lg shadow-blue-950/20 transition-transform hover:rotate-6 cursor-default">
+                <UserIcon size={32} />
               </div>
               <div>
-                <CardTitle className="text-xl font-montserrat text-stone-900">Kontoinformationen</CardTitle>
-                <CardDescription className="text-stone-500">{user?.email}</CardDescription>
+                <CardTitle className="text-2xl font-montserrat font-black text-blue-950 tracking-tighter">Kontoinformationen</CardTitle>
+                <CardDescription className="text-stone-500 font-medium text-base">{user?.email}</CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-8">
-            <form onSubmit={handleSave} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Vorname</label>
+          <CardContent className="p-8 md:p-10">
+            <form onSubmit={handleSave} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-900/40">Vorname</label>
                   <Input 
                     value={firstName} 
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="Max"
-                    className="border-stone-200 focus:ring-stone-900"
+                    className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Nachname</label>
+                <div className="space-y-3">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-900/40">Nachname</label>
                   <Input 
                     value={lastName} 
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Mustermann"
-                    className="border-stone-200 focus:ring-stone-900"
+                    className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Geburtsdatum</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-900/40">Geburtsdatum</label>
                   <Input 
                     type="date"
                     value={dateOfBirth} 
                     onChange={(e) => setDateOfBirth(e.target.value)}
-                    className="border-stone-200 focus:ring-stone-900"
+                    className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Telefonnummer</label>
+                <div className="space-y-3">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-900/40">Telefonnummer</label>
                   <Input 
                     type="tel"
                     value={phoneNumber} 
                     onChange={(e) => setPhoneNumber(e.target.value)}
                     placeholder="+49 123 456789"
-                    className="border-stone-200 focus:ring-stone-900"
+                    className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                   />
                 </div>
               </div>
 
-              <Separator className="my-4 bg-stone-100" />
+              <Separator className="bg-stone-100" />
 
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-stone-700">Straße & Hausnummer</label>
+              <div className="space-y-8">
+                <div className="space-y-3">
+                  <label className="text-[11px] font-black uppercase tracking-widest text-blue-900/40">Straße & Hausnummer</label>
                   <Input 
                     value={addressLine1} 
                     onChange={(e) => setAddressLine1(e.target.value)}
                     placeholder="Hauptstraße 12"
-                    className="border-stone-200 focus:ring-stone-900"
+                    className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-6">
-                  <div className="space-y-2 col-span-1">
-                    <label className="text-sm font-semibold text-stone-700">PLZ</label>
+                <div className="grid grid-cols-3 gap-8">
+                  <div className="space-y-3 col-span-1">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-blue-900/40">PLZ</label>
                     <Input 
                       value={postCode} 
                       onChange={(e) => setPostCode(e.target.value)}
                       placeholder="12345"
-                      className="border-stone-200 focus:ring-stone-900"
+                      className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                     />
                   </div>
-                  <div className="space-y-2 col-span-2">
-                    <label className="text-sm font-semibold text-stone-700">Stadt</label>
+                  <div className="space-y-3 col-span-2">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-blue-900/40">Stadt</label>
                     <Input 
                       value={city} 
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="Berlin"
-                      className="border-stone-200 focus:ring-stone-900"
+                      className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end">
+              <div className="pt-6 flex justify-end">
                 <Button 
                   type="submit" 
                   disabled={isSaving}
-                  className="bg-stone-900 text-[#faf8f5] hover:bg-stone-800 h-11 px-8 font-semibold transition-all rounded-md flex items-center gap-2 shadow-md"
+                  className="bg-blue-950 text-white hover:bg-blue-900 h-14 px-10 font-black uppercase tracking-widest text-xs transition-all rounded-xl flex items-center gap-3 shadow-xl shadow-blue-950/20 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   {isSaving ? "Wird gespeichert..." : (
                     <>
@@ -222,7 +230,7 @@ export default function ProfilePage() {
         </Card>
 
         {profile?.updated_at && (
-          <p className="text-center text-[10px] text-stone-400 mt-6 uppercase tracking-widest">
+          <p className="text-center text-[10px] text-stone-400 mt-10 uppercase tracking-[0.3em] font-bold">
             Letzte Aktualisierung: {new Date(profile.updated_at).toLocaleString('de-DE')}
           </p>
         )}

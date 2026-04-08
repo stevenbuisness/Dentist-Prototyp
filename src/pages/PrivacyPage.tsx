@@ -2,8 +2,11 @@ import { motion } from "framer-motion";
 import { PremiumNavigation } from "../screens/PremiumLanding/sections/PremiumNavigation";
 import { PremiumFooter } from "../screens/PremiumLanding/sections/PremiumFooter";
 import { ShieldCheck, FileText, Lock, Globe } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function PrivacyPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-900 antialiased">
       <PremiumNavigation />
@@ -120,7 +123,7 @@ export default function PrivacyPage() {
 
           <div className="mt-16 text-center">
              <button 
-                onClick={() => window.history.back()}
+                onClick={() => navigate("/")}
                 className="inline-flex items-center gap-2 text-stone-400 hover:text-stone-900 font-black uppercase tracking-[0.2em] text-[10px] bg-white px-6 py-3 rounded-full border border-stone-100 transition-all shadow-sm hover:shadow-md"
              >
                 ← Zurück zur Startseite

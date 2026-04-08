@@ -14,8 +14,11 @@ export function translateError(error: any): string {
   const message = error.message || "";
   const code = error.code || "";
 
-  // Custom DB Trigger Messages
+  // Custom DB Trigger & Function Messages
   if (message.includes("SLOT_FULL")) return "Dieser Termin ist leider bereits ausgebucht.";
+  if (message.includes("Praxis geschlossen")) return "An diesem Tag ist die Praxis leider geschlossen.";
+  if (message.includes("Öffnungszeiten")) return "Der Termin liegt außerhalb unserer Öffnungszeiten.";
+  if (message.includes("Mittagspause")) return "Dieser Termin überschneidet sich mit der Mittagspause (12:00-13:00).";
   
   // Auth Errors
   if (message.includes("JWT expired") || code === "PGRST301") 

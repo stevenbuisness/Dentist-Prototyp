@@ -25,8 +25,13 @@ function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    // Disable browser's automatic scroll restoration to ensure our scrollTo(0,0) works
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
     // Scroll to top when the actual path changes (e.g., from / to /impressum)
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }, [pathname]);
 
   return null;

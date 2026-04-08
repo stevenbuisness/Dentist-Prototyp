@@ -363,36 +363,46 @@ export default function DashboardPage() {
   }, [calendarViewMonth]);
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] font-lato pb-20">
-      <header className="border-b border-stone-200 bg-white/80 backdrop-blur-md sticky top-0 z-10">
-        <div className="w-full px-6 md:px-10 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-montserrat font-bold text-stone-900 hover:opacity-80 transition-opacity">
+    <div className="min-h-screen bg-gradient-to-br from-[#faf9f7] via-[#faf9f7] to-[#f4f7fb] font-lato pb-20 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-100/30 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-[20%] -right-[5%] w-[30%] h-[30%] bg-blue-50/40 rounded-full blur-[100px]" />
+      </div>
+
+      <header className="border-b border-blue-100/30 bg-white/80 backdrop-blur-xl sticky top-0 z-50 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3 font-montserrat group">
             <img 
               src="/logo.png" 
               alt="Dr. Schmidt Logo" 
-              className="w-10 h-10 object-contain mix-blend-multiply"
+              className="w-12 h-12 object-contain transition-transform group-hover:scale-105 mix-blend-multiply"
             />
-            <span>Dr. Schmidt</span>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold leading-none tracking-tight text-blue-950">Dr. Schmidt</span>
+              <span className="text-[9px] font-semibold italic text-blue-600/80 leading-none mt-1">Ihr Lächeln in besten Händen</span>
+            </div>
           </Link>
-          <div className="flex items-center gap-4 sm:gap-6">
-            <Link to="/" className="text-stone-600 hover:text-stone-900 transition-colors flex items-center justify-center group p-1">
-              <Home size={22} /> <span className="hidden sm:inline ml-1.5 text-sm font-medium">Zur Startseite</span>
+          <div className="flex items-center gap-2 sm:gap-6">
+            <Link to="/" className="text-stone-500 hover:text-blue-600 transition-all flex items-center gap-2 px-3 py-2 rounded-full hover:bg-blue-50/50">
+              <Home size={18} /> <span className="hidden sm:inline text-[11px] font-black uppercase tracking-widest">Start</span>
             </Link>
-            <Link to="/profile" className="text-stone-600 hover:text-stone-900 transition-colors flex items-center justify-center group p-1">
-              <UserIcon size={22} /> <span className="hidden sm:inline ml-1.5 text-sm font-medium">Profil</span>
+            <Link to="/profile" className="text-stone-500 hover:text-blue-600 transition-all flex items-center gap-2 px-3 py-2 rounded-full hover:bg-blue-50/50">
+              <UserIcon size={18} /> <span className="hidden sm:inline text-[11px] font-black uppercase tracking-widest">Profil</span>
             </Link>
-            <button onClick={handleLogout} className="px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-stone-900 text-[#faf8f5] text-xs sm:text-sm font-bold hover:bg-stone-800 transition-all shadow-sm active:scale-95">
-              Abmelden
+            <div className="h-4 w-px bg-stone-200 hidden sm:block" />
+            <button onClick={handleLogout} className="px-5 py-2.5 rounded-full bg-stone-950 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-stone-200 hover:bg-stone-800 transition-all active:scale-95">
+              Logout
             </button>
           </div>
         </div>
       </header>
       
-      <main className="w-full p-6 md:p-10 space-y-8">
+      <main className="w-full p-6 md:p-10 space-y-8 relative z-10">
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-montserrat font-bold text-stone-900">
-              Guten Tag, {profile?.first_name || (isLoadingBookings ? <Skeleton className="h-8 w-32 inline-block align-middle" /> : "Patient")}!
+            <h1 className="text-4xl font-montserrat font-black text-blue-950 uppercase tracking-tighter">
+              Guten Tag, {profile?.first_name || (isLoadingBookings ? <Skeleton className="h-10 w-48 inline-block align-middle" /> : "Patient")}!
             </h1>
             <p className="text-stone-500 mt-1">Verwalten Sie Ihre Gesundheit und buchen Sie neue Termine.</p>
           </div>
@@ -403,16 +413,22 @@ export default function DashboardPage() {
             {/* BOOKING WIZARD */}
             <div 
               ref={wizardRef}
-              className="bg-white rounded-[2.5rem] border border-stone-100 shadow-xl shadow-stone-200/50 overflow-hidden min-h-[500px] flex flex-col scroll-mt-24 sm:scroll-mt-28"
+              className="bg-white rounded-[2.5rem] border border-stone-200/50 shadow-2xl shadow-stone-200/30 overflow-hidden min-h-[500px] flex flex-col scroll-mt-24 sm:scroll-mt-28 relative"
             >
-               <div className="p-8 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
+               {/* Subtle background glow */}
+               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/30 rounded-full blur-[100px] pointer-events-none" />
+
+               <div className="p-10 border-b border-stone-100/50 bg-stone-50/30 flex items-center justify-between relative z-10">
                   <div>
-                    <h2 className="text-xl font-montserrat font-black text-stone-900 uppercase tracking-tight">Terminbuchung</h2>
-                    <p className="text-stone-400 text-[10px] font-black uppercase tracking-widest mt-1">Schritt {bookingStep} von 4</p>
+                    <h2 className="text-2xl font-montserrat font-black text-blue-950 uppercase tracking-tighter">Terminbuchung</h2>
+                    <div className="flex items-center gap-2 mt-2">
+                       <span className="h-px w-6 bg-blue-500" />
+                       <p className="text-stone-400 text-[9px] font-black uppercase tracking-[0.3em]">Phase {bookingStep} von 4</p>
+                    </div>
                   </div>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-2">
                     {[1, 2, 3, 4].map(step => (
-                      <div key={step} className={cn("w-2 h-2 rounded-full transition-all duration-300", bookingStep >= step ? "bg-stone-900 w-6" : "bg-stone-200")} />
+                      <div key={step} className={cn("h-1.5 rounded-full transition-all duration-500", bookingStep >= step ? "bg-blue-600 w-8" : "bg-stone-200 w-3")} />
                     ))}
                   </div>
                </div>
@@ -463,18 +479,24 @@ export default function DashboardPage() {
                                 <button
                                   key={type.id}
                                   onClick={() => { setSelectedType(type); setBookingStep(2); }}
-                                  className="group p-6 rounded-3xl border border-stone-100 bg-stone-50/50 hover:bg-white hover:border-primary hover:ring-4 hover:ring-primary/10 transition-all text-left"
+                                  className="group p-8 rounded-[2rem] border border-stone-100 bg-white hover:border-blue-200 hover:ring-[12px] hover:ring-blue-50/30 transition-all text-left shadow-sm hover:shadow-xl relative overflow-hidden"
                                 >
-                                  <div className="flex justify-between items-start mb-4">
-                                    <div className="p-3 bg-white rounded-2xl shadow-sm group-hover:bg-primary group-hover:text-white transition-colors">
-                                      <ClipboardList size={20} />
+                                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50/50 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-blue-100/50 transition-colors" />
+                                  
+                                  <div className="flex justify-between items-start mb-6 relative z-10">
+                                    <div className="p-3.5 bg-stone-50 rounded-2xl group-hover:bg-blue-600 group-hover:text-white transition-all transform group-hover:scale-110 shadow-sm">
+                                      <ClipboardList size={22} />
                                     </div>
-                                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest bg-white px-2 py-1 rounded-full border border-stone-100">
+                                    <span className="text-[9px] font-black text-blue-600/60 uppercase tracking-widest bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100/50">
                                       {type.duration_minutes || type.default_duration_minutes} Min
                                     </span>
                                   </div>
-                                  <h3 className="font-montserrat font-bold text-stone-900 group-hover:text-primary transition-colors uppercase tracking-tight text-xs">{type.name}</h3>
-                                  <p className="text-stone-500 mt-2 line-clamp-2 leading-relaxed text-[11px] font-medium">{type.description || "Professionelle Behandlung durch unser Team."}</p>
+                                  <h3 className="font-montserrat font-black text-blue-950 group-hover:text-blue-600 transition-colors uppercase tracking-tight text-xs relative z-10">{type.name}</h3>
+                                  <p className="text-stone-500 mt-3 line-clamp-3 leading-relaxed text-[11px] font-medium relative z-10">{type.description || "Professionelle Behandlung durch unser Team."}</p>
+                                  
+                                  <div className="mt-6 flex items-center gap-1.5 text-blue-600/0 group-hover:text-blue-600 transition-all font-black text-[9px] uppercase tracking-widest relative z-10">
+                                    Termin wählen <ChevronRight size={10} />
+                                  </div>
                                 </button>
                               ))
                             )}
@@ -673,12 +695,12 @@ export default function DashboardPage() {
                             })()}
                             
                             {filteredSlots.length > 0 ? (
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                 {filteredSlots.map((slot) => (
                                   <button
                                     key={slot.id}
                                     onClick={() => handleSelectSlot(slot)}
-                                    className="h-14 rounded-2xl bg-white border border-stone-100 text-stone-900 font-bold text-sm hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 transition-all shadow-sm active:scale-95"
+                                    className="h-16 rounded-2xl bg-white border border-stone-200 text-blue-950 font-black text-sm hover:border-blue-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm hover:shadow-lg active:scale-95"
                                   >
                                     {format(new Date(slot.start_time), "HH:mm")}
                                   </button>
@@ -722,26 +744,26 @@ export default function DashboardPage() {
                               </div>
 
                               <div className="space-y-4">
-                                 <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
-                                    <div className="flex items-center gap-4">
-                                       <div className="w-10 h-10 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500">
-                                          <ClipboardList size={20} />
+                                 <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-sm group">
+                                    <div className="flex items-center gap-5">
+                                       <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                                          <ClipboardList size={22} />
                                        </div>
                                        <div>
-                                          <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-0.5">Leistung</span>
-                                          <span className="font-bold text-stone-900 text-sm">{selectedType?.name}</span>
+                                          <span className="text-[9px] font-black text-stone-400 uppercase tracking-[0.2em] block mb-1">Gewählte Leistung</span>
+                                          <span className="font-montserrat font-black text-blue-950 uppercase text-xs tracking-tight">{selectedType?.name}</span>
                                        </div>
                                     </div>
                                  </div>
 
-                                 <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
-                                    <div className="flex items-center gap-4">
-                                       <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500">
-                                          <CalendarIcon size={20} />
+                                 <div className="bg-white p-6 rounded-3xl border border-blue-50 shadow-sm group">
+                                    <div className="flex items-center gap-5">
+                                       <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                                          <CalendarIcon size={22} />
                                        </div>
                                        <div>
-                                          <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest block mb-0.5">Zeitpunkt</span>
-                                          <span className="font-bold text-stone-900 text-sm">
+                                          <span className="text-[9px] font-black text-stone-400 uppercase tracking-[0.2em] block mb-1">Gewählter Zeitpunkt</span>
+                                          <span className="font-montserrat font-black text-blue-950 uppercase text-xs tracking-tight">
                                             {format(new Date(selectedSlot?.start_time || new Date()), "EEEE, d. MMMM • HH:mm", { locale: de })} Uhr
                                           </span>
                                        </div>
@@ -772,28 +794,28 @@ export default function DashboardPage() {
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ type: "spring", damping: 25, stiffness: 300 }}
                         >
-                          <div className="bg-stone-900 rounded-[3rem] p-12 text-center text-white relative overflow-hidden shadow-2xl max-w-lg w-full mx-auto">
+                          <div className="bg-blue-600 rounded-[3rem] p-12 text-center text-white relative overflow-hidden shadow-2xl max-w-lg w-full mx-auto group">
                             {/* Inner Glow Background */}
                             <motion.div 
                               className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none"
                               animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
                               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                             >
-                              <div className="w-64 h-64 bg-primary rounded-full blur-[100px]" />
+                              <div className="w-80 h-80 bg-white rounded-full blur-[120px]" />
                             </motion.div>
                             
                             <div className="relative z-10 flex flex-col items-center">
                               <motion.div 
-                                className="w-24 h-24 bg-gradient-to-br from-primary via-primary/80 to-primary/40 rounded-[2rem] flex items-center justify-center text-white shadow-xl shadow-primary/20 mb-8 border-4 border-primary/30 pointer-events-none"
+                                className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center text-blue-600 shadow-xl shadow-blue-900/20 mb-8 border-4 border-white/20 pointer-events-none"
                                 initial={{ y: 20, rotate: -15, scale: 0.5 }}
                                 animate={{ y: 0, rotate: 0, scale: 1 }}
                                 transition={{ type: "spring", bounce: 0.6, delay: 0.2 }}
                               >
-                                <CheckCircle2 size={48} strokeWidth={2.5} className="text-stone-900" />
+                                <CheckCircle2 size={48} strokeWidth={2.5} />
                               </motion.div>
                               
                               <motion.h2 
-                                className="text-3xl font-montserrat font-black tracking-tight mb-4"
+                                className="text-3xl font-montserrat font-black tracking-tight mb-4 uppercase"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
@@ -867,33 +889,33 @@ export default function DashboardPage() {
                  <Skeleton className="h-12 w-full rounded-2xl" />
               </div>
             ) : upcomingBooking ? (
-              <div className="bg-stone-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-white/10 transition-colors" />
-                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-6">Nächster Termin</h3>
+              <div className="bg-blue-950 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-600/30 transition-colors" />
+                 <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-blue-400 mb-6">Nächster Termin</h3>
                  
                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                       <CalendarIcon size={24} className="text-white" />
+                    <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-blue-400">
+                       <CalendarIcon size={24} />
                     </div>
                     <div>
-                      <div className="text-lg font-montserrat font-bold">
+                      <div className="text-xl font-montserrat font-black uppercase tracking-tight">
                         {format(new Date(upcomingBooking.session.start_time), "d. MMMM", { locale: de })}
                       </div>
-                      <div className="text-white/40 text-xs font-bold uppercase tracking-widest">
+                      <div className="text-blue-400/80 text-[10px] font-black uppercase tracking-[0.2em] mt-1">
                         {format(new Date(upcomingBooking.session.start_time), "HH:mm")} Uhr
                       </div>
                     </div>
                  </div>
                  
-                 <div className="p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
-                   <p className="text-[10px] text-white/30 font-black uppercase tracking-widest mb-1.5">Behandlung</p>
-                   <p className="font-bold text-sm tracking-tight">{upcomingBooking.session.session_type?.name}</p>
+                 <div className="p-5 bg-white/5 rounded-2xl border border-white/10 mb-8 backdrop-blur-sm">
+                   <p className="text-[9px] text-white/30 font-black uppercase tracking-widest mb-1.5">Behandlung</p>
+                   <p className="font-bold text-sm tracking-tight text-blue-50">{upcomingBooking.session.session_type?.name}</p>
                  </div>
 
                  <Button 
                    variant="outline" 
                    onClick={() => handleCancelExisting(upcomingBooking.id, upcomingBooking.session.start_time)}
-                   className="w-full bg-white/5 border-white/10 text-white/60 hover:bg-red-500 hover:text-white hover:border-red-500 rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 transition-all"
+                   className="w-full bg-white/5 border-white/10 text-stone-400 hover:bg-red-500 hover:text-white hover:border-red-500 rounded-2xl font-black uppercase tracking-widest text-[10px] h-12 transition-all"
                  >
                     Termin absagen
                  </Button>
@@ -931,7 +953,7 @@ export default function DashboardPage() {
                            <div className="flex items-center gap-3">
                               <div className={cn(
                                 "w-10 h-10 rounded-xl flex items-center justify-center transition-colors font-bold text-xs",
-                                booking.status === 'confirmed' ? "bg-primary/10 text-primary" : "bg-stone-50 text-stone-400"
+                                booking.status === 'confirmed' ? "bg-blue-50 text-blue-600" : "bg-stone-50 text-stone-400"
                               )}>
                                  <CheckCircle2 size={16} />
                               </div>
@@ -959,13 +981,13 @@ export default function DashboardPage() {
       <AlertDialog open={cancelBookingId !== null} onOpenChange={(open) => !open && setCancelBookingId(null)}>
         <AlertDialogContent className="rounded-[2.5rem] border-stone-200 p-8 sm:rounded-[2.5rem]">
           <AlertDialogHeader>
-            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 mb-4 mx-auto md:mx-0">
-              <AlertCircle size={32} />
+            <div className="w-20 h-20 bg-red-50 rounded-[2rem] flex items-center justify-center text-red-500 mb-6 mx-auto md:mx-0 shadow-sm">
+              <AlertCircle size={36} />
             </div>
-            <AlertDialogTitle className="text-2xl font-montserrat font-black text-stone-900">
+            <AlertDialogTitle className="text-2xl font-montserrat font-black text-blue-950 uppercase tracking-tighter">
               Termin stornieren?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-stone-500 font-medium">
+            <AlertDialogDescription className="text-stone-500 font-medium leading-relaxed mt-2">
               Möchten Sie diesen anstehenden Termin wirklich absagen? Diese Aktion kann nicht rückgängig gemacht werden.
             </AlertDialogDescription>
           </AlertDialogHeader>

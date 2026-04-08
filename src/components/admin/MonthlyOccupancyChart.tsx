@@ -82,7 +82,7 @@ export const MonthlyOccupancyChart: React.FC<MonthlyOccupancyChartProps> = ({
                onClick={() => onDayClick(dateStr)}
                style={{ gridColumnStart: column }}
                className={cn(
-                 "relative h-12 flex flex-col items-center justify-center rounded-lg border transition-all group cursor-pointer",
+                 "relative h-16 flex flex-col items-center justify-center rounded-lg border transition-all group cursor-pointer",
                  isToday ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-stone-100 hover:border-stone-300 bg-white"
                )}
              >
