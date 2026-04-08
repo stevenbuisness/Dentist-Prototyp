@@ -9,7 +9,7 @@ export const Navigation = (): JSX.Element => {
         <div className="flex items-center gap-4 sm:gap-12">
           <a
             href="#"
-            className="flex items-center gap-2 [font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-lg sm:text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 [font-family:'Kollektif-Bold',Helvetica] font-bold text-primary text-lg sm:text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
           >
             <img 
               src="/logo.png" 
@@ -22,25 +22,25 @@ export const Navigation = (): JSX.Element => {
           <div className="hidden lg:flex items-center gap-8">
             <a
               href="#leistungen"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#7DC9E8] transition-colors"
             >
               Leistungen
             </a>
             <a
               href="#team"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#7DC9E8] transition-colors"
             >
               Unser Team
             </a>
             <a
               href="#patienten"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#7DC9E8] transition-colors"
             >
               Qualität
             </a>
             <a
               href="#kontakt"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#7DC9E8] transition-colors"
             >
               Kontakt
             </a>
@@ -50,7 +50,7 @@ export const Navigation = (): JSX.Element => {
         <div className="flex items-center gap-2 sm:gap-4">
           <a
             href="tel:03012345678"
-            className="hidden md:flex items-center gap-2 [font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors"
+            className="hidden md:flex items-center gap-2 [font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#7DC9E8] transition-colors"
           >
             <svg
               width="20"
@@ -70,7 +70,7 @@ export const Navigation = (): JSX.Element => {
             030 1234 5678
           </a>
 
-          <button className="px-2 py-1.5 sm:px-6 sm:py-3 bg-[#5ba3bb] text-white [font-family:'Kollektif-Bold',Helvetica] font-bold text-[9px] sm:text-xs tracking-normal sm:tracking-[0.70px] hover:bg-[#4a92a9] transition-colors rounded whitespace-nowrap">
+          <button className="px-2 py-1.5 sm:px-6 sm:py-3 bg-primary text-primary-foreground [font-family:'Kollektif-Bold',Helvetica] font-bold text-[9px] sm:text-xs tracking-normal sm:tracking-[0.70px] hover:bg-[#6ab8d7] transition-colors rounded whitespace-nowrap">
             TERMIN BUCHEN
           </button>
 
@@ -103,35 +103,35 @@ export const Navigation = (): JSX.Element => {
           <div className="flex flex-col gap-4">
             <a
               href="#leistungen"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors py-2"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Leistungen
             </a>
             <a
               href="#team"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors py-2"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Unser Team
             </a>
             <a
               href="#patienten"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors py-2"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Qualität
             </a>
             <a
               href="#kontakt"
-              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors py-2"
+              className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-primary transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               Kontakt
             </a>
             <a
               href="tel:03012345678"
-              className="flex items-center gap-2 [font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#5ba3bb] transition-colors py-2"
+              className="flex items-center gap-2 [font-family:'Kollektif-Regular',Helvetica] font-normal text-[#282828] text-base tracking-[0.5px] hover:text-[#7DC9E8] transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               <svg

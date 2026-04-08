@@ -5,7 +5,7 @@ export const ClinicianProfileSection = (): JSX.Element => {
         {/* Left: Image with decorative border */}
         <div className="relative flex-shrink-0 w-[560px] h-[688px]">
           {/* Decorative offset border */}
-          <div className="absolute top-8 left-8 w-[560px] h-[688px] border border-solid border-[#5ba3bb] rotate-180 opacity-50" />
+          <div className="absolute top-8 left-8 w-[560px] h-[688px] border border-solid border-[#7DC9E8] rotate-180 opacity-50" />
           {/* Doctor image */}
           <img
             className="absolute top-0 left-0 w-[560px] h-[688px] object-cover"

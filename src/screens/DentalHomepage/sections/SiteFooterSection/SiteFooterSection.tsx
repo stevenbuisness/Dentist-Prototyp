@@ -124,10 +124,10 @@ export const SiteFooterSection = (): JSX.Element => {
               placeholder="Ihre E-Mail-Adresse"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-full bg-transparent px-4 [font-family:'Kollektif-Regular',Helvetica] font-normal text-white text-sm tracking-[0.98px] leading-[26px] outline-none placeholder:text-[#a7adaf] focus:border-[#5ba3bb]"
+              className="w-full h-full bg-transparent px-4 [font-family:'Kollektif-Regular',Helvetica] font-normal text-white text-sm tracking-[0.98px] leading-[26px] outline-none placeholder:text-[#a7adaf] focus:border-[#7DC9E8]"
             />
           </div>
-          <button className="w-32 h-12 bg-white flex items-center justify-center flex-shrink-0 hover:bg-[#5ba3bb] transition-colors group">
+          <button className="w-32 h-12 bg-white flex items-center justify-center flex-shrink-0 hover:bg-[#7DC9E8] transition-colors group">
             <span className="[font-family:'Kollektif-Bold',Helvetica] font-bold text-[#282828] group-hover:text-white text-[10px] text-center tracking-[0.70px] leading-[normal] transition-colors">
               ABSENDEN
             </span>

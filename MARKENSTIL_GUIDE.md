@@ -18,8 +18,10 @@ Unsere Farbpalette ist minimalistisch, beruhigend und hochwertig. Für E-Mails s
   - Sekundärer Text (Mittelgrau): `#44403c` (entspricht `text-stone-800`) oder `#78716c` (`text-stone-500` für weniger wichtige Hinweise / Footer)
 
 - **Akzentfarben (Buttons, Linien, Hervorhebungen):**
-  - Dunkler Akzent (Schwarz/Stone): `#1c1917`
-  - Kontrast-Texte in Buttons: `#fafaf9` oder `#ffffff`
+  - **Primär-Akzent (Lichtblau):** `#7DC9E8` (Logo-Orbit)
+  - **Sekundär-Akzent (Silbergrau):** `#A0A0A0` (Logo-Zahn-Glanz)
+  - Dunkler Kontrast (Stone): `#1c1917`
+  - Kontrast-Texte in Buttons: `#1c1917` (auf Lichtblau) oder `#ffffff`
 
 ---
 

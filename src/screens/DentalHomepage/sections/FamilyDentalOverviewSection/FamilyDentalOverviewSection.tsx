@@ -42,8 +42,8 @@ export const FamilyDentalOverviewSection = (): JSX.Element => {
 
             {/* Learn More link */}
             <div className="relative w-[95px] h-[23px] flex-shrink-0 cursor-pointer group">
-              <div className="absolute top-0 left-px w-[91px] h-[23px] border-b-2 border-solid border-[#5ba3bb] group-hover:border-[#4a92a9] transition-colors" />
-              <span className="absolute top-1.5 left-0 [font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-[10px] text-center tracking-[0.70px] leading-[normal] whitespace-nowrap group-hover:text-[#4a92a9] transition-colors">
+              <div className="absolute top-0 left-px w-[91px] h-[23px] border-b-2 border-solid border-[#7DC9E8] group-hover:border-[#6AB8D7] transition-colors" />
+              <span className="absolute top-1.5 left-0 [font-family:'Kollektif-Bold',Helvetica] font-bold text-[#7DC9E8] text-[10px] text-center tracking-[0.70px] leading-[normal] whitespace-nowrap group-hover:text-[#6AB8D7] transition-colors">
                 MEHR ERFAHREN
               </span>
             </div>

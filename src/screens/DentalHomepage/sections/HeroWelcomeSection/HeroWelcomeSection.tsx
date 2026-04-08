@@ -35,7 +35,7 @@ export const HeroWelcomeSection = (): JSX.Element => {
           ein wunderschönes,
           <br />
         </span>
-        <span className="text-[#5ba3bb] tracking-[-0.92px]">strahlendes </span>
+        <span className="text-[#7DC9E8] tracking-[-0.92px]">strahlendes </span>
         <span className="text-[#282828] tracking-[0]">Lächeln.</span>
       </div>
 
@@ -61,7 +61,7 @@ export const HeroWelcomeSection = (): JSX.Element => {
             }}
           >
             {/* Number */}
-            <span className="[font-family:'Kollektif-Bold',Helvetica] font-bold text-[#5ba3bb] text-2xl tracking-[-0.24px] leading-normal">
+            <span className="[font-family:'Kollektif-Bold',Helvetica] font-bold text-[#7DC9E8] text-2xl tracking-[-0.24px] leading-normal">
               {service.number}
             </span>
 
@@ -72,7 +72,7 @@ export const HeroWelcomeSection = (): JSX.Element => {
 
             {/* Learn More with arrow */}
             <div className="flex flex-row items-center mt-[9px] gap-2 cursor-pointer group">
-              <span className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#a7adaf] text-lg tracking-[1.26px] leading-normal group-hover:text-[#5ba3bb] transition-colors">
+              <span className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#a7adaf] text-lg tracking-[1.26px] leading-normal group-hover:text-[#7DC9E8] transition-colors">
                 Mehr erfahren
               </span>
               <img className="w-2.5 h-[7px]" alt="Arrow" src="/arrow.svg" />

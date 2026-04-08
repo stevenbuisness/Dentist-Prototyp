@@ -55,7 +55,7 @@ export const PatientTestimonialSection = (): JSX.Element => {
                 key={b.title}
                 className="rounded-lg border border-[#c5d9e2]/80 bg-white/90 p-6 shadow-sm"
               >
-                <p className="[font-family:'Kollektif-Bold',Helvetica] text-2xl font-bold text-[#5ba3bb]">
+                <p className="[font-family:'Kollektif-Bold',Helvetica] text-2xl font-bold text-[#7DC9E8]">
                   {b.value}
                 </p>
                 <p className="mt-1 [font-family:'Kollektif-Bold',Helvetica] text-xs uppercase tracking-[0.2em] text-[#6b7d85]">
@@ -68,7 +68,7 @@ export const PatientTestimonialSection = (): JSX.Element => {
             ))}
           </div>
 
-          <blockquote className="mt-12 border-l-4 border-[#5ba3bb] pl-6">
+          <blockquote className="mt-12 border-l-4 border-[#7DC9E8] pl-6">
             <p className="[font-family:'Kollektif-Regular',Helvetica] text-lg italic leading-relaxed text-[#3d474c]">
               „Vertrauen entsteht, wenn Erklärung, Technik und Nachsorge
               zusammenpassen — nicht wenn isolierte Ergebnisse gefeiert werden.“

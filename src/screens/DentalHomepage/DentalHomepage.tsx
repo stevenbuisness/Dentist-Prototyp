@@ -28,7 +28,7 @@ export const DentalHomepage = (): JSX.Element => {
               Werbeversprechen, mit Fokus auf dokumentierte Abläufe.
             </p>
           </div>
-          <div className="mx-auto mt-10 h-px max-w-[720px] bg-gradient-to-r from-transparent via-[#5ba3bb]/40 to-transparent" />
+          <div className="mx-auto mt-10 h-px max-w-[720px] bg-gradient-to-r from-transparent via-[#7DC9E8]/40 to-transparent" />
         </div>
         <PatientTestimonialSection />
         <SiteFooterSection />
