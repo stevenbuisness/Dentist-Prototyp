@@ -53,7 +53,7 @@ export const PremiumTrustSection = (): JSX.Element => {
               <div className="mt-10 relative pl-8 border-l-2 border-blue-500/20">
                 <Quote className="absolute -left-3 -top-4 h-8 w-8 text-blue-500/10 rotate-180" />
                 <p className="font-lato text-lg md:text-xl italic leading-relaxed text-stone-600">
-                  „Patientenfeedback ist wertvoll. Entscheidend für Ihre Sicherheit sind jedoch klar definierte, reproduzierbare Prozesse – nachvollziehbar dokumentiert und konsequent umgesetzt.“
+                  „Wir schätzen Ihr Feedback sehr. Entscheidend für Ihre Sicherheit sind bei uns jedoch klar definierte, reproduzierbare Prozesse – von uns lückenlos dokumentiert und konsequent umgesetzt.“
                 </p>
               </div>
             </motion.div>

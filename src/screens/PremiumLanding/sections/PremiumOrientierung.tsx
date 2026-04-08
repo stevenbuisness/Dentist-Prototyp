@@ -37,7 +37,7 @@ export const PremiumOrientierung = (): JSX.Element => {
               <div className="absolute left-0 top-0 h-full w-px bg-blue-100" />
               <div className="absolute left-[-4px] top-1.5 h-2 w-2 rounded-full bg-blue-600" />
               <p className="font-lato text-lg leading-relaxed text-stone-700">
-                Jede Behandlung beginnt mit einer strukturierten Diagnostik nach aktuellen Leitlinien – inklusive präziser Bildgebung. 
+                Wir beginnen jede Behandlung mit einer strukturierten Diagnostik nach aktuellen Leitlinien – inklusive präziser Bildgebung. 
                 Sie erhalten eine klare Einschätzung, nachvollziehbare Empfehlungen und echte Alternativen mit transparenter Nutzen-Risiko-Abwägung.
               </p>
             </div>

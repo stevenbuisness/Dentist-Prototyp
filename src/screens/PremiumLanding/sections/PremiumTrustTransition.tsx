@@ -100,7 +100,7 @@ export const PremiumTrustTransition = (): JSX.Element => {
                   {stat.value}
                 </div>
                 <div className="mt-6 h-1 w-6 bg-blue-500/20 transition-all group-hover:w-12 group-hover:bg-blue-500" />
-                <div className="mt-6 font-montserrat text-[11px] font-bold uppercase tracking-[0.2em] text-stone-400 leading-relaxed max-w-[140px]">
+                <div className="mt-6 font-montserrat text-[11px] font-bold uppercase tracking-[0.2em] text-stone-400 leading-relaxed px-2">
                   {stat.label}
                 </div>
               </div>

@@ -54,31 +54,36 @@ export const PremiumHero = (): JSX.Element => {
             transition={{ delay: 1, duration: 0.8 }}
             className="mt-6 font-lato text-lg leading-relaxed text-stone-600 max-w-lg"
           >
-            Sichere, planbare Ergebnisse durch modernste Technik und menschliche Empathie.
+            Wir schaffen für Sie sichere, planbare Ergebnisse durch unsere Expertise, modernste Technik und menschliche Empathie.
           </motion.p>
 
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
-            className="mt-12 flex flex-wrap gap-5"
+            className="mt-12 flex flex-col gap-4"
           >
-            <motion.a
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              href="#orientierung"
-              className="font-montserrat inline-flex rounded-full bg-stone-950 px-8 py-4 text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
-            >
-              Konzept entdecken
-            </motion.a>
-            <motion.a
-              whileHover={{ x: 5 }}
-              href="#standards"
-              className="font-lato inline-flex items-center gap-2 rounded-full px-6 py-4 text-sm font-semibold text-stone-900 underline-offset-8 hover:underline"
-            >
-              Qualitätsversprechen
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
-            </motion.a>
+            <div className="flex flex-wrap gap-5">
+              <motion.a
+                whileHover={{ scale: 1.03, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                href="#orientierung"
+                className="font-montserrat inline-flex rounded-full bg-stone-950 px-8 py-4 text-xs font-bold uppercase tracking-widest text-white shadow-xl transition-all hover:bg-stone-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
+              >
+                Lernen Sie uns kennen
+              </motion.a>
+              <motion.a
+                whileHover={{ x: 5 }}
+                href="#standards"
+                className="font-lato inline-flex items-center gap-2 rounded-full px-6 py-4 text-sm font-semibold text-stone-900 underline-offset-8 hover:underline"
+              >
+                Qualitätsversprechen
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+              </motion.a>
+            </div>
+            <p className="font-lato text-xs italic text-stone-400 pl-2">
+              Wir freuen uns auf Sie.
+            </p>
           </motion.div>
         </motion.div>
 

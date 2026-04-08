@@ -106,8 +106,8 @@ export const PremiumTeam = (): JSX.Element => {
                 Ihre Experten für Präzision
               </h2>
               <p className="mt-8 font-lato text-xl leading-relaxed text-stone-600">
-                Dr. Maria leitet die Praxis mit klarer Vision: Strukturierte Diagnostik mit einem hohen Anspruch an Präzision und Verlässlichkeit. 
-                Jede Behandlung wird im Team koordiniert, um für Sie das bestmögliche Ergebnis zu sichern.
+                Gemeinsam mit Dr. Maria leben wir eine klare Vision: Strukturierte Diagnostik mit einem hohen Anspruch an Präzision und Verlässlichkeit. 
+                Jede Behandlung wird bei uns im Team koordiniert, um für Sie das bestmögliche Ergebnis zu sichern.
               </p>
 
               {/* Signature Area */}
