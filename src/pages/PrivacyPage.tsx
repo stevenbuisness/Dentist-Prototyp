@@ -37,9 +37,9 @@ export default function PrivacyPage() {
               </div>
               <p className="text-stone-600 leading-relaxed font-medium">
                 Verantwortlich für die Datenverarbeitung auf dieser Webseite ist:<br /><br />
-                **Zahnarztpraxis Dr. Schmidt**<br />
-                Burgstraße 37, 10115 Berlin<br />
-                E-Mail: datenschutz@zahnarzt-schmidt.berlin
+                **Zahnarztpraxis Dr. Maria Schmidt**<br />
+                Charlottenring 12, 40227 Düsseldorf<br />
+                E-Mail: Dr.Schmidt@praxis.de
               </p>
             </section>
 

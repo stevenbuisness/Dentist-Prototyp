@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { supabase } from "../../../lib/supabase";
 import { useToast } from "../../../hooks/use-toast";
@@ -17,6 +17,17 @@ export const PremiumNavigation = (): JSX.Element => {
   const { user, profile } = useAuthContext();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    // If we're not on the landing page, we need to go there first
+    // window.location.href is the most reliable way to force a page change with anchor jump in this setup
+    if (location.pathname !== "/") {
+      e.preventDefault();
+      window.location.href = "/" + target;
+    }
+    // If we are on /, the default <a> behavior handles the same-page jump
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -57,6 +68,7 @@ export const PremiumNavigation = (): JSX.Element => {
             <li key={item.href} className="group relative">
               <a
                 href={item.href}
+                onClick={(e) => handleNavClick(e, item.href)}
                 className="font-lato text-sm font-semibold tracking-wide text-stone-600 transition-colors hover:text-blue-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 {item.label}
@@ -154,7 +166,7 @@ export const PremiumNavigation = (): JSX.Element => {
                 <a
                   href={item.href}
                   className="font-lato block py-1 text-stone-800"
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => { handleNavClick(e, item.href); setOpen(false); }}
                 >
                   {item.label}
                 </a>
