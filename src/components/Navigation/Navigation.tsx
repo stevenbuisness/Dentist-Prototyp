@@ -22,6 +22,13 @@ export const Navigation = (): JSX.Element => {
         <div className="flex items-center gap-4 sm:gap-12">
           <Link
             to="/"
+            onClick={(e) => {
+              if (location.pathname === "/") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.history.replaceState({}, "", "/");
+              }
+            }}
             className="flex items-center gap-2 [font-family:'Kollektif-Bold',Helvetica] font-bold text-stone-900 text-lg sm:text-2xl tracking-[-0.5px] hover:opacity-80 transition-opacity"
           >
             <img 

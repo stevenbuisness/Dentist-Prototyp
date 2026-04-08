@@ -50,6 +50,13 @@ export const PremiumNavigation = (): JSX.Element => {
       >
         <Link
           to="/"
+          onClick={(e) => {
+            if (location.pathname === "/") {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              window.history.replaceState({}, "", "/");
+            }
+          }}
           className="flex items-center gap-3 font-montserrat text-stone-900 group"
         >
           <img 

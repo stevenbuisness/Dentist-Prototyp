@@ -49,7 +49,7 @@ export default function PrivacyPage() {
             {/* Sektion 2: Logfiles */}
             <section className="space-y-6">
               <div className="flex items-center gap-3 mb-6 text-stone-900 border-l-4 border-emerald-500 pl-4">
-                 <h2 className="text-2xl font-montserrat font-black uppercase tracking-wide">2. Server-Log-Files</h2>
+                 <h2 className="text-2xl font-montserrat font-black uppercase tracking-wide">2. Server-Logfiles</h2>
               </div>
               <p className="text-stone-600 leading-relaxed font-medium">
                 Beim Aufruf unserer Webseite werden automatisch Informationen durch Ihren Browser an unseren Server (Supabase/Host) übermittelt. Diese "Logfiles" umfassen:
