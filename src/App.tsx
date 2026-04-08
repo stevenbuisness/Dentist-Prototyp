@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, Routes, Route, Navigate } from "react-router-dom";
 import { PremiumLanding } from "./screens/PremiumLanding/PremiumLanding";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -17,6 +18,19 @@ import PrivacyPage from "./pages/PrivacyPage";
 import ImpressumPage from "./pages/ImpressumPage";
 import { ProtectedRoute, AdminRoute } from "./components/auth/ProtectedRoutes";
 import { useAuthContext } from "./contexts/AuthContext";
+import { NetworkOfflineBanner } from "./components/ui/NetworkOfflineBanner";
+import { CookieBanner } from "./components/ui/CookieBanner";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Scroll to top when the actual path changes (e.g., from / to /impressum)
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function AdminDashboardRedirect() {
   const { profile, loading } = useAuthContext();
@@ -27,12 +41,10 @@ function AdminDashboardRedirect() {
   return <DashboardPage />;
 }
 
-import { NetworkOfflineBanner } from "./components/ui/NetworkOfflineBanner";
-import { CookieBanner } from "./components/ui/CookieBanner";
-
 export default function App() {
   return (
     <>
+      <ScrollToTop />
       <NetworkOfflineBanner />
       <CookieBanner />
       <Routes>
