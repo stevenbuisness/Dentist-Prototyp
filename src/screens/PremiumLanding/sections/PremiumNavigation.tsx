@@ -58,16 +58,19 @@ export const PremiumNavigation = (): JSX.Element => {
               window.history.replaceState({}, "", "/");
             }
           }}
-          className="flex items-center gap-3 font-montserrat text-stone-900 group min-w-max"
+          className="flex flex-col items-start sm:flex-row sm:items-center gap-0.5 sm:gap-3 font-montserrat text-stone-900 group min-w-max"
         >
-          <img 
-            src="/logo.png" 
-            alt="Dr. Schmidt Logo" 
-            className="w-8 h-8 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 transition-transform group-hover:scale-105"
-          />
+          <div className="flex items-center gap-2">
+            <img 
+              src="/logo.png" 
+              alt="Dr. Schmidt Logo" 
+              className="w-8 h-8 sm:w-[4.5rem] sm:h-[4.5rem] object-contain flex-shrink-0 transition-transform group-hover:scale-105"
+            />
+            <span className="text-[13px] font-bold leading-none tracking-tight text-blue-950 whitespace-nowrap sm:hidden">Dr. Schmidt</span>
+          </div>
           <div className="flex flex-col items-start justify-center">
-            <span className="text-sm sm:text-xl font-bold leading-none tracking-tight text-blue-950 whitespace-nowrap">Dr. Schmidt</span>
-            <span className="hidden xs:inline text-[9px] sm:text-xs font-semibold italic text-blue-600/80 leading-none mt-1 ml-0.5 whitespace-nowrap">Ihr Lächeln in besten Händen</span>
+            <span className="hidden sm:inline text-base sm:text-xl font-bold leading-none tracking-tight text-blue-950 whitespace-nowrap">Dr. Schmidt</span>
+            <span className="text-[8px] sm:text-xs font-semibold italic text-blue-600/80 leading-none sm:mt-1 ml-0.5 sm:ml-[1.5px] whitespace-nowrap">Ihr Lächeln in besten Händen</span>
           </div>
         </Link>
 
