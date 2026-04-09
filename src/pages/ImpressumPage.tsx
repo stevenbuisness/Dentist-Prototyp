@@ -3,12 +3,18 @@ import { PremiumNavigation } from "../screens/PremiumLanding/sections/PremiumNav
 import { PremiumFooter } from "../screens/PremiumLanding/sections/PremiumFooter";
 import { Info, MapPin, Phone, Mail, Award, Landmark, FileCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { MetaTags } from "../components/seo/MetaTags";
 
 export default function ImpressumPage() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-900 antialiased">
+      <MetaTags 
+        title="Impressum" 
+        description="Gesetzliche Angaben und Kontaktinformationen der Zahnarztpraxis Dr. Maria Schmidt in Düsseldorf."
+        canonical="https://zahnarztpraxis-schmidt.de/impressum"
+      />
       <PremiumNavigation />
       
       <main className="pt-32 pb-20 px-6 max-w-4xl mx-auto">

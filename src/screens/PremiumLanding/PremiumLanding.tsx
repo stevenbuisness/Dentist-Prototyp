@@ -8,6 +8,10 @@ import { PremiumTrustSection } from "./sections/PremiumTrustSection";
 import { PremiumTrustTransition } from "./sections/PremiumTrustTransition";
 import { PremiumNavigation } from "./sections/PremiumNavigation";
 
+import { PremiumFAQ } from "./sections/PremiumFAQ";
+import { MetaTags } from "../../components/seo/MetaTags";
+import { StructuredData } from "../../components/seo/StructuredData";
+
 export const PremiumLanding = (): JSX.Element => {
   useEffect(() => {
     const hash = window.location.hash;
@@ -26,6 +30,8 @@ export const PremiumLanding = (): JSX.Element => {
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-900 antialiased">
+      <MetaTags />
+      <StructuredData />
       <PremiumNavigation />
       <main className="pt-[4.5rem]">
         <PremiumHero />
@@ -34,6 +40,7 @@ export const PremiumLanding = (): JSX.Element => {
         <PremiumTeam />
         <PremiumTrustTransition />
         <PremiumTrustSection />
+        <PremiumFAQ />
         <PremiumFooter />
       </main>
     </div>

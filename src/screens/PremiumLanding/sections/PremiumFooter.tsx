@@ -107,6 +107,9 @@ export const PremiumFooter = (): JSX.Element => {
               <p className="font-lato text-[9px] font-bold uppercase tracking-[0.2em] text-stone-400">
                 © {new Date().getFullYear()} Zahnarztpraxis Dr. Maria Schmidt
               </p>
+              <p className="font-lato text-[9px] font-medium uppercase tracking-[0.1em] text-stone-400 opacity-60">
+                Letzte Aktualisierung: 09. April 2026
+              </p>
             </div>
             
             <nav aria-label="Rechtliches" className="flex flex-wrap gap-x-10 gap-y-4">

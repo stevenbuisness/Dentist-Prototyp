@@ -9,6 +9,7 @@ import { Phone, LogOut } from "lucide-react";
 const navItems = [
   { href: "#leistungen", label: "Leistungen" },
   { href: "#team", label: "Team" },
+  { href: "#faq", label: "FAQ" },
   { href: "#standards", label: "Qualität" },
   { href: "#kontakt", label: "Kontakt" },
 ] as const;

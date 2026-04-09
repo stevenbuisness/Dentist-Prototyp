@@ -34,16 +34,20 @@ Sentry.init({
 const container = document.getElementById("app") as HTMLElement;
 const root = createRoot(container);
 
+import { HelmetProvider } from "react-helmet-async";
+
 root.render(
   <StrictMode>
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <App />
-          <Analytics />
-          <SpeedInsights />
-        </BrowserRouter>
-      </QueryClientProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <App />
+            <Analytics />
+            <SpeedInsights />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </AuthProvider>
+    </HelmetProvider>
   </StrictMode>
 );

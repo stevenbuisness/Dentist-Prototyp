@@ -204,7 +204,7 @@ export default function ProfilePage() {
                     <Input 
                       value={city} 
                       onChange={(e) => setCity(e.target.value)}
-                      placeholder="Berlin"
+                      placeholder="Düsseldorf"
                       className="h-12 bg-white border-stone-200 rounded-xl focus:ring-blue-600 focus:border-blue-600 font-medium"
                     />
                   </div>

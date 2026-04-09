@@ -3,12 +3,18 @@ import { PremiumNavigation } from "../screens/PremiumLanding/sections/PremiumNav
 import { PremiumFooter } from "../screens/PremiumLanding/sections/PremiumFooter";
 import { ShieldCheck, FileText, Lock, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { MetaTags } from "../components/seo/MetaTags";
 
 export default function PrivacyPage() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-[#faf8f5] text-stone-900 antialiased">
+      <MetaTags 
+        title="Datenschutz" 
+        description="Informationen zur Verarbeitung Ihrer personenbezogenen Daten in der Zahnarztpraxis Dr. Maria Schmidt."
+        canonical="https://zahnarztpraxis-schmidt.de/datenschutz"
+      />
       <PremiumNavigation />
       
       <main className="pt-32 pb-20 px-6 max-w-4xl mx-auto">

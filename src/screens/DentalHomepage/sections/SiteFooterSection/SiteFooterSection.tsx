@@ -82,11 +82,9 @@ export const SiteFooterSection = (): JSX.Element => {
           Kontakt
         </h3>
         <address className="not-italic [font-family:'Kollektif-Regular',Helvetica] font-normal text-[#a7adaf] text-lg tracking-[1.26px] leading-[26px] mb-[17px]">
-          Hauptstraße 123
+          Charlottenring 12
           <br />
-          2. Etage
-          <br />
-          10115 Berlin
+          40227 Düsseldorf
         </address>
         <div className="flex items-center gap-[18px] mb-2">
           <img
@@ -95,7 +93,7 @@ export const SiteFooterSection = (): JSX.Element => {
             src="/icon-phone.png"
           />
           <span className="[font-family:'Kollektif-Regular',Helvetica] font-normal text-[#a7adaf] text-lg tracking-[1.26px] leading-9">
-            030 1234 5678
+            0211 1593 482
           </span>
         </div>
         <div className="flex items-center gap-[18px]">
