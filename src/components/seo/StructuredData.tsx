@@ -1,13 +1,14 @@
 import { Helmet } from "react-helmet-async";
 
 export const StructuredData = () => {
+  const baseUrl = window.location.origin;
   const practiceSchema = {
     "@context": "https://schema.org",
     "@type": "Dentist",
     "name": "Zahnarztpraxis Dr. Maria Schmidt",
-    "image": "https://zahnarztpraxis-schmidt.de/og-image.png",
-    "@id": "https://zahnarztpraxis-schmidt.de",
-    "url": "https://zahnarztpraxis-schmidt.de",
+    "image": `${baseUrl}/og-image.png`,
+    "@id": baseUrl,
+    "url": baseUrl,
     "telephone": "0211 1593 482",
     "address": {
       "@type": "PostalAddress",
