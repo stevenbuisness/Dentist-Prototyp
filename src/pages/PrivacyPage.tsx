@@ -13,7 +13,7 @@ export default function PrivacyPage() {
       <MetaTags 
         title="Datenschutz" 
         description="Informationen zur Verarbeitung Ihrer personenbezogenen Daten in der Zahnarztpraxis Dr. Maria Schmidt."
-        canonical="https://zahnarztpraxis-schmidt.de/datenschutz"
+        canonical="https://dentist-prototyp.vercel.app/datenschutz"
       />
       <PremiumNavigation />
       

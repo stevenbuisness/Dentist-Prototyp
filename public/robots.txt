@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /dashboard
 
-Sitemap: https://zahnarztpraxis-schmidt.de/sitemap.xml
+Sitemap: https://dentist-prototyp.vercel.app/sitemap.xml

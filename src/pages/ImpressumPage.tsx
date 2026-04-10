@@ -13,7 +13,7 @@ export default function ImpressumPage() {
       <MetaTags 
         title="Impressum" 
         description="Gesetzliche Angaben und Kontaktinformationen der Zahnarztpraxis Dr. Maria Schmidt in Düsseldorf."
-        canonical="https://zahnarztpraxis-schmidt.de/impressum"
+        canonical="https://dentist-prototyp.vercel.app/impressum"
       />
       <PremiumNavigation />
       
